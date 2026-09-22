@@ -1,0 +1,29 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secrets
+.env
+*.key
+
+# Large or sensitive artifacts — never commit
+data/raw/
+data/interim/
+data/catalog/
+models/
+*.gguf
+*.safetensors
+*.onnx
+mlruns/
+
+# Keep small, hand-made samples
+!data/sample/
+product_all_2026-09-22T19-49-07_part_1_0df81806-5d13-4353-99a2-dbf3a308c5c9/
+
+# Downloaded catalog snapshots (manual download, never committed)
+*.zip
+*.xlsx
+data/catalog/
