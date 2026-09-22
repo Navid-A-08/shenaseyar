@@ -21,6 +21,12 @@ exempt flag per ID, or a documented decision to narrow scope to a few product gr
 - Treat invoice text (`sstt`) as untrusted data. Never place it in a prompt unquoted.
 - Never commit data files, model weights, or scraped content. Check `.gitignore` before `git add`.
 - Model files: GGUF or safetensors only. Never load pickle-based weights.
+- The catalog is obtained by manual download only. This project never automates access to
+  stuffid.tax.gov.ir (no scraping, no API calls, never bypass its CAPTCHA).
+- The catalog file and any large extract of it are never committed (copyright). Tests use the
+  invented `data/sample/fake_catalog.csv` instead.
+- Third-party catalog mirrors: only for spot-checking a handful of IDs by hand. Never a data
+  source, never in the pipeline.
 
 ## Working rules for Claude
 - Propose a plan and wait for my approval before writing code for any non-trivial task.

@@ -157,16 +157,21 @@ Confidence: **verified**.
 
 ## 6. Is this the complete catalog?
 
-**Probably not. This looks like part 1 of several. Not verified.**
+**Yes: the user confirmed on 2026-09-22 that the file is the complete catalog.** It is treated as complete from here on.
 
-Evidence from the file content alone:
-- **Exactly 1,000,000 data rows.** That is a round number, typical of an export split at a fixed row limit. It matches the `part_1` in the filename.
+- **No part 2:** the site produced only this one file. This matches the Downloads folder (only `part_1`, 38,102,431 bytes) and the site's file list («فایل یک» only).
+- **Complete:** confirmed by the user. The basis for the confirmation is not recorded here.
+
+The file-content evidence below had suggested a possible 1,000,000-row cut-off. It is kept for the record, and so the question can be reopened if IDs turn out to be missing.
+
+Evidence from the file content (earlier analysis):
+- **Exactly 1,000,000 data rows.** That is a round number, typical of a fixed export limit.
 - **Rows are sorted by `CreateDate`, newest first.** Only 39 of 999,999 adjacent pairs break the order. The first row was created 1405-06-31.
 - **The file ends in the middle of a large batch.** All of the last 100,000 rows have `CreateDate` = 1404-06-05. That date looks like a bulk load, though this is inferred. The final row belongs to that batch too, so the batch probably continues past the 1M cut.
 - `RunDate` goes back to 1401-07-24. So IDs in use since 1401 are present only if they were created or re-loaded on or after about 1403-11-17 (the earliest `CreateDate`). Older IDs that were never re-loaded would be missing.
-- Goods IDs dominate (≈963k of 1M). The site offered one file («فایل یک»), yet this file's name says `part_1`. The site may split one logical file into several parts on download.
+- Goods IDs dominate (≈963k of 1M).
 
-The only way to verify is on the site. Check whether the download produced, or offers, a `part_2`, and compare the total row count if the site shows one.
+Safeguard: during evaluation, count golden-set IDs that are not in the catalog and report them separately. A non-zero count would be the signal to reopen this question.
 
 ## 7. Fake catalog for tests
 
