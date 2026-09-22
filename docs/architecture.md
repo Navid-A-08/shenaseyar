@@ -19,15 +19,20 @@ This keeps CPU cost low and every decision traceable.
 ## 3. Error types (targets)
 | Code | Meaning | Detected by |
 |---|---|---|
-| T1 | Description doesn't match declared ID (e.g. taxable good under an exempt ID) | retrieval + risk model (core NLP) |
+| T1 | Description doesn't match declared ID (e.g. a good that charges VAT filed under an ID with `charges_vat = false`) | retrieval + risk model (core NLP) |
 | T2 | Declared rate ≠ reference rate of the ID on invoice date | rule |
 | T3 | Generic/"other" ID used where a specific ID exists | retrieval + rule |
 | T4 | Vague description ("کالا", "خدمات") with high amount | rule + feature |
 | T5 | Unit price far outside the ID group's distribution | feature (robust z-score) |
 | T6 | `vam` ≠ base × `vra` | rule |
 
+Tax status: the catalog separates three statuses, `taxable` (مشمول), `exempt` (معاف) and
+`out_of_scope` (غیر مشمول). **Detection** (rules, features such as `exempt_flip`, the risk model)
+uses only the derived boolean `charges_vat`. The **explanation layer** must use `tax_status`, so it
+never presents `exempt` and `out_of_scope` as the same thing.
+
 ## 4. Layers
-1. **Data**: catalog (`stuffid.tax.gov.ir`, access method TBD in phase 0), versioned rate table,
+1. **Data**: catalog (`stuffid.tax.gov.ir`, manual download only, see `docs/data_dictionary.md`), versioned rate table,
    VAT law 1400 (esp. art. 9 exemptions), Moadian law & bylaws, circulars, annual budget law rate
    (**sources conflict on the 1405 rate, so it's a table parameter, never a constant**), invoice spec,
    synthetic invoices.
@@ -49,13 +54,28 @@ hash-chained audit log, human in the loop, model cards, alert-rate monitoring by
 
 ## 5. Core schema
 ```sql
-goods_catalog(sstid CHAR(13), title, group_path TEXT[], id_kind, vat_rate, is_exempt,
+goods_catalog(sstid CHAR(13), title, group_path TEXT[], id_kind, vat_rate,
+              tax_status ENUM('taxable','exempt','out_of_scope'),   -- مشمول / معاف / غیر مشمول
+              charges_vat BOOLEAN GENERATED AS (tax_status = 'taxable'),
               legal_basis, valid_from, valid_to, source_url, PK(sstid, valid_from))  -- SCD2
 invoice_item(item_id, invoice_id, issue_date, seller_hash, sstid, sstt, am, mu, fee,
              vra, vam, label_types TEXT[])   -- label_types only in synthetic data
 legal_unit(unit_id, doc_type, title, body, valid_from, valid_to, superseded_by, source_url)
 ```
 Field names must be checked against the current Moadian spec in phase 0.
+
+**`rate_at(sstid, issue_date)`** uses the rows of `sstid` in force on `issue_date`
+(`valid_from ≤ issue_date` and (`valid_to` is null or `issue_date ≤ valid_to`)):
+- one row: return its rate and status.
+- several rows: take the one with the latest `valid_from`.
+- still tied: return an explicit **`AMBIGUOUS`** result, not a rate. With `AMBIGUOUS`, the T2 rule
+  does not fire and the line is marked for human review.
+- Never pick arbitrarily, and never silently take the first row.
+
+This applies to the 3 IDs that have more than one row in force (`docs/data_quality.md`).
+Catalog source columns and their mapping: `docs/data_dictionary.md` §5. Rows that fail the
+data-quality rules are not in `goods_catalog`. They go to a quarantine list with a reason code
+(`docs/data_quality.md`).
 
 ## 6. Risk-model features
 `sim_declared`, `rank_declared` (21 if absent), `margin_top1`, `exempt_flip`, `is_general_id`,

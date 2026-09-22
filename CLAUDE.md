@@ -7,9 +7,16 @@ legal article or circular valid on the invoice date. Output is a **suggestion fo
 never a verdict**. Full design: `docs/architecture.md`. Read it before any design decision.
 
 ## Current phase
-**Phase 0: data feasibility.** Exit criterion: a usable product-ID catalog with VAT rate or
-exempt flag per ID, or a documented decision to narrow scope to a few product groups.
+**Phase 1: retrieval baseline.** Exit criterion: Recall@5 at least 0.85 on the 300-row
+hand-labeled golden set (target 0.90).
 (Update this section whenever the phase changes.)
+
+Phase 0 exit met 2026-09-22 (see `docs/data_dictionary.md`, `docs/data_quality.md`).
+Still open: `TODO(legal)`, what the catalog's `Vat` column means (values like 65 / 50 / 90,
+see `docs/data_dictionary.md` §8). It **must be resolved before the T2 rule in Phase 2.**
+
+OPEN: catalog may be truncated (1,000,000-row export cap). Any recall metric measured before
+this is resolved is provisional.
 
 ## Hard constraints (never violate)
 - CPU only. No GPU, no CUDA-only libraries. Prefer ONNX/int8 and GGUF quantized models.
