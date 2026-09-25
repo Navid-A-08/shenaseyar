@@ -658,3 +658,33 @@ Data only, no interpretation. `TODO(legal)`: what `Vat` means is still open. Nav
   - empty `ExpirationDate` → `valid_to_excl = NULL` (open-ended)
 - Every comparison is then `valid_from <= d < valid_to_excl`. No other code does "+1 day" logic.
 - The Jalali arithmetic in the loader uses `jdatetime` (pinned). No hand-written calendar code in `src/`.
+
+## 10. Findings from labeling (measured 2026-09-25)
+
+Full pass over the 1,000,000-row file with `tools/catalog_search.py` matching (casefold, whitespace
+and ZWNJ removed, ي/ك and digits folded). In force = as of 1405-07-03. Provisional: the catalog may
+be truncated (§6). Counts only; no titles are copied here.
+
+### 10.1 General vs specific IDs
+- The `Type` counts in §2 were re-measured and match exactly.
+- General (`عمومی`) IDs exist but are rare: **3,996 rows, 0.40%** (2,052 imported, 1,936 domestic,
+  8 service). The other 99.60% are specific (`اختصاصی`).
+- For a generic query this matters: e.g. the substring `دفتر` matches 226 rows (225 distinct IDs),
+  **all specific**: 168 domestic, 51 service, 7 imported, 0 general.
+- Consequence: a generic query often has no single correct ID. The golden set therefore has two
+  tiers, S (exactly one correct ID) and C (several acceptable IDs); see `eval/run_eval.py`.
+
+### 10.2 Rates for one query are not rates for one product class
+The 226 `دفتر` rows split by `Vat` as 154 at 0, 60 at 10, 12 at 9. This does **not** show one
+product class spanning three rates:
+- **The substring mixes products.** It also matches booklets (`دفترچه`: manuals, packaging),
+  office-rental and design services, bank passbooks, and titles where only the manufacturer's
+  name contains `دفتر`.
+- **All 12 `Vat = 9` rows are expired** (`ExpirationDate` 1402-12-29; 12 distinct IDs). Only 1 of
+  them has a later version (at `Vat = 10`). They are history, not a current rate difference.
+- **The notebook class itself** (titles starting with `دفتر،`): 150 rows, all domestic, all in
+  force. **149 are `Vat = 0` / `معاف`, 1 is `Vat = 10` / `مشمول`.**
+
+**Candidate example for later T1/T2 work:** `2902802000012` (`Vat = 10`, `مشمول`,
+`شناسه اختصاصی تولید داخل`, `RunDate` 1405-01-15, open-ended) is the single outlier in that
+150-row class. Which rate is correct for it is `TODO(legal)`; this is an observation only.

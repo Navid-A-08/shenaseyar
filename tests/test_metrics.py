@@ -1,6 +1,6 @@
 import pytest
 
-from eval.metrics import mrr, rank_of, recall_at_k
+from eval.metrics import mrr, rank_of, rank_of_any, recall_at_k
 
 
 def test_rank_of_first_middle_absent():
@@ -34,3 +34,14 @@ def test_mrr():
 def test_no_queries_gives_none_not_zero():
     assert recall_at_k([], 5) is None
     assert mrr([]) is None
+
+
+def test_rank_of_any_takes_best_rank():
+    assert rank_of_any(["c", "a"], ["a", "b", "c"]) == 1
+    assert rank_of_any(["z", "c"], ["a", "b", "c"]) == 3
+    assert rank_of_any(["z", "y"], ["a", "b"]) is None
+    assert rank_of_any([], ["a"]) is None
+
+
+def test_rank_of_any_uses_first_occurrence_rule():
+    assert rank_of_any(["c", "d"], ["a", "b", "b", "c", "d"]) == 3
