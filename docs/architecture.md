@@ -112,10 +112,12 @@ data-quality rules are not in `goods_catalog`. They go to a quarantine list with
 `sim_declared`, `rank_declared` (21 if absent), `margin_top1`, `exempt_flip`, `is_general_id`,
 `specific_exists`, `desc_specificity`, `price_z` (median-based), `injection_flag`, `rule_hits`,
 `id_status` (categorical: `ok` | `not_in_force` | `not_in_catalog` | `ambiguous`, from `rate_at`;
-`ambiguous` is the §5 tie case). Constraint: `ambiguous` must never raise a line's risk score (§3).
-A plain categorical feature would let the model learn to do exactly that. OPEN (Navid): how the
-feature encodes `ambiguous` so it cannot, e.g. a monotone constraint, or treating it like `ok` for
-the model while the maintenance counter records it.
+`ambiguous` is the §5 tie case).
+**DECIDED (Navid, 2026-09-25): the model never sees `ambiguous`.** At the feature boundary it is mapped
+to `ok`, and it is recorded only in the catalog-maintenance counter. So the model's `id_status`
+values are `ok` | `not_in_force` | `not_in_catalog`. Rationale: `ambiguous` is a defect in our data
+(3 known IDs), and it carries no signal about the seller. A monotone constraint would add complexity
+to guard against a value the model should never receive in the first place.
 Threshold is set by **review capacity** (e.g. top 2% per period); report Precision@k at that point.
 
 ## 7. Synthetic data
