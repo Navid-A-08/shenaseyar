@@ -19,15 +19,32 @@ This keeps CPU cost low and every decision traceable.
 ## 3. Error types (targets)
 | Code | Meaning | Detected by |
 |---|---|---|
-| T1 | Description doesn't match declared ID (e.g. taxable good under an exempt ID) | retrieval + risk model (core NLP) |
+| T1 | Description doesn't match declared ID (e.g. a good that charges VAT filed under an ID with `charges_vat = false`) | retrieval + risk model (core NLP) |
 | T2 | Declared rate ≠ reference rate of the ID on invoice date | rule |
 | T3 | Generic/"other" ID used where a specific ID exists | retrieval + rule |
 | T4 | Vague description ("کالا", "خدمات") with high amount | rule + feature |
 | T5 | Unit price far outside the ID group's distribution | feature (robust z-score) |
 | T6 | `vam` ≠ base × `vra` | rule |
+| `NOT_IN_CATALOG` | **Separate from T1–T6, high severity.** The declared `sstid` does not exist in the catalog. Rationale: an invoice quoting an ID that doesn't exist is a real error in itself, not a rate question. | rule (`rate_at` → `NOT_IN_CATALOG`) |
+| `NOT_IN_FORCE` | Separate from T1–T6. The `sstid` exists, but no version is in force on the invoice date (a gap between versions, or a date before the first version). Severity: not yet set (Navid). | rule (`rate_at` → `NOT_IN_FORCE`) |
+
+ID-status findings (`NOT_IN_CATALOG`, `NOT_IN_FORCE`):
+- **Never** fall back to a nearby version or to "no VAT due". A missing rate is never treated as a zero rate.
+- T2 does not fire for either. The line gets its own finding, not a rate mismatch.
+- The reviewer view shows the raw status text, never a guessed rate.
+- Every detection run report records the count of each.
+- Caveat: while the catalog-truncation question is open (CLAUDE.md), some `NOT_IN_CATALOG` findings
+  may be caused by missing catalog rows, not by the invoice.
+- OPEN (Navid): which status applies to an ID whose rows were **all** quarantined
+  (`docs/data_quality.md`). Such an ID is not in the active index but does exist in the source.
+
+Tax status: the catalog separates three statuses, `taxable` (مشمول), `exempt` (معاف) and
+`out_of_scope` (غیر مشمول). **Detection** (rules, features such as `exempt_flip`, the risk model)
+uses only the derived boolean `charges_vat`. The **explanation layer** must use `tax_status`, so it
+never presents `exempt` and `out_of_scope` as the same thing.
 
 ## 4. Layers
-1. **Data**: catalog (`stuffid.tax.gov.ir`, access method TBD in phase 0), versioned rate table,
+1. **Data**: catalog (`stuffid.tax.gov.ir`, manual download only, see `docs/data_dictionary.md`), versioned rate table,
    VAT law 1400 (esp. art. 9 exemptions), Moadian law & bylaws, circulars, annual budget law rate
    (**sources conflict on the 1405 rate, so it's a table parameter, never a constant**), invoice spec,
    synthetic invoices.
@@ -49,17 +66,51 @@ hash-chained audit log, human in the loop, model cards, alert-rate monitoring by
 
 ## 5. Core schema
 ```sql
-goods_catalog(sstid CHAR(13), title, group_path TEXT[], id_kind, vat_rate, is_exempt,
-              legal_basis, valid_from, valid_to, source_url, PK(sstid, valid_from))  -- SCD2
+goods_catalog(sstid CHAR(13), title, group_path TEXT[], id_kind, vat_rate,
+              tax_status ENUM('taxable','exempt','out_of_scope'),   -- مشمول / معاف / غیر مشمول
+              charges_vat BOOLEAN GENERATED AS (tax_status = 'taxable'),
+              legal_basis, valid_from, valid_to_excl, source_url, PK(sstid, valid_from))  -- SCD2, half-open
 invoice_item(item_id, invoice_id, issue_date, seller_hash, sstid, sstt, am, mu, fee,
              vra, vam, label_types TEXT[])   -- label_types only in synthetic data
 legal_unit(unit_id, doc_type, title, body, valid_from, valid_to, superseded_by, source_url)
 ```
 Field names must be checked against the current Moadian spec in phase 0.
 
+**Validity dates: source vs code convention.**
+- **Source** (catalog export): `ExpirationDate` is **inclusive**, the last day the version is in force.
+  Measured in `docs/data_dictionary.md` §9: 33,319 consecutive-version pairs follow the
+  "+1 day" pattern and 0 follow the "same day" pattern.
+- **Code**: half-open intervals `[valid_from, valid_to_excl)`. The loader converts once:
+  - `valid_from = RunDate`
+  - `valid_to_excl = ExpirationDate + 1 day` (Jalali arithmetic via `jdatetime`, pinned)
+  - empty `ExpirationDate` → `valid_to_excl = NULL` (open-ended)
+- After loading, no code may add or subtract a day on these fields.
+- `issue_date` and the validity fields must be compared in the same calendar. Where the conversion
+  happens is decided in the loader plan.
+
+**`rate_at(sstid, issue_date)`** uses the rows of `sstid` in force on `issue_date`, i.e.
+`valid_from ≤ issue_date < valid_to_excl`, with `valid_to_excl = NULL` meaning no end:
+- one row: return its rate and status.
+- several rows: take the one with the latest `valid_from`.
+- still tied: return an explicit **`AMBIGUOUS`** result, not a rate. With `AMBIGUOUS`, the T2 rule
+  does not fire and the line is marked for human review.
+- no row in force: return an explicit **`NOT_IN_FORCE`** result, not a rate. This happens when the
+  date falls in a gap between versions (341 gaps measured) or before the first version.
+- `sstid` not in the catalog at all: return an explicit **`NOT_IN_CATALOG`** result, not a rate.
+- Never pick arbitrarily, never silently take the first row, and never fall back to the nearest version.
+- How `NOT_IN_FORCE` and `NOT_IN_CATALOG` are treated (no fallback, T2 does not fire, own finding,
+  raw status shown to the reviewer): see §3.
+
+The tie rule applies to the 3 IDs that have more than one row in force (`docs/data_quality.md`).
+Catalog source columns and their mapping: `docs/data_dictionary.md` §5. Rows that fail the
+data-quality rules are not in `goods_catalog`. They go to a quarantine list with a reason code
+(`docs/data_quality.md`).
+
 ## 6. Risk-model features
 `sim_declared`, `rank_declared` (21 if absent), `margin_top1`, `exempt_flip`, `is_general_id`,
-`specific_exists`, `desc_specificity`, `price_z` (median-based), `injection_flag`, `rule_hits`.
+`specific_exists`, `desc_specificity`, `price_z` (median-based), `injection_flag`, `rule_hits`,
+`id_status` (categorical: `ok` | `not_in_force` | `not_in_catalog`, from `rate_at`; `AMBIGUOUS` is not
+one of its values yet, so how to encode it is open).
 Threshold is set by **review capacity** (e.g. top 2% per period); report Precision@k at that point.
 
 ## 7. Synthetic data
