@@ -1,0 +1,165 @@
+{
+ "catalog_zip": "product_all_2026-09-22T19-49-07_part_1_0df81806-5d13-4353-99a2-dbf3a308c5c9.zip",
+ "params": {
+  "seed": 20260925,
+  "n": 300,
+  "as_of": "1405-07-01",
+  "noise_frac": 0.3,
+  "floor": 5,
+  "max_matches": 20,
+  "pool_factor": 10
+ },
+ "median_title_length": 136.0,
+ "excluded_ids": {
+  "ambiguous_two_in_force": 38,
+  "not_13_digits": 1
+ },
+ "cells": [
+  {
+   "type": "شناسه اختصاصی تولید داخل",
+   "length": "long",
+   "eligible_rows": 248695,
+   "quota": 73,
+   "pool": 730,
+   "tried": 175,
+   "emitted_S": 19,
+   "emitted_C": 54,
+   "rejected_over_max": 102,
+   "rejected_duplicate_query": 0,
+   "shortfall": 0
+  },
+  {
+   "type": "شناسه اختصاصی تولید داخل",
+   "length": "short",
+   "eligible_rows": 174993,
+   "quota": 52,
+   "pool": 520,
+   "tried": 76,
+   "emitted_S": 24,
+   "emitted_C": 28,
+   "rejected_over_max": 24,
+   "rejected_duplicate_query": 0,
+   "shortfall": 0
+  },
+  {
+   "type": "شناسه اختصاصی خدمت",
+   "length": "long",
+   "eligible_rows": 2860,
+   "quota": 5,
+   "pool": 50,
+   "tried": 5,
+   "emitted_S": 1,
+   "emitted_C": 4,
+   "rejected_over_max": 0,
+   "rejected_duplicate_query": 0,
+   "shortfall": 0
+  },
+  {
+   "type": "شناسه اختصاصی خدمت",
+   "length": "short",
+   "eligible_rows": 23782,
+   "quota": 7,
+   "pool": 70,
+   "tried": 8,
+   "emitted_S": 3,
+   "emitted_C": 4,
+   "rejected_over_max": 1,
+   "rejected_duplicate_query": 0,
+   "shortfall": 0
+  },
+  {
+   "type": "شناسه اختصاصی وارداتی",
+   "length": "long",
+   "eligible_rows": 225170,
+   "quota": 67,
+   "pool": 670,
+   "tried": 104,
+   "emitted_S": 26,
+   "emitted_C": 41,
+   "rejected_over_max": 37,
+   "rejected_duplicate_query": 0,
+   "shortfall": 0
+  },
+  {
+   "type": "شناسه اختصاصی وارداتی",
+   "length": "short",
+   "eligible_rows": 265267,
+   "quota": 78,
+   "pool": 780,
+   "tried": 96,
+   "emitted_S": 37,
+   "emitted_C": 41,
+   "rejected_over_max": 18,
+   "rejected_duplicate_query": 0,
+   "shortfall": 0
+  },
+  {
+   "type": "شناسه عمومی تولید داخل",
+   "length": "short",
+   "eligible_rows": 1222,
+   "quota": 5,
+   "pool": 50,
+   "tried": 5,
+   "emitted_S": 0,
+   "emitted_C": 5,
+   "rejected_over_max": 0,
+   "rejected_duplicate_query": 0,
+   "shortfall": 0
+  },
+  {
+   "type": "شناسه عمومی خدمت",
+   "length": "long",
+   "eligible_rows": 5,
+   "quota": 5,
+   "pool": 5,
+   "tried": 5,
+   "emitted_S": 2,
+   "emitted_C": 3,
+   "rejected_over_max": 0,
+   "rejected_duplicate_query": 0,
+   "shortfall": 0
+  },
+  {
+   "type": "شناسه عمومی خدمت",
+   "length": "short",
+   "eligible_rows": 3,
+   "quota": 3,
+   "pool": 3,
+   "tried": 3,
+   "emitted_S": 3,
+   "emitted_C": 0,
+   "rejected_over_max": 0,
+   "rejected_duplicate_query": 0,
+   "shortfall": 0
+  },
+  {
+   "type": "شناسه عمومی وارداتی",
+   "length": "short",
+   "eligible_rows": 1351,
+   "quota": 5,
+   "pool": 50,
+   "tried": 5,
+   "emitted_S": 1,
+   "emitted_C": 4,
+   "rejected_over_max": 0,
+   "rejected_duplicate_query": 0,
+   "shortfall": 0
+  }
+ ],
+ "totals": {
+  "rows": 300,
+  "tier_S": 116,
+  "tier_C": 184,
+  "rejected_over_max": 182,
+  "rejected_duplicate_query": 0,
+  "shortfall": 0
+ },
+ "noise": {
+  "rows": 90,
+  "noise_arabic_yk": 34,
+  "noise_no_zwnj": 0,
+  "noise_fa_digits": 18,
+  "noise_typo": 38
+ },
+ "catalog_sha256": "b0703c8b5fea42a6e8590184a24090b13f5bdfd0d1b950f344615fad917957ba"
+}

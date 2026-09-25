@@ -11,6 +11,8 @@ never a verdict**. Full design: `docs/architecture.md`. Read it before any desig
 300-row hand-labeled golden set (target 0.90). Tier C and combined are reported but never gate
 (tier C is a lower bound). The criterion is NOT YET MEASURABLE below 60 evaluated tier S rows;
 the harness says so instead of printing a pass/fail.
+The machine-generated silver set (`eval/silver.csv`, `docs/silver_set.md`) is optimistic and
+never gates: the exit criterion reads NOT APPLICABLE on it. It is gitignored (catalog extract).
 (Update this section whenever the phase changes.)
 
 Phase 0 exit met 2026-09-22 (see `docs/data_dictionary.md`, `docs/data_quality.md`).

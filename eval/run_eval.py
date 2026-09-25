@@ -1,6 +1,11 @@
 """Evaluate a retriever against the hand-labeled golden set.
 
 Usage: python eval/run_eval.py --retriever random --catalog <catalog.csv|catalog.zip>
+                              [--golden eval/golden.csv | eval/silver.csv]
+
+--golden picks the file. A SILVER file (named silver.csv, or any notes starting `silver|`) is
+machine-generated and optimistic: the report prints a loud banner and the exit criterion reads
+NOT APPLICABLE. golden.csv containing a silver row is an error. See docs/silver_set.md.
 
 A retriever is any object with search(text, k) -> list of sstids, best first.
 Golden header: query_text,expected_sstid,tier,notes
@@ -41,13 +46,19 @@ TIERS = ("S", "C")
 EXIT_MIN_TIER_S = 60
 EXIT_RECALL_AT_5 = 0.85
 PROVISIONAL_BANNER = "PROVISIONAL: catalog may be truncated (1,000,000-row export cap)"
+SILVER_BANNER = (
+    "*** SILVER (OPTIMISTIC, MACHINE-GENERATED) ***  Queries are derived from catalog titles, so"
+    " scores favour lexical retrieval and are NOT an accuracy estimate. Never gates Phase 1."
+    " See docs/silver_set.md."
+)
+SILVER_NOTE_PREFIX = "silver|"
 QUARANTINE_NOT_CHECKED = (
     "WARNING quarantined_only: NOT CHECKED. Loader not available: catalog IDs are raw (R1-R4 not"
     " applied), so an ID whose rows are all quarantined is counted as present."
 )
 TIER_C_LOWER_BOUND = (
-    "Tier C numbers are a LOWER BOUND: the acceptable-ID set is hand-made and cannot be complete,"
-    " so a correct ID outside the set counts as a miss."
+    "Tier C numbers are a LOWER BOUND: the acceptable-ID set (hand-made in golden, rule-made in"
+    " silver) cannot be complete, so a correct ID outside the set counts as a miss."
 )
 LEGEND = [
     "Buckets: evaluated = counted in metrics | missing_from_catalog = none of the row's IDs in catalog"
@@ -130,9 +141,22 @@ def _metrics(ranks, k):
             "recall_at_5": recall_at_k(ranks, 5), f"mrr_at_{k}": mrr(ranks)}
 
 
-def exit_criterion(tier_s):
+def is_silver(path, golden_rows):
+    """A file is silver if it is named silver.csv or any row's notes start with `silver|`.
+
+    Machine rows must never enter the human set: golden.csv with a silver row is an error.
+    """
+    tagged = [g["row"] for g in golden_rows if g["notes"].startswith(SILVER_NOTE_PREFIX)]
+    if Path(path).name == "golden.csv" and tagged:
+        raise ValueError(f"{path}: golden set contains machine-generated silver rows {tagged}")
+    return Path(path).name == "silver.csv" or bool(tagged)
+
+
+def exit_criterion(tier_s, silver=False):
     n, r5 = tier_s["evaluated"], tier_s["recall_at_5"]
-    if n < EXIT_MIN_TIER_S:
+    if silver:
+        status = "not_applicable"
+    elif n < EXIT_MIN_TIER_S:
         status = "not_yet_measurable"
     else:
         status = "met" if r5 >= EXIT_RECALL_AT_5 else "not_met"
@@ -140,8 +164,11 @@ def exit_criterion(tier_s):
             "min_rows": EXIT_MIN_TIER_S, "evaluated": n, "status": status}
 
 
-def evaluate(golden_rows, retriever, catalog_ids, k=20, quarantined_only_ids=None):
-    """`quarantined_only_ids=None` means the quarantine check could not run (no loader yet)."""
+def evaluate(golden_rows, retriever, catalog_ids, k=20, quarantined_only_ids=None, silver=False):
+    """`quarantined_only_ids=None` means the quarantine check could not run (no loader yet).
+
+    `silver=True` marks a machine-generated set: reported, but the exit criterion does not apply.
+    """
     if k < 5:
         raise ValueError("k must be at least 5 to report Recall@5")
     checked = quarantined_only_ids is not None
@@ -187,7 +214,8 @@ def evaluate(golden_rows, retriever, catalog_ids, k=20, quarantined_only_ids=Non
         },
         "k": k,
         "metrics": metrics,
-        "exit_criterion": exit_criterion(metrics["tier_S"]),
+        "set": "silver" if silver else "golden",
+        "exit_criterion": exit_criterion(metrics["tier_S"], silver),
     }
 
 
@@ -201,10 +229,13 @@ def format_report(result, retriever_name):
 
     c, r, m = result["counts"], result["rows"], result["metrics"]
     quarantined = "NOT CHECKED" if c["quarantined_only"] is None else c["quarantined_only"]
-    lines = [PROVISIONAL_BANNER]
+    silver = result.get("set") == "silver"
+    lines = [SILVER_BANNER] if silver else []
+    lines.append(PROVISIONAL_BANNER)
     if c["quarantined_only"] is None:
         lines.append(QUARANTINE_NOT_CHECKED)
     lines += [
+        f"golden file: {result.get('golden_file', '(not given)')}   set: {result.get('set', 'golden')}",
         f"retriever: {retriever_name}   k: {result['k']}",
         f"golden rows: {c['total']}   evaluated: {c['evaluated']}   "
         f"missing_from_catalog: {c['missing_from_catalog']}   quarantined_only: {quarantined}   "
@@ -219,7 +250,10 @@ def format_report(result, retriever_name):
     e = result["exit_criterion"]
     rule = (f"Phase 1 exit (tier S recall_at_5 >= {e['threshold']}, needs >= {e['min_rows']} "
             f"evaluated tier S rows):")
-    if e["status"] == "not_yet_measurable":
+    if e["status"] == "not_applicable":
+        lines.append(f"{rule} NOT APPLICABLE: silver set. The criterion is measured on the human"
+                     f" golden set only.")
+    elif e["status"] == "not_yet_measurable":
         lines.append(f"{rule} NOT YET MEASURABLE ({e['evaluated']} tier S rows evaluated)")
     else:
         lines.append(f"{rule} {e['status'].upper().replace('_', ' ')} "
@@ -244,7 +278,8 @@ def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--retriever", required=True, choices=sorted(RETRIEVERS))
     p.add_argument("--catalog", required=True, help="catalog CSV, or the downloaded zip")
-    p.add_argument("--golden", default=str(Path(__file__).with_name("golden.csv")))
+    p.add_argument("--golden", default=str(Path(__file__).with_name("golden.csv")),
+                   help="golden.csv (human) or silver.csv (machine-generated, optimistic)")
     p.add_argument("--k", type=int, default=20)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--out", help="optional JSON file for the same report")
@@ -253,7 +288,9 @@ def main(argv=None):
     # TODO(loader): pass the active index as catalog_ids and quarantined_only_ids; see module docstring.
     catalog_ids = load_catalog_ids(a.catalog)
     retriever = RETRIEVERS[a.retriever](catalog_ids, a.seed)
-    result = evaluate(load_golden(a.golden), retriever, catalog_ids, a.k)
+    golden_rows = load_golden(a.golden)
+    result = evaluate(golden_rows, retriever, catalog_ids, a.k, silver=is_silver(a.golden, golden_rows))
+    result["golden_file"] = a.golden
     print(format_report(result, a.retriever))
     if a.out:
         payload = {"provisional": PROVISIONAL_BANNER, "retriever": a.retriever, "seed": a.seed,
