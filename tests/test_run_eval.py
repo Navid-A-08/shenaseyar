@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 
 from eval.run_eval import (EXIT_MIN_TIER_S, GOLDEN_HEADER, LEGEND, PROVISIONAL_BANNER,
-                           QUARANTINE_NOT_CHECKED, TIER_C_LOWER_BOUND, evaluate, format_report,
-                           load_catalog_ids, load_golden, main)
+                           QUARANTINE_NOT_CHECKED, SILVER_BANNER, TIER_C_LOWER_BOUND, evaluate,
+                           format_report, is_silver, load_catalog_ids, load_golden, main)
 
 FAKE_CATALOG = Path(__file__).resolve().parents[1] / "data" / "sample" / "fake_catalog.csv"
 
@@ -281,3 +281,54 @@ def test_end_to_end_random_retriever(tmp_path, capsys):
     assert saved["counts"] == first["counts"] and saved["retriever"] == "random"
     assert saved["metrics"] == first["metrics"]
     assert saved["exit_criterion"]["status"] == "not_yet_measurable"
+
+
+# --- silver set ----------------------------------------------------------------------------
+
+SILVER_NOTE = "silver|rule-derived|head+attr1|20260925"
+
+
+def test_silver_detected_by_name_or_notes(tmp_path):
+    plain = [["q1", A, "S", ""]]
+    tagged = [["q1", A, "S", SILVER_NOTE]]
+    assert is_silver(write_golden(tmp_path / "silver.csv", plain), load_golden(tmp_path / "silver.csv"))
+    p = write_golden(tmp_path / "other.csv", tagged)
+    assert is_silver(p, load_golden(p))
+    p = write_golden(tmp_path / "golden.csv", plain)
+    assert not is_silver(p, load_golden(p))
+
+
+def test_golden_with_a_silver_row_is_an_error(tmp_path):
+    p = write_golden(tmp_path / "golden.csv", [["q1", A, "S", ""], ["q2", B, "S", SILVER_NOTE]])
+    with pytest.raises(ValueError, match=r"silver rows \[2\]"):
+        is_silver(p, load_golden(p))
+    with pytest.raises(ValueError):
+        main(["--retriever", "random", "--catalog", str(FAKE_CATALOG), "--golden", str(p)])
+
+
+def test_silver_exit_criterion_not_applicable_even_when_perfect(tmp_path):
+    rows = [[f"s{i}", A, "S", SILVER_NOTE] for i in range(EXIT_MIN_TIER_S + 10)]
+    res = evaluate(load_golden(write_golden(tmp_path / "silver.csv", rows)),
+                   ConstantRetriever([A]), CATALOG, silver=True)
+    assert res["metrics"]["tier_S"]["recall_at_5"] == 1.0
+    assert res["exit_criterion"]["status"] == "not_applicable"
+    report = format_report(res, "const")
+    assert report.splitlines()[0] == SILVER_BANNER
+    assert "NOT APPLICABLE: silver set" in report
+    assert " MET " not in report and "MET (" not in report
+
+
+def test_golden_report_has_no_silver_banner(tmp_path):
+    report = format_report(_evaluate(tmp_path), "stub")
+    assert "SILVER" not in report
+    assert report.splitlines()[0] == PROVISIONAL_BANNER
+
+
+def test_cli_prints_file_and_silver_banner(tmp_path, capsys):
+    ids = sorted(load_catalog_ids(FAKE_CATALOG))
+    silver = write_golden(tmp_path / "silver.csv", [["نمونه", ids[0], "S", SILVER_NOTE]])
+    res = main(["--retriever", "random", "--catalog", str(FAKE_CATALOG), "--golden", str(silver)])
+    out = capsys.readouterr().out
+    assert out.splitlines()[0] == SILVER_BANNER
+    assert f"golden file: {silver}   set: silver" in out
+    assert res["set"] == "silver" and res["golden_file"] == str(silver)

@@ -27,3 +27,7 @@ product_all_2026-09-22T19-49-07_part_1_0df81806-5d13-4353-99a2-dbf3a308c5c9/
 *.zip
 *.xlsx
 data/catalog/
+
+# Silver set: derived from the catalog, rebuilt by tools/make_silver.py (never committed)
+eval/silver.csv
+eval/silver_meta.csv

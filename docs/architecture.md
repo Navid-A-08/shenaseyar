@@ -162,6 +162,8 @@ Golden rows have a tier: S = exactly one correct ID, C = a class query with seve
 (`;`-separated; a hit is any of them in the top k). Metrics are reported for S, C and combined. C is a
 lower bound (the acceptable set is hand-made, never complete). The Phase 1 exit criterion gates on
 tier S only, and only with at least 60 evaluated tier S rows. Why tiers: data_dictionary.md §10.
+A machine-generated SILVER set (docs/silver_set.md) is reported with a loud banner, is optimistic
+(queries derived from catalog titles), and never gates a phase.
 Risk: PR-AUC, Precision@2%, recall per T-type (group split).
 Rules: 100% on injected T2/T6. Citations: existence, validity, support. Explanations: 1–5 by two
 raters. Efficiency: p50/p95 latency, lines/hour.

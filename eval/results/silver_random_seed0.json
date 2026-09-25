@@ -1,0 +1,53 @@
+{
+ "provisional": "PROVISIONAL: catalog may be truncated (1,000,000-row export cap)",
+ "retriever": "random",
+ "seed": 0,
+ "golden": "eval/silver.csv",
+ "catalog": "data/catalog/product_all_2026-09-22T19-49-07_part_1_0df81806-5d13-4353-99a2-dbf3a308c5c9.zip",
+ "counts": {
+  "total": 300,
+  "evaluated": 300,
+  "missing_from_catalog": 0,
+  "quarantined_only": null,
+  "invalid": 0
+ },
+ "quarantine_check": "not_checked",
+ "rows": {
+  "missing_from_catalog": [],
+  "quarantined_only": null,
+  "invalid": {},
+  "partially_missing": {},
+  "partially_quarantined": null
+ },
+ "k": 20,
+ "metrics": {
+  "tier_S": {
+   "evaluated": 116,
+   "recall_at_1": 0.0,
+   "recall_at_5": 0.0,
+   "mrr_at_20": 0.0
+  },
+  "tier_C": {
+   "evaluated": 184,
+   "recall_at_1": 0.0,
+   "recall_at_5": 0.0,
+   "mrr_at_20": 0.0
+  },
+  "combined": {
+   "evaluated": 300,
+   "recall_at_1": 0.0,
+   "recall_at_5": 0.0,
+   "mrr_at_20": 0.0
+  }
+ },
+ "set": "silver",
+ "exit_criterion": {
+  "tier": "S",
+  "metric": "recall_at_5",
+  "threshold": 0.85,
+  "min_rows": 60,
+  "evaluated": 116,
+  "status": "not_applicable"
+ },
+ "golden_file": "eval/silver.csv"
+}
