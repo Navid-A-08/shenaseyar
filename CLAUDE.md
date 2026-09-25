@@ -7,8 +7,10 @@ legal article or circular valid on the invoice date. Output is a **suggestion fo
 never a verdict**. Full design: `docs/architecture.md`. Read it before any design decision.
 
 ## Current phase
-**Phase 1: retrieval baseline.** Exit criterion: Recall@5 at least 0.85 on the 300-row
-hand-labeled golden set (target 0.90).
+**Phase 1: retrieval baseline.** Exit criterion: **tier S** Recall@5 at least 0.85 on the
+300-row hand-labeled golden set (target 0.90). Tier C and combined are reported but never gate
+(tier C is a lower bound). The criterion is NOT YET MEASURABLE below 60 evaluated tier S rows;
+the harness says so instead of printing a pass/fail.
 (Update this section whenever the phase changes.)
 
 Phase 0 exit met 2026-09-22 (see `docs/data_dictionary.md`, `docs/data_quality.md`).

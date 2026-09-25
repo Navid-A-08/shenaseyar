@@ -125,7 +125,7 @@ Seeded, reproducible generator: stratified ID sampling (weight groups mixing exe
 realistic descriptions (templates + offline LLM paraphrase + noise: typos, Arabic ي/ك, missing
 half-space, abbreviations, mixed script), log-normal prices, ~15% injected errors T1–T6. T1 is built
 from "misleading neighbors" (lexically close, different rate). Random **and** group-based splits.
-**Golden set: 300 lines written and labeled by hand, independent of the generator.** It's the final
+**Golden set: 300 lines written and labeled by hand, independent of the generator** (two tiers, S and C; §10). It's the final
 reference for accuracy. Known weakness: evaluating on self-generated data is circular. Real
 anonymized lines, even 100, would be the biggest improvement.
 
@@ -157,7 +157,12 @@ The 14-week estimate is probably optimistic for one person. Expect 20–28.
 ## 10. Evaluation
 Retrieval: Recall@1/@5, MRR (golden set). The harness (`eval/run_eval.py`) reports golden rows that
 are missing from the catalog, quarantined-only, or invalid as separate buckets, never as misses.
-Until the loader exists, the quarantined-only check reads NOT CHECKED (raw IDs; TODO(loader)). Risk: PR-AUC, Precision@2%, recall per T-type (group split).
+Until the loader exists, the quarantined-only check reads NOT CHECKED (raw IDs; TODO(loader)).
+Golden rows have a tier: S = exactly one correct ID, C = a class query with several acceptable IDs
+(`;`-separated; a hit is any of them in the top k). Metrics are reported for S, C and combined. C is a
+lower bound (the acceptable set is hand-made, never complete). The Phase 1 exit criterion gates on
+tier S only, and only with at least 60 evaluated tier S rows. Why tiers: data_dictionary.md §10.
+Risk: PR-AUC, Precision@2%, recall per T-type (group split).
 Rules: 100% on injected T2/T6. Citations: existence, validity, support. Explanations: 1–5 by two
 raters. Efficiency: p50/p95 latency, lines/hour.
 Ablations: BM25 → dense → hybrid → +reranker. ± normalization/synonyms. Rules only vs full model.

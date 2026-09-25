@@ -15,6 +15,12 @@ def rank_of(expected, results):
     return None
 
 
+def rank_of_any(expected_ids, results):
+    """Best 1-based rank of any ID in `expected_ids`, with rank_of's duplicate rule. None if none."""
+    ranks = [r for r in (rank_of(e, results) for e in expected_ids) if r is not None]
+    return min(ranks) if ranks else None
+
+
 def recall_at_k(ranks, k):
     """Share of queries whose expected ID is in the top k. None when there are no queries."""
     if not ranks:
