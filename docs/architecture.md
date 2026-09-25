@@ -25,12 +25,14 @@ This keeps CPU cost low and every decision traceable.
 | T4 | Vague description ("کالا", "خدمات") with high amount | rule + feature |
 | T5 | Unit price far outside the ID group's distribution | feature (robust z-score) |
 | T6 | `vam` ≠ base × `vra` | rule |
-| `NOT_IN_CATALOG` | **Separate from T1–T6, high severity.** The declared `sstid` does not exist in the catalog. Rationale: an invoice quoting an ID that doesn't exist is a real error in itself, not a rate question. | rule (`rate_at` → `NOT_IN_CATALOG`) |
-| `NOT_IN_FORCE` | Separate from T1–T6. The `sstid` exists, but no version is in force on the invoice date (a gap between versions, or a date before the first version). Severity: not yet set (Navid). | rule (`rate_at` → `NOT_IN_FORCE`) |
+| `NOT_IN_CATALOG` | Separate from T1–T6. **Severity: high.** The declared `sstid` does not exist in the catalog. Rationale: an invoice quoting a non-existent ID is the seller's error, and an error in itself, not a rate question. | rule (`rate_at` → `NOT_IN_CATALOG`) |
+| `NOT_IN_FORCE` | Separate from T1–T6. **Severity: medium.** The `sstid` exists, but no version is in force on the invoice date (a gap between versions, or a date before the first version). Rationale: it could be a genuinely wrong ID, or just a lag around a version change. It warrants review, but is not a strong signal on its own. | rule (`rate_at` → `NOT_IN_FORCE`) |
 
-ID-status findings (`NOT_IN_CATALOG`, `NOT_IN_FORCE`):
+| `AMBIGUOUS` | Separate from T1–T6. **Severity: none (informational). Do not upgrade.** Several versions are in force on the invoice date and tie on the latest `valid_from` (§5). Rationale: this is **our** data problem (two catalog rows in force for one ID), not the seller's. It must **never raise a line's risk score**. It is logged as a catalog-maintenance issue with its own counter in the run report. | rule (`rate_at` → `AMBIGUOUS`) |
+
+ID-status findings (`NOT_IN_CATALOG`, `NOT_IN_FORCE`, `AMBIGUOUS`):
 - **Never** fall back to a nearby version or to "no VAT due". A missing rate is never treated as a zero rate.
-- T2 does not fire for either. The line gets its own finding, not a rate mismatch.
+- T2 does not fire for any of them. The line gets its own finding, not a rate mismatch.
 - The reviewer view shows the raw status text, never a guessed rate.
 - Every detection run report records the count of each.
 - Caveat: while the catalog-truncation question is open (CLAUDE.md), some `NOT_IN_CATALOG` findings
@@ -98,8 +100,8 @@ Field names must be checked against the current Moadian spec in phase 0.
   date falls in a gap between versions (341 gaps measured) or before the first version.
 - `sstid` not in the catalog at all: return an explicit **`NOT_IN_CATALOG`** result, not a rate.
 - Never pick arbitrarily, never silently take the first row, and never fall back to the nearest version.
-- How `NOT_IN_FORCE` and `NOT_IN_CATALOG` are treated (no fallback, T2 does not fire, own finding,
-  raw status shown to the reviewer): see §3.
+- How `NOT_IN_FORCE`, `NOT_IN_CATALOG` and `AMBIGUOUS` are treated (no fallback, T2 does not fire,
+  own finding, raw status shown to the reviewer, counted in the run report): see §3.
 
 The tie rule applies to the 3 IDs that have more than one row in force (`docs/data_quality.md`).
 Catalog source columns and their mapping: `docs/data_dictionary.md` §5. Rows that fail the
@@ -109,8 +111,11 @@ data-quality rules are not in `goods_catalog`. They go to a quarantine list with
 ## 6. Risk-model features
 `sim_declared`, `rank_declared` (21 if absent), `margin_top1`, `exempt_flip`, `is_general_id`,
 `specific_exists`, `desc_specificity`, `price_z` (median-based), `injection_flag`, `rule_hits`,
-`id_status` (categorical: `ok` | `not_in_force` | `not_in_catalog`, from `rate_at`; `AMBIGUOUS` is not
-one of its values yet, so how to encode it is open).
+`id_status` (categorical: `ok` | `not_in_force` | `not_in_catalog` | `ambiguous`, from `rate_at`;
+`ambiguous` is the §5 tie case). Constraint: `ambiguous` must never raise a line's risk score (§3).
+A plain categorical feature would let the model learn to do exactly that. OPEN (Navid): how the
+feature encodes `ambiguous` so it cannot, e.g. a monotone constraint, or treating it like `ok` for
+the model while the maintenance counter records it.
 Threshold is set by **review capacity** (e.g. top 2% per period); report Precision@k at that point.
 
 ## 7. Synthetic data
@@ -148,7 +153,9 @@ anonymized lines, even 100, would be the biggest improvement.
 The 14-week estimate is probably optimistic for one person. Expect 20–28.
 
 ## 10. Evaluation
-Retrieval: Recall@1/@5, MRR (golden set). Risk: PR-AUC, Precision@2%, recall per T-type (group split).
+Retrieval: Recall@1/@5, MRR (golden set). The harness (`eval/run_eval.py`) reports golden rows that
+are missing from the catalog, quarantined-only, or invalid as separate buckets, never as misses.
+Until the loader exists, the quarantined-only check reads NOT CHECKED (raw IDs; TODO(loader)). Risk: PR-AUC, Precision@2%, recall per T-type (group split).
 Rules: 100% on injected T2/T6. Citations: existence, validity, support. Explanations: 1–5 by two
 raters. Efficiency: p50/p95 latency, lines/hour.
 Ablations: BM25 → dense → hybrid → +reranker. ± normalization/synonyms. Rules only vs full model.
