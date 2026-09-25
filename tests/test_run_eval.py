@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from eval.run_eval import (PROVISIONAL_BANNER, evaluate, format_report, load_catalog_ids,
-                           load_golden, main)
+from eval.run_eval import (LEGEND, PROVISIONAL_BANNER, QUARANTINE_NOT_CHECKED, evaluate,
+                           format_report, load_catalog_ids, load_golden, main)
 
 FAKE_CATALOG = Path(__file__).resolve().parents[1] / "data" / "sample" / "fake_catalog.csv"
 
@@ -53,8 +53,10 @@ GOLDEN_ROWS = [
 def test_evaluate_fixture(tmp_path):
     golden = load_golden(write_golden(tmp_path / "g.csv", GOLDEN_ROWS))
     res = evaluate(golden, StubRetriever(), CATALOG, k=20)
-    assert res["counts"] == {"total": 7, "evaluated": 4, "missing_from_catalog": 1, "invalid": 2}
-    assert res["rows"] == {"missing_from_catalog": [5], "invalid": [6, 7]}
+    assert res["counts"] == {"total": 7, "evaluated": 4, "missing_from_catalog": 1,
+                             "quarantined_only": None, "invalid": 2}
+    assert res["rows"] == {"missing_from_catalog": [5], "quarantined_only": None, "invalid": [6, 7]}
+    assert res["quarantine_check"] == "not_checked"
     m = res["metrics"]
     assert m["recall_at_1"] == pytest.approx(0.25)
     assert m["recall_at_5"] == pytest.approx(0.5)
@@ -111,7 +113,40 @@ def test_end_to_end_random_retriever(tmp_path, capsys):
     first = main(args)
     second = main(args)
     assert first == second  # deterministic for a fixed seed
-    assert first["counts"] == {"total": 3, "evaluated": 2, "missing_from_catalog": 1, "invalid": 0}
+    assert first["counts"] == {"total": 3, "evaluated": 2, "missing_from_catalog": 1,
+                               "quarantined_only": None, "invalid": 0}
     assert capsys.readouterr().out.startswith(PROVISIONAL_BANNER)
     saved = json.loads(out.read_text(encoding="utf-8"))
     assert saved["counts"] == first["counts"] and saved["retriever"] == "random"
+
+
+def test_quarantine_not_checked_is_loud_not_zero(tmp_path):
+    golden = load_golden(write_golden(tmp_path / "g.csv", GOLDEN_ROWS))
+    report = format_report(evaluate(golden, StubRetriever(), CATALOG), "stub")
+    assert QUARANTINE_NOT_CHECKED in report
+    assert "quarantined_only: NOT CHECKED" in report
+    assert "quarantined_only: 0" not in report
+
+
+def test_quarantined_only_bucket_when_checked(tmp_path):
+    # Future loader path: B's rows are all quarantined, so row 2 is reported, not scored.
+    golden = load_golden(write_golden(tmp_path / "g.csv", GOLDEN_ROWS))
+    res = evaluate(golden, StubRetriever(), CATALOG, quarantined_only_ids={B})
+    assert res["quarantine_check"] == "checked"
+    assert res["counts"] == {"total": 7, "evaluated": 3, "missing_from_catalog": 1,
+                             "quarantined_only": 1, "invalid": 2}
+    assert res["rows"]["quarantined_only"] == [2]
+    # remaining hits: rank 1, rank 6, miss
+    assert res["metrics"]["recall_at_5"] == pytest.approx(1 / 3)
+    report = format_report(res, "stub")
+    assert QUARANTINE_NOT_CHECKED not in report
+    assert "quarantined_only: 1" in report
+
+
+def test_report_legend_says_not_in_force_cannot_occur(tmp_path):
+    golden = load_golden(write_golden(tmp_path / "g.csv", []))
+    report = format_report(evaluate(golden, StubRetriever(), CATALOG), "stub")
+    for line in LEGEND:
+        assert line in report
+    assert "not_in_force / ambiguous: CANNOT OCCUR" in report
+    assert "NOT a passing result" in report
