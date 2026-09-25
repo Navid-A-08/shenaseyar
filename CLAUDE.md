@@ -41,6 +41,8 @@ this is resolved is provisional.
 - Write or update tests with every change. A task is done when `pytest` passes, not before.
 - Evaluation code comes before model code. Report metrics as numbers, never "looks good".
 - Do NOT write or edit `eval/golden.csv`. It is hand-labeled by me and must stay independent.
+- `eval/golden.csv` is committed. It must never contain text copied from a real business's
+  invoices. Any such row is paraphrased before it is added.
 - Do not make claims about Iranian tax law. If a legal fact is needed, leave a `TODO(legal)`
   and tell me.
 - If a metric improves suspiciously, check for train/test leakage before reporting it.
@@ -48,7 +50,7 @@ this is resolved is provisional.
 - Scraping: never fetch more than a handful of pages without my explicit approval. Respect robots.txt.
 
 ## Stack
-Python 3.11 · hazm · BGE-M3 (dense+sparse) · bge-reranker-v2-m3 · Qdrant · PostgreSQL ·
+Python 3.12 (venv: CPython 3.12.8) · jdatetime (pinned; all Jalali date arithmetic) · hazm · BGE-M3 (dense+sparse) · bge-reranker-v2-m3 · Qdrant · PostgreSQL ·
 LightGBM + SHAP · LangGraph · llama.cpp (Dorna2-Llama3.1-8B Q4_K_M, compared later with a
 smaller model) · FastAPI · Redis/RQ · Streamlit · Docker Compose · pytest · MLflow
 

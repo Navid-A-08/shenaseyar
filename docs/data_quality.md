@@ -82,7 +82,7 @@ So 35 groups differ only in dates, and 6 also differ in rate and tax status. Exa
 
 ### R3: `invalid_date_range` (135 raw rows, 71 after R1)
 
-The 8 most common `(RunDate, ExpirationDate)` pairs cover 131 of the 135 raw rows. In all of them `ExpirationDate` is exactly one day before `RunDate`:
+In **all 135** raw rows, `ExpirationDate` is exactly one day before `RunDate` (checked with `jdatetime` 6.1.0). Under the inclusive convention (`docs/data_dictionary.md` §9), these are zero-length periods. The 8 most common date pairs:
 
 | RunDate | ExpirationDate | Raw rows |
 |---|---|---:|
@@ -95,7 +95,7 @@ The 8 most common `(RunDate, ExpirationDate)` pairs cover 131 of the 135 raw row
 | 1405-05-21 | 1405-05-20 | 3 |
 | 1404-08-26 | 1404-08-25 | 2 |
 
-The remaining 4 rows fall in 4 other date pairs, not inspected one by one.
+The remaining 4 rows fall in 4 other date pairs, also exactly one day apart.
 
 Raw rows by `Vat`/`Taxable`: 0/معاف 93, 10/مشمول 41, 30/مشمول 1.
 By `Type`: شناسه اختصاصی تولید داخل 124, شناسه اختصاصی خدمت 7, شناسه عمومی وارداتی 2, شناسه عمومی تولید داخل 2.

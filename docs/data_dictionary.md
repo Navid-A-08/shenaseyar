@@ -108,7 +108,7 @@ Details on the repeated IDs (all measured):
   - `Taxable` differs in 1,431.
   - `DescriptionOfID` differs in 13.
   - `Type` never differs.
-- 33,037 of the 33,117 IDs have periods that follow each other without overlapping (`ExpirationDate` ≤ the next `RunDate`). This fits `valid_from = RunDate`, `valid_to = ExpirationDate`.
+- 33,037 of the 33,117 IDs have periods that follow each other without overlapping (`ExpirationDate` ≤ the next `RunDate`). This fits `valid_from = RunDate`, with `ExpirationDate` as the end. The end is inclusive; see §9.
 - 32,994 repeated IDs have exactly one row with an empty `ExpirationDate`. 38 have two such rows, and 85 have none.
 - **Data-quality issues:**
   - 100 exact duplicate rows.
@@ -138,7 +138,7 @@ Confidence: **verified**.
 | `charges_vat` | derived | `tax_status == 'taxable'`. Note: 32 rows are `مشمول` with `Vat = 0`. |
 | `legal_basis` | `PricingDescription` | Only 16 of 1,000,000 rows. Effectively empty. |
 | `valid_from` | `RunDate` | Convert Jalali to Gregorian, or store Jalali as well. |
-| `valid_to` | `ExpirationDate` | Empty = open-ended (inferred, **partly verified**). |
+| `valid_to_excl` | `ExpirationDate` + 1 day | The source date is inclusive (§9); the code stores a half-open end. Empty = open-ended. |
 | `source_url` | **none in file** | Fill from download metadata (site + filename + download date). |
 | `PK(sstid, valid_from)` | `ID` + `RunDate` | **Violated by 141 rows** (100 exact duplicates + 41 conflicting). Needs a dedup rule. |
 
@@ -619,3 +619,42 @@ Data only, no interpretation. `TODO(legal)`: what `Vat` means is still open. Nav
 | # | Title | Type | Expired |
 |---:|---|---|---|
 | 1 | سیگار برگ، کارتن، 40، قراصه، TOSCANO، زرد، سازنده MANIFATTURE SIGARO TOSCANO S.P.A، ایتالیا، قطر 7 mm، طول 75  | شناسه اختصاصی وارداتی | yes |
+
+## 9. `ExpirationDate` convention: inclusive (measured 2026-09-25)
+
+**Numbers produced with `jdatetime` 6.1.0 (`jalali-core` 1.0.0)**, pinned in `requirements.txt`. The library did all date parsing and day arithmetic.
+
+**Question:** is `ExpirationDate` the last day a version is in force (inclusive), or the first day it no longer is (exclusive)?
+
+**Method:**
+- Take the active index (after R1–R4, `docs/data_quality.md`) and every ID with two or more versions: 32,981 IDs.
+- Sort each ID's versions by `RunDate` and compare consecutive pairs: 33,664 pairs.
+- For each pair, compute `next.RunDate − prev.ExpirationDate` in days with `jdatetime`.
+- Calendar check: all 681 distinct date values in the four date columns parse as valid `jdatetime` dates (0 invalid).
+- History of this check:
+  - A first run used a hand-written rule (fixed month lengths plus the 33-year-cycle leap rule). It gave identical counts.
+  - That rule is now kept **only** as a test: `tests/test_jalali_crosscheck.py` compares it with `jdatetime` on every day of 1401–1405 and fails on any disagreement.
+  - Project code must use the library.
+
+| Pattern | Meaning | Pairs | Share |
+|---|---|---:|---:|
+| `next.RunDate == prev.ExpirationDate + 1 day` | `ExpirationDate` is **inclusive** | **33,319** | 98.98% |
+| `next.RunDate == prev.ExpirationDate` | `ExpirationDate` is exclusive (half-open) | **0** | 0% |
+| difference > 1 day | gap: no version in force between them | 341 | 1.01% |
+| previous version has no `ExpirationDate` | two versions open at once | 3 | 0.01% |
+| difference < 0 (−3 days) | overlap | 1 | <0.01% |
+
+**Verdict: `ExpirationDate` is inclusive, i.e. the last day the version is in force. Verified by the data** (33,319 vs 0).
+
+- **Gaps.** They range from 3 days to 931 days; 171 of them are exactly 366 days. During a gap, no version of that ID is in force.
+- **Example of a gap:** ID `2800008669456` has `Vat` 50, in force until 1403-12-30. The next version starts 1405-05-18 with `Vat` 35.
+- **The 3 open-ended cases and the 1 overlap** make two versions in force at once. `rate_at`'s tie rule handles them (`docs/architecture.md` §5).
+- **Link to R3.** **All 135** raw R3 rows (`invalid_date_range`) have `ExpirationDate` exactly one day before `RunDate` (measured with `jdatetime`). Under the inclusive convention, those are **zero-length** periods, not scrambled dates. R3 still applies as decided; this is only an observation.
+
+**Conversion in the loader (documented, not yet implemented):**
+- The source is inclusive. The code uses half-open intervals: `[valid_from, valid_to_excl)`.
+  - `valid_from = RunDate`
+  - `valid_to_excl = ExpirationDate + 1 day`, computed on the Jalali calendar (so 1403-12-30 → 1404-01-01, and 1404-06-31 → 1404-07-01)
+  - empty `ExpirationDate` → `valid_to_excl = NULL` (open-ended)
+- Every comparison is then `valid_from <= d < valid_to_excl`. No other code does "+1 day" logic.
+- The Jalali arithmetic in the loader uses `jdatetime` (pinned). No hand-written calendar code in `src/`.
