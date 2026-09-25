@@ -45,6 +45,26 @@ Tax status: the catalog separates three statuses, `taxable` (مشمول), `exemp
 uses only the derived boolean `charges_vat`. The **explanation layer** must use `tax_status`, so it
 never presents `exempt` and `out_of_scope` as the same thing.
 
+### Finding: exact-ID prediction from seller-style text is often not possible (measured 2026-09-26)
+Source: the silver set (`docs/silver_set.md` §Finding). Catalog in force as of 1405-07-01; provisional
+(catalog may be truncated).
+- Of 300 rule-derived, seller-style queries (head + brand + at most 2 attributes), **116 match
+  exactly one in-force ID**, **184 match 2–20**, and **182 further candidates were rejected for
+  matching more than 20**.
+- What would separate the 184 ambiguous rows: **103** become unique with *all* their remaining
+  descriptive attributes (no manufacturer, no part number); **46** only once the manufacturer or
+  part number is added; **35** not even then.
+- So, for this catalog, **one text line often does not determine one ID in principle**. Whether a
+  line can be resolved depends on how many attributes the seller writes, and for a sizeable share
+  (at least 81 of the 184) on the manufacturer or part number.
+- UNVERIFIED assumption: that invoice lines rarely carry the manufacturer or part number. There is
+  no invoice data in this project yet. `TODO(data)`: check on real (anonymized) lines.
+
+**OPEN for Phase 2 (flagged, not decided; Navid):** retrieval may be best framed as *suggest
+plausible alternative IDs*, while the well-posed task is **consistency of the DECLARED `sstid`
+with the text (T1)**: "is this text compatible with the declared ID?" rather than "which ID is
+this text?". **Nothing changes in Phase 1**: the retrieval baseline and its exit criterion stand.
+
 ## 4. Layers
 1. **Data**: catalog (`stuffid.tax.gov.ir`, manual download only, see `docs/data_dictionary.md`), versioned rate table,
    VAT law 1400 (esp. art. 9 exemptions), Moadian law & bylaws, circulars, annual budget law rate

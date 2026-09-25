@@ -163,6 +163,52 @@ do not identify one ID. Even among specific IDs, several often share the same he
 first attributes. They differ in the manufacturer, part number or later attributes, which the
 rules drop.
 
+## Finding: ambiguity (measured 2026-09-26)
+
+**This is the most important result of the silver set so far.** It is also recorded in
+`docs/architecture.md` §3.
+
+**1. Most seller-style queries do not identify one ID.**
+
+| Outcome for a rule-derived query (head + brand + at most 2 attributes) | Count |
+|---|---:|
+| matches exactly 1 in-force ID (tier S) | 116 of 300 |
+| matches 2–20 in-force IDs (tier C) | 184 of 300 |
+| matches more than 20: rejected, replaced by the next candidate | 182 further candidates |
+
+**2. What would separate the ambiguous rows.** For each of the 184 tier C rows, the source title
+was rebuilt with more information and the same token-subset test was re-run:
+
+| Query rebuilt with … | Rows that become unique |
+|---|---:|
+| all remaining descriptive attributes (still no manufacturer, no part number) | 103 of 184 (56%) |
+| … plus the manufacturer, or plus the part number (not unique before) | 46 of 184 (25%): 17 by manufacturer, 32 by part number, 3 by either |
+| unique under none of these | 35 of 184 (19%) |
+
+The 182 rejected candidates were not analysed this way.
+
+**3. What this means.**
+- For this catalog, exact-ID prediction from seller-style text is **often impossible in
+  principle**. The text does not carry enough information to pick one ID.
+- **Short lines** (a head and 1–2 attributes): the missing information is often ordinary
+  descriptive attributes, which a seller *could* write but often won't.
+- **At least 81 of the 184** (44%): it takes the manufacturer or the part number, or nothing in
+  the title separates the IDs at all.
+- **UNVERIFIED assumption:** that invoice lines rarely carry the manufacturer or part number.
+  There is no invoice data in this project yet (`TODO(data)`).
+
+**4. OPEN for Phase 2 (flagged, not decided).** Retrieval may be best framed as *suggest plausible
+alternative IDs*, while the well-posed task is **consistency of the DECLARED ID with the text (T1)**.
+Phase 1 is unchanged.
+
+Method for table 2 (one-off analysis, script not committed):
+- The same rules and normalization as the generator. Catalog in force as of 1405-07-01, 13-digit IDs.
+- "All remaining attributes": head + brand + every attribute kept by `derive()`. Countries,
+  packaging, placeholders and admin tails stay dropped.
+- "Manufacturer": the `سازنده …` / `تولید کننده …` / `شرکت …` segments (or the trailing
+  `/ شرکت …`). "Part number": the `شماره فنی …` segment.
+- Of the 184 rows, 168 have a manufacturer segment and 57 have a part number.
+
 ## Metrics so far
 
 | Retriever | File | Tier S R@5 | Tier C R@5 | Combined R@5 |
