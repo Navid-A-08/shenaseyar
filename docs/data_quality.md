@@ -113,3 +113,10 @@ By `Type`: شناسه اختصاصی تولید داخل 124, شناسه اخت�
   - 22,709 IDs have **no** open row: every row has an `ExpirationDate`.
   - 3 IDs have **more than one** open row. `rate_at` handles them by taking the latest `valid_from`, else `AMBIGUOUS` (`docs/architecture.md` §5). Before R1–R4 there were 38 such IDs; R1–R4 resolved the other 35. I did not break down which rule resolved which.
 - These affect `rate_at(sstid, issue_date)` once lookups are built. There is no rule for them yet. It's Navid's call whether they need one.
+
+## Implementation
+
+R1-R4 are implemented in `src/retrieval/catalog.py` (`load_snapshot`). On the 2026-09-22 export it
+reproduces every count above: 100 R1 copies removed (999,900 rows left), R2 41 keys / 82 rows, R3 71,
+R4 1, 7 rows with two reasons. It also measures 67 quarantined-only IDs, and 3 IDs with two active
+rows in force on 1405-07-01 (943,383 rows, 943,380 IDs).

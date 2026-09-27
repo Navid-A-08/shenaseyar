@@ -1,6 +1,6 @@
 {
  "provisional": "PROVISIONAL: catalog may be truncated (1,000,000-row export cap)",
- "retriever": "random",
+ "retriever": "bm25",
  "seed": 0,
  "golden": "eval/silver.csv",
  "catalog": "data/catalog/product_all_2026-09-22T19-49-07_part_1_0df81806-5d13-4353-99a2-dbf3a308c5c9.zip",
@@ -27,21 +27,21 @@
  "metrics": {
   "tier_S": {
    "evaluated": 116,
-   "recall_at_1": 0.0,
-   "recall_at_5": 0.0,
-   "mrr_at_20": 0.0
+   "recall_at_1": 0.9568965517241379,
+   "recall_at_5": 1.0,
+   "mrr_at_20": 0.9732758620689655
   },
   "tier_C": {
    "evaluated": 184,
-   "recall_at_1": 0.0,
-   "recall_at_5": 0.0,
-   "mrr_at_20": 0.0
+   "recall_at_1": 0.9456521739130435,
+   "recall_at_5": 0.9728260869565217,
+   "mrr_at_20": 0.9547101449275361
   },
   "combined": {
    "evaluated": 300,
-   "recall_at_1": 0.0,
-   "recall_at_5": 0.0,
-   "mrr_at_20": 0.0
+   "recall_at_1": 0.95,
+   "recall_at_5": 0.9833333333333333,
+   "mrr_at_20": 0.9618888888888889
   }
  },
  "set": "silver",
@@ -75,11 +75,20 @@
   }
  },
  "runtime": {
-  "snapshot_s": 10.21,
-  "index_build_s": 0.33,
+  "snapshot_s": 10.1,
+  "index_build_s": 23.62,
   "queries": 300,
-  "search_total_s": 0.003,
-  "search_ms_per_query": 0.01,
-  "process_peak_mb": 995
+  "search_total_s": 1.634,
+  "search_ms_per_query": 5.45,
+  "process_peak_mb": 1573,
+  "index": {
+   "docs": 943383,
+   "vocab": 501371,
+   "postings": 22757220,
+   "avg_doc_tokens": 26.45,
+   "k1": 1.5,
+   "b": 0.75,
+   "index_arrays_mb": 179.4
+  }
  }
 }
