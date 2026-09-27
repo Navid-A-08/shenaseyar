@@ -528,6 +528,62 @@ The contains-rule table is in `eval/results/silver_v2b_contains_bm25_report.json
 | 41ffd1f1b9 | rev | هندزفری → هدفون | 0 | 1.00 (1) | 1.00 (1) | 0.50 (2) | 0.33 (3) | n/a (0) |
 | c9e270251e | rev | نوشابه → نوشابه گازدار | 0 | 1.00 (1) | 1.00 (1) | 1.00 (9) | 1.00 (10) | 1.00 (10) |
 
+## Decision rule: dense vs BM25 (pre-registered 2026-09-28, before any dense code)
+
+Written before any dense retriever exists, so the result cannot shape the rule. No parameters of
+either retriever are tuned on this set: it is the test set.
+
+**Data.** `eval/silver_v2b.csv`, prefix class rule, as registered:
+
+| | |
+|---|---|
+| Synonym list SHA-256 | `ab86e48bada29bb277b13d40888a52c62c094dbae092b7753f3aed5813f232f3` |
+| Catalog zip SHA-256 | `b0703c8b5fea42a6e8590184a24090b13f5bdfd0d1b950f344615fad917957ba` |
+| Build | seed 20260928, K = 10, as_of 1405-07-01, snapshot R1-R4 |
+
+- **Same index for both retrievers.** Both run on the same snapshot (943,383 in-force rows). A
+  dense run on a smaller index is **not** a valid comparison unless BM25 is re-run on exactly the
+  same rows.
+- **If the list grows before or after the dense run,** the result on the registered list (hash
+  above) is always reported. Results on a newer list are reported next to it, with that list's
+  hash. They never replace it.
+
+**Primary comparison.** Recall@5 at **L1** (substituted head), **original-direction
+pure-mismatch pairs only** (11 pairs, 23 queries at registration), averaged over pairs.
+- For each pair *p*: *d_p* = dense R@5 − BM25 R@5 on that pair's L1 queries.
+- Δ = mean of *d_p* over the 11 pairs. **BM25 baseline: 0.2455.**
+- Bootstrap over pairs: 10,000 resamples of the 11 pairs with replacement (seed 20260928). The
+  statistic is the mean *d_p*; the 95% interval is the 2.5th–97.5th percentile.
+
+**Verdict, in this order:**
+
+| Outcome | Condition |
+|---|---|
+| **Dense better** | Δ ≥ **+0.15** AND the 95% interval excludes 0 (lower bound > 0) |
+| **BM25 better** | Δ ≤ −0.15 AND the 95% interval excludes 0 (upper bound < 0) |
+| **No detectable difference** | anything else. This is not "equal": 11 pairs cannot show a small difference. |
+
+Resolution: one pair is 1/11 ≈ 0.09 of Δ, so 0.15 means roughly two pairs going from miss to hit.
+
+**Secondary: reported, never deciding.**
+- Same slice at L0 and L2.
+- All levels for the headline slice, the seller-headed slice and the reversed slice.
+- Per-query (micro) averages.
+- Index build time, memory, and per-query latency (median and 95th percentile), next to recall.
+  A retriever that wins by 0.2 but needs 2 s per query is a different product decision, and the
+  report says so rather than letting recall alone decide.
+
+**Hybrid signal.** If dense is "better" at L1 but its headline R@5 (averaged over pairs) at **L3 or
+L4** is below BM25's, the report states it plainly: *dense wins where the seller writes little
+and loses where they write more, which points to a hybrid, not dense alone.* The L3/L4 gap is
+shown with its own bootstrap interval.
+
+**Caveats that apply to any verdict.**
+- The synonym list was drafted by Claude and reviewed by Navid: this tests those 11 gaps, not
+  sellers' real vocabulary.
+- Silver sets are optimistic. A verdict here is a direction for the human golden set, not a
+  replacement for it.
+
 ## Known limitations
 - **Optimistic by construction** (see the top). Seller wording, abbreviations, synonyms and
   missing words are not modelled; only 4 kinds of character noise are.
