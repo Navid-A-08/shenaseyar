@@ -24,6 +24,8 @@ The silver set exists to exercise the retrieval stack at volume until the golden
 | `eval/silver_meta.csv` | **no** (gitignored) | per row: source ID, Type, Vat, length bucket, number of matches, tier (for later analysis) |
 | `eval/results/silver_build.json` | yes | build parameters, catalog SHA-256, allocation table, counts. No text. |
 | `eval/results/silver_*.json` | yes | `run_eval.py --out` results on the silver set. No query text. |
+| `tools/analyze_ambiguity.py` | yes | rebuilds the ambiguity table (§Finding) |
+| `eval/results/ambiguity.json` | yes | its output: counts and per-row categories by source ID. No text. |
 
 The two CSVs are an extract of the catalog, so they are never committed (the no-extracts rule in
 `CLAUDE.md`).
@@ -177,12 +179,13 @@ rules drop.
 | matches more than 20: rejected, replaced by the next candidate | 182 further candidates |
 
 **2. What would separate the ambiguous rows.** For each of the 184 tier C rows, the source title
-was rebuilt with more information and the same token-subset test was re-run:
+was rebuilt with more information and the same token-subset test was re-run. Source:
+`eval/results/ambiguity.json` (built by `tools/analyze_ambiguity.py`; per-row categories included):
 
 | Query rebuilt with … | Rows that become unique |
 |---|---:|
 | all remaining descriptive attributes (still no manufacturer, no part number) | 103 of 184 (56%) |
-| … plus the manufacturer, or plus the part number (not unique before) | 46 of 184 (25%): 17 by manufacturer, 32 by part number, 3 by either |
+| … plus the manufacturer, or plus the part number (not unique before) | 46 of 184 (25%): 14 by manufacturer only, 29 by part number only, 3 by either |
 | unique under none of these | 35 of 184 (19%) |
 
 The 182 rejected candidates were not analysed this way.
@@ -200,14 +203,20 @@ The 182 rejected candidates were not analysed this way.
 **4. OPEN for Phase 2 (flagged, not decided).** Retrieval may be best framed as *suggest plausible
 alternative IDs*, while the well-posed task is **consistency of the DECLARED ID with the text (T1)**.
 Phase 1 is unchanged.
+- *Suggestion, not a decision:* since 56% of ambiguous rows resolve with ordinary descriptive
+  attributes, a useful future metric is **recall as a function of query detail level** (head only /
+  + attributes / + brand), rather than a single recall number.
 
-Method for table 2 (one-off analysis, script not committed):
+Method for table 2 (`tools/analyze_ambiguity.py`; output `eval/results/ambiguity.json`):
 - The same rules and normalization as the generator. Catalog in force as of 1405-07-01, 13-digit IDs.
 - "All remaining attributes": head + brand + every attribute kept by `derive()`. Countries,
   packaging, placeholders and admin tails stay dropped.
 - "Manufacturer": the `سازنده …` / `تولید کننده …` / `شرکت …` segments (or the trailing
   `/ شرکت …`). "Part number": the `شماره فنی …` segment.
 - Of the 184 rows, 168 have a manufacturer segment and 57 have a part number.
+- Rebuild: `python tools/analyze_ambiguity.py`. It reads the catalog zip (same SHA-256 as above)
+  and `eval/silver_meta.csv` (gitignored; rebuilt by `tools/make_silver.py`). It records both
+  SHA-256 hashes in the JSON. Same inputs give the same JSON.
 
 ## Metrics so far
 

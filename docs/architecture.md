@@ -46,14 +46,14 @@ uses only the derived boolean `charges_vat`. The **explanation layer** must use 
 never presents `exempt` and `out_of_scope` as the same thing.
 
 ### Finding: exact-ID prediction from seller-style text is often not possible (measured 2026-09-26)
-Source: the silver set (`docs/silver_set.md` §Finding). Catalog in force as of 1405-07-01; provisional
-(catalog may be truncated).
+Source: the silver set (`docs/silver_set.md` §Finding) and `eval/results/ambiguity.json`
+(`tools/analyze_ambiguity.py`). Catalog in force as of 1405-07-01; provisional (catalog may be truncated).
 - Of 300 rule-derived, seller-style queries (head + brand + at most 2 attributes), **116 match
   exactly one in-force ID**, **184 match 2–20**, and **182 further candidates were rejected for
   matching more than 20**.
 - What would separate the 184 ambiguous rows: **103** become unique with *all* their remaining
   descriptive attributes (no manufacturer, no part number); **46** only once the manufacturer or
-  part number is added; **35** not even then.
+  part number is added (14 manufacturer only, 29 part number only, 3 either); **35** not even then.
 - So, for this catalog, **one text line often does not determine one ID in principle**. Whether a
   line can be resolved depends on how many attributes the seller writes, and for a sizeable share
   (at least 81 of the 184) on the manufacturer or part number.
@@ -64,6 +64,9 @@ Source: the silver set (`docs/silver_set.md` §Finding). Catalog in force as of 
 plausible alternative IDs*, while the well-posed task is **consistency of the DECLARED `sstid`
 with the text (T1)**: "is this text compatible with the declared ID?" rather than "which ID is
 this text?". **Nothing changes in Phase 1**: the retrieval baseline and its exit criterion stand.
+*Suggestion, not a decision:* since 56% of ambiguous rows resolve with ordinary descriptive
+attributes, a useful future metric is **recall as a function of query detail level** (head only /
++ attributes / + brand), rather than a single recall number.
 
 ## 4. Layers
 1. **Data**: catalog (`stuffid.tax.gov.ir`, manual download only, see `docs/data_dictionary.md`), versioned rate table,

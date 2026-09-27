@@ -215,6 +215,35 @@ def sha256(path):
     return h.hexdigest()
 
 
+def match_ids(rows, queries, cap, exclude_ids=frozenset()):
+    """For each query, the IDs whose title contains every query token (a plain subset test).
+
+    `rows` is a callable returning a fresh iterator of catalog records (it is streamed twice).
+    `queries` maps query -> tokens(query). At most `cap` IDs are kept per query, so "cap IDs"
+    means "cap or more". Each query is indexed on its rarest token, so only rows containing that
+    token are tested.
+    """
+    vocab = set().union(*queries.values()) if queries else set()
+    df = Counter()
+    for rec in rows():
+        if rec["ID"] not in exclude_ids:
+            df.update(tokens(rec["DescriptionOfID"]) & vocab)
+    by_key = defaultdict(list)
+    for q, toks in queries.items():
+        if toks:
+            by_key[min(toks, key=lambda t: (df[t], t))].append(q)
+    matches = defaultdict(set)
+    for rec in rows():
+        if rec["ID"] in exclude_ids:
+            continue
+        toks = tokens(rec["DescriptionOfID"])
+        for key in toks & by_key.keys():
+            for q in by_key[key]:
+                if len(matches[q]) < cap and queries[q] <= toks:
+                    matches[q].add(rec["ID"])
+    return matches
+
+
 def build(zip_path, seed, n, as_of, noise_frac, floor, max_matches, pool_factor):
     """Return (silver_rows, meta_rows, report). Streams the zip five times; nothing is extracted."""
     cs.check_date(as_of, "--as-of")
@@ -272,27 +301,8 @@ def build(zip_path, seed, n, as_of, noise_frac, floor, max_matches, pool_factor)
             cand[rec["ID"]] = [build_query(head, brand, attrs, k, rules) for k in attr_ladder(attrs)]
     queries = {q: tokens(q) for ladder in cand.values() for q, _ in ladder}
 
-    # Pass 4: document frequency of query tokens, to index each query on its rarest token.
-    vocab = set().union(*queries.values()) if queries else set()
-    df = Counter()
-    for rec in in_force_rows():
-        if rec["ID"] not in bad_ids:
-            df.update(tokens(rec["DescriptionOfID"]) & vocab)
-    by_key = defaultdict(list)
-    for q, toks in queries.items():
-        if toks:
-            by_key[min(toks, key=lambda t: (df[t], t))].append(q)
-
-    # Pass 5: which in-force IDs contain every token of each query (capped at max_matches + 1).
-    matches = defaultdict(set)
-    for rec in in_force_rows():
-        if rec["ID"] in bad_ids:
-            continue
-        toks = tokens(rec["DescriptionOfID"])
-        for key in toks & by_key.keys():
-            for q in by_key[key]:
-                if len(matches[q]) <= max_matches and queries[q] <= toks:
-                    matches[q].add(rec["ID"])
+    # Passes 4-5: which in-force IDs contain every token of each query.
+    matches = match_ids(in_force_rows, queries, max_matches + 1, bad_ids)
 
     # Emit per cell until its quota is met: unique -> S, <= max_matches -> C, else reject.
     rows, meta, cells, used_queries = [], [], [], set()
