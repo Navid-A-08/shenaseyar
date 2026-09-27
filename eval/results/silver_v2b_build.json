@@ -1,0 +1,907 @@
+{
+ "catalog_zip": "product_all_2026-09-22T19-49-07_part_1_0df81806-5d13-4353-99a2-dbf3a308c5c9.zip",
+ "catalog_sha256": "b0703c8b5fea42a6e8590184a24090b13f5bdfd0d1b950f344615fad917957ba",
+ "pairs_sha256": "ab86e48bada29bb277b13d40888a52c62c094dbae092b7753f3aed5813f232f3",
+ "params": {
+  "seed": 20260928,
+  "k_rows": 10,
+  "as_of": "1405-07-01",
+  "class_rule": "contains"
+ },
+ "snapshot": "rules R1-R4 (docs/data_quality.md); index = active rows in force on 1405-07-01",
+ "index_ids": 943380,
+ "levels": {
+  "L0": "bare seller term",
+  "L1": "substituted head",
+  "L2": "head + 1 attribute",
+  "L3": "head + 2 attributes",
+  "L4": "head + brand + 2 attributes"
+ },
+ "pairs": 36,
+ "zero_coverage": [
+  "9ba041ae85",
+  "117211339f",
+  "3d8b74ada1",
+  "b79fb23e13",
+  "bcec63c2c1",
+  "e8b64cedb8",
+  "ce1717abb0",
+  "57457811ae",
+  "f95b0aa66d",
+  "35c46c6af3"
+ ],
+ "queries_per_level": {
+  "L0": 26,
+  "L1": 107,
+  "L2": 152,
+  "L3": 171,
+  "L4": 98
+ },
+ "rows": 554,
+ "pair_details": [
+  {
+   "pair_id": "ca7d916e61",
+   "catalog_term": "تلفن همراه",
+   "seller_term": "گوشی",
+   "direction": "original",
+   "class_rows": 662,
+   "seller_head_rows": 19,
+   "distinct_heads": 7,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 7,
+    "L2": 9,
+    "L3": 4,
+    "L4": 1
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 3,
+    "L2": 1,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "6175c97b41",
+   "catalog_term": "تلفن همراه",
+   "seller_term": "موبایل",
+   "direction": "original",
+   "class_rows": 662,
+   "seller_head_rows": 0,
+   "distinct_heads": 7,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 7,
+    "L2": 10,
+    "L3": 3,
+    "L4": 1
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 3,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "9ba041ae85",
+   "catalog_term": "رایانه قابل حمل",
+   "seller_term": "لپ تاپ",
+   "direction": "original",
+   "class_rows": 0,
+   "seller_head_rows": 1419,
+   "distinct_heads": 0,
+   "sampled_rows": 0,
+   "queries": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "75a17561ba",
+   "catalog_term": "رایانه",
+   "seller_term": "کامپیوتر",
+   "direction": "original",
+   "class_rows": 532,
+   "seller_head_rows": 1,
+   "distinct_heads": 8,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 8,
+    "L2": 8,
+    "L3": 8,
+    "L4": 4
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 2,
+    "L2": 1,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "e9647fa607",
+   "catalog_term": "رایانه لوحی",
+   "seller_term": "تبلت",
+   "direction": "original",
+   "class_rows": 63,
+   "seller_head_rows": 0,
+   "distinct_heads": 1,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 1,
+    "L2": 3,
+    "L3": 6,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 9,
+    "L2": 7,
+    "L3": 4,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "d0c2f148e1",
+   "catalog_term": "چاپگر",
+   "seller_term": "پرینتر",
+   "direction": "original",
+   "class_rows": 983,
+   "seller_head_rows": 0,
+   "distinct_heads": 7,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 7,
+    "L2": 9,
+    "L3": 8,
+    "L4": 4
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 3,
+    "L2": 1,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "117211339f",
+   "catalog_term": "حافظه فلش",
+   "seller_term": "فلش مموری",
+   "direction": "original",
+   "class_rows": 0,
+   "seller_head_rows": 581,
+   "distinct_heads": 0,
+   "sampled_rows": 0,
+   "queries": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "75c23d66c8",
+   "catalog_term": "دوربین عکاسی",
+   "seller_term": "دوربین",
+   "direction": "original",
+   "class_rows": 34,
+   "seller_head_rows": 4988,
+   "distinct_heads": 1,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 1,
+    "L2": 4,
+    "L3": 8,
+    "L4": 8
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 9,
+    "L2": 6,
+    "L3": 2,
+    "L4": 2
+   }
+  },
+  {
+   "pair_id": "3d8b74ada1",
+   "catalog_term": "هدفون",
+   "seller_term": "هندزفری",
+   "direction": "original",
+   "class_rows": 0,
+   "seller_head_rows": 747,
+   "distinct_heads": 0,
+   "sampled_rows": 0,
+   "queries": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "a1a95ec002",
+   "catalog_term": "شارژر همراه",
+   "seller_term": "پاوربانک",
+   "direction": "original",
+   "class_rows": 612,
+   "seller_head_rows": 0,
+   "distinct_heads": 1,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 1,
+    "L2": 2,
+    "L3": 10,
+    "L4": 10
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 9,
+    "L2": 8,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "41b3e73ab2",
+   "catalog_term": "تلویزیون",
+   "seller_term": "ال ای دی",
+   "direction": "original",
+   "class_rows": 2556,
+   "seller_head_rows": 0,
+   "distinct_heads": 4,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 4,
+    "L2": 6,
+    "L3": 6,
+    "L4": 5
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 6,
+    "L2": 4,
+    "L3": 2,
+    "L4": 1
+   }
+  },
+  {
+   "pair_id": "dcae132067",
+   "catalog_term": "کولر گازی",
+   "seller_term": "اسپلیت",
+   "direction": "original",
+   "class_rows": 7187,
+   "seller_head_rows": 0,
+   "distinct_heads": 3,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 3,
+    "L2": 5,
+    "L3": 7,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 7,
+    "L2": 5,
+    "L3": 3,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "7ffb58a51b",
+   "catalog_term": "کولر آبی",
+   "seller_term": "کولر",
+   "direction": "original",
+   "class_rows": 588,
+   "seller_head_rows": 2273,
+   "distinct_heads": 1,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 1,
+    "L2": 2,
+    "L3": 8,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 9,
+    "L2": 8,
+    "L3": 2,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "1859cf187d",
+   "catalog_term": "اجاق گاز",
+   "seller_term": "گاز",
+   "direction": "original",
+   "class_rows": 2012,
+   "seller_head_rows": 124,
+   "distinct_heads": 3,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 3,
+    "L2": 4,
+    "L3": 8,
+    "L4": 3
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 7,
+    "L2": 6,
+    "L3": 2,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "24b6a8b86b",
+   "catalog_term": "ماشین لباسشویی",
+   "seller_term": "لباسشویی",
+   "direction": "original",
+   "class_rows": 1576,
+   "seller_head_rows": 0,
+   "distinct_heads": 2,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 2,
+    "L2": 5,
+    "L3": 9,
+    "L4": 4
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 8,
+    "L2": 5,
+    "L3": 1,
+    "L4": 1
+   }
+  },
+  {
+   "pair_id": "b79fb23e13",
+   "catalog_term": "مایکروویو",
+   "seller_term": "ماکروفر",
+   "direction": "original",
+   "class_rows": 0,
+   "seller_head_rows": 0,
+   "distinct_heads": 0,
+   "sampled_rows": 0,
+   "queries": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "7df7d49b68",
+   "catalog_term": "یخچال فریزر",
+   "seller_term": "یخچال",
+   "direction": "original",
+   "class_rows": 2175,
+   "seller_head_rows": 3038,
+   "distinct_heads": 1,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 1,
+    "L2": 4,
+    "L3": 8,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 9,
+    "L2": 6,
+    "L3": 2,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "3dfb52f92b",
+   "catalog_term": "روغن موتور",
+   "seller_term": "روغن ماشین",
+   "direction": "original",
+   "class_rows": 2208,
+   "seller_head_rows": 0,
+   "distinct_heads": 1,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 1,
+    "L2": 8,
+    "L3": 8,
+    "L4": 10
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 9,
+    "L2": 2,
+    "L3": 2,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "c2da0529b5",
+   "catalog_term": "لاستیک",
+   "seller_term": "تایر",
+   "direction": "original",
+   "class_rows": 3281,
+   "seller_head_rows": 6905,
+   "distinct_heads": 976,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 10,
+    "L2": 1,
+    "L3": 1,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "4866f9e8e4",
+   "catalog_term": "باتری",
+   "seller_term": "باطری",
+   "direction": "original",
+   "class_rows": 6059,
+   "seller_head_rows": 0,
+   "distinct_heads": 13,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 10,
+    "L2": 8,
+    "L3": 8,
+    "L4": 3
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "a94b0a0c21",
+   "catalog_term": "خودرو",
+   "seller_term": "ماشین",
+   "direction": "original",
+   "class_rows": 7451,
+   "seller_head_rows": 5855,
+   "distinct_heads": 45,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 10,
+    "L2": 9,
+    "L3": 6,
+    "L4": 3
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "bcec63c2c1",
+   "catalog_term": "کفش ورزشی",
+   "seller_term": "کتونی",
+   "direction": "original",
+   "class_rows": 0,
+   "seller_head_rows": 0,
+   "distinct_heads": 0,
+   "sampled_rows": 0,
+   "queries": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "e8b64cedb8",
+   "catalog_term": "شلوار جین",
+   "seller_term": "جین",
+   "direction": "original",
+   "class_rows": 0,
+   "seller_head_rows": 0,
+   "distinct_heads": 0,
+   "sampled_rows": 0,
+   "queries": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "b078c5fb3e",
+   "catalog_term": "پوشاک",
+   "seller_term": "لباس",
+   "direction": "original",
+   "class_rows": 12,
+   "seller_head_rows": 49,
+   "distinct_heads": 5,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 5,
+    "L2": 6,
+    "L3": 3,
+    "L4": 3
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 5,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "ce1717abb0",
+   "catalog_term": "نوشابه گازدار",
+   "seller_term": "نوشابه",
+   "direction": "original",
+   "class_rows": 0,
+   "seller_head_rows": 456,
+   "distinct_heads": 0,
+   "sampled_rows": 0,
+   "queries": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "1cb85cec47",
+   "catalog_term": "آب آشامیدنی",
+   "seller_term": "آب معدنی",
+   "direction": "original",
+   "class_rows": 111,
+   "seller_head_rows": 68,
+   "distinct_heads": 3,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 3,
+    "L2": 9,
+    "L3": 3,
+    "L4": 3
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 7,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "5d69d20e0b",
+   "catalog_term": "دستمال کاغذی",
+   "seller_term": "دستمال",
+   "direction": "original",
+   "class_rows": 165,
+   "seller_head_rows": 356,
+   "distinct_heads": 3,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 3,
+    "L2": 5,
+    "L3": 6,
+    "L4": 7
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 7,
+    "L2": 5,
+    "L3": 4,
+    "L4": 1
+   }
+  },
+  {
+   "pair_id": "57457811ae",
+   "catalog_term": "لامپ ال ای دی",
+   "seller_term": "لامپ کم مصرف",
+   "direction": "original",
+   "class_rows": 0,
+   "seller_head_rows": 4,
+   "distinct_heads": 0,
+   "sampled_rows": 0,
+   "queries": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "158bdd49d2",
+   "catalog_term": "میلگرد",
+   "seller_term": "آرماتور",
+   "direction": "original",
+   "class_rows": 1589,
+   "seller_head_rows": 0,
+   "distinct_heads": 11,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 10,
+    "L2": 10,
+    "L3": 10,
+    "L4": 2
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "f95b0aa66d",
+   "catalog_term": "سیمان پرتلند",
+   "seller_term": "سیمان",
+   "direction": "original",
+   "class_rows": 0,
+   "seller_head_rows": 80,
+   "distinct_heads": 0,
+   "sampled_rows": 0,
+   "queries": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "35c46c6af3",
+   "catalog_term": "صندلی اداری",
+   "seller_term": "صندلی گردان",
+   "direction": "original",
+   "class_rows": 0,
+   "seller_head_rows": 0,
+   "distinct_heads": 0,
+   "sampled_rows": 0,
+   "queries": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "6fab2affcb",
+   "catalog_term": "ماشین حساب",
+   "seller_term": "حساب گر",
+   "direction": "original",
+   "class_rows": 67,
+   "seller_head_rows": 0,
+   "distinct_heads": 1,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 1,
+    "L2": 1,
+    "L3": 2,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 9,
+    "L2": 9,
+    "L3": 8,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "5b3218fdd0",
+   "catalog_term": "لپ تاپ",
+   "seller_term": "رایانه قابل حمل",
+   "direction": "reversed",
+   "class_rows": 1547,
+   "seller_head_rows": 0,
+   "distinct_heads": 2,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 2,
+    "L2": 9,
+    "L3": 9,
+    "L4": 9
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 8,
+    "L2": 1,
+    "L3": 1,
+    "L4": 1
+   }
+  },
+  {
+   "pair_id": "48ec5184ef",
+   "catalog_term": "فلش مموری",
+   "seller_term": "حافظه فلش",
+   "direction": "reversed",
+   "class_rows": 581,
+   "seller_head_rows": 0,
+   "distinct_heads": 1,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 1,
+    "L2": 6,
+    "L3": 10,
+    "L4": 10
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 9,
+    "L2": 4,
+    "L3": 0,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "41ffd1f1b9",
+   "catalog_term": "هندزفری",
+   "seller_term": "هدفون",
+   "direction": "reversed",
+   "class_rows": 747,
+   "seller_head_rows": 0,
+   "distinct_heads": 1,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 1,
+    "L2": 2,
+    "L3": 3,
+    "L4": 0
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 9,
+    "L2": 8,
+    "L3": 7,
+    "L4": 0
+   }
+  },
+  {
+   "pair_id": "c9e270251e",
+   "catalog_term": "نوشابه",
+   "seller_term": "نوشابه گازدار",
+   "direction": "reversed",
+   "class_rows": 476,
+   "seller_head_rows": 0,
+   "distinct_heads": 4,
+   "sampled_rows": 10,
+   "queries": {
+    "L0": 1,
+    "L1": 4,
+    "L2": 7,
+    "L3": 9,
+    "L4": 8
+   },
+   "duplicates": {
+    "L0": 0,
+    "L1": 6,
+    "L2": 3,
+    "L3": 1,
+    "L4": 0
+   }
+  }
+ ]
+}

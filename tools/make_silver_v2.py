@@ -54,8 +54,12 @@ def v2_tokens(text):
     return frozenset(tokenize(text))
 
 
-def load_pairs(path):
-    """Return [(catalog_term, seller_term)] in file order. Lines starting with # are comments."""
+def read_pairs(path):
+    """Return [{"catalog_term", "seller_term", "note"}] in file order, validated.
+
+    Lines starting with # are comments. The note column is optional free text; silver-v2b reads
+    `direction=reversed` from it.
+    """
     with open(path, encoding="utf-8-sig", newline="") as f:
         lines = [ln for ln in f if not ln.lstrip().startswith("#")]
     rows = list(csv.DictReader(lines))
@@ -71,8 +75,13 @@ def load_pairs(path):
         if (cat, sel) in seen:
             raise SynonymError(f"{path} pair {n}: duplicate pair")
         seen.add((cat, sel))
-        pairs.append((cat, sel))
+        pairs.append({"catalog_term": cat, "seller_term": sel, "note": (r.get("note") or "").strip()})
     return pairs
+
+
+def load_pairs(path):
+    """Return [(catalog_term, seller_term)] in file order (see read_pairs)."""
+    return [(p["catalog_term"], p["seller_term"]) for p in read_pairs(path)]
 
 
 def find_span(tokens, term):

@@ -30,6 +30,9 @@ The silver set exists to exercise the retrieval stack at volume until the golden
 | `tools/make_silver_v2.py` | yes | builds silver-v2 (main + head-only) |
 | `eval/silver_v2.csv`, `eval/silver_v2_head.csv`, `eval/silver_v2_meta.csv` | **no** (gitignored) | silver-v2 sets and per-row meta |
 | `eval/results/silver_v2_*.json` | yes | build counts, BM25 results, per-pair table. No catalog text (terms come from the list). |
+| `tools/make_silver_v2b.py`, `tools/silver_v2b_report.py` | yes | builds silver-v2b (detail ladder); report per level / pair / slice |
+| `eval/silver_v2b*.csv`, `eval/silver_v2b*_meta.csv` | **no** (gitignored) | silver-v2b sets (contains and prefix rule) |
+| `eval/results/silver_v2b*_{build,bm25,bm25_report}.json` | yes | build counts, BM25 ranks, ladder report. No catalog text. |
 
 The two CSVs are an extract of the catalog, so they are never committed (the no-extracts rule in
 `CLAUDE.md`).
@@ -365,6 +368,157 @@ catalog. That is an observation for the list's author, not a change made here.
 | 27 | لامپ ال ای دی → لامپ کم مصرف | 4 |
 | 29 | سیمان پرتلند → سیمان | 80 |
 | 30 | صندلی اداری → صندلی گردان | 0 |
+
+## Silver-v2b: query-detail ladder (measured 2026-09-28)
+
+Same synonym list (drafted by Claude, reviewed and edited by Navid; not independent human data),
+now with **4 reversed pairs added as new rows** (`direction=reversed` in the note; the originals
+stay, with their zero coverage). **A reversed pair tests the mismatch in the unrealistic
+direction**: no seller types رایانه قابل حمل. It is a valid test of synonym handling, not a
+realistic seller query, so reversed pairs are **their own slice and never enter the headline**.
+
+**Method** (`tools/make_silver_v2b.py`):
+- **Sources:** per pair, up to K = 10 source rows, picked round-robin across distinct heads.
+- **Queries:** from each source row, one query per level, with the catalog term in the head
+  replaced by the seller term:
+
+  | Level | Query |
+  |---|---|
+  | L0 | bare seller term (once per pair) |
+  | L1 | substituted head |
+  | L2 | L1 + 1 attribute |
+  | L3 | L1 + 2 attributes |
+  | L4 | L1 + brand + 2 attributes |
+
+  Identical queries within a pair and level are kept once.
+- **Label (no cap, every level):** the ID's head matches the source head (catalog side) or starts
+  with the substituted head (seller side), AND its title contains the level's brand and attribute
+  tokens.
+- **Re-runnable as the list grows:** pair IDs are hashes of the normalized terms and each pair has
+  its own seed, so adding pairs never changes existing pairs' queries (tested).
+- **Report** (`tools/silver_v2b_report.py`):
+  - **macro** = mean over pairs (each pair counts once): the headline.
+  - **micro** = mean over queries.
+  - **random** = expected Recall@5 of a uniform random retriever given the label sizes (chance level).
+
+### Label rule: *contains* vs *prefix* (a measured problem)
+The planned catalog-side rule was "the head **contains** the catalog term". Measured on the
+snapshot: **11,649 of 43,274 class rows (26.9%) do not start with the term**, and many of them are
+not the product:
+- لاستیک: 100% (3,089 `تولید …` heads and 172 `ورق …` rubber sheets; لاستیک is also "rubber").
+- کولر گازی: 77% (5,522 `یونیت …` units).
+- چاپگر: 35% (322 `کارتریج …` cartridges).
+- خودرو: 24% (پخش خودرو, repair services, `عوارض` tolls).
+
+Such rows enter the class and can even become source rows. `--class-rule prefix` applies
+"**starts with**" on the catalog side too (the seller side already used it). Both were built and
+run.
+- **Prefix:** 468 queries, 11 zero-coverage pairs (پوشاک drops out: none of its 12 class rows
+  starts with the term).
+- **Contains:** 554 queries, 10 zero-coverage pairs.
+
+**The tables below use prefix. The last column shows the contains number for comparison.**
+Contains inflates L1–L2 (headline L1 0.57 vs 0.45, L2 0.79 vs 0.64) through false class members.
+Which rule is the default is **open (Navid)**. The code default is still `contains`, as planned.
+
+### BM25 (untuned) by detail level: prefix rule
+
+**Headline: original-direction pairs**
+
+| Level | Pairs | Queries | R@5 macro | R@5 micro | R@1 macro | random R@5 | R@5 macro, *contains* rule |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| L0 bare seller term | 21 | 21 | **0.38** | 0.38 | 0.29 | 0.01 | 0.41 |
+| L1 substituted head | 21 | 50 | **0.45** | 0.42 | 0.32 | 0.01 | 0.57 |
+| L2 head + 1 attribute | 21 | 86 | **0.64** | 0.74 | 0.58 | 0.00 | 0.79 |
+| L3 head + 2 attributes | 21 | 144 | **0.90** | 0.90 | 0.85 | 0.00 | 0.95 |
+| L4 head + brand + 2 attributes | 12 | 76 | **0.98** | 0.97 | 0.91 | 0.00 | 1.00 |
+
+**Original pairs, pure vocabulary mismatch** (the catalog heads no row with the seller term)
+
+| Level | Pairs | Queries | R@5 macro | R@5 micro | R@1 macro | random R@5 | R@5 macro, *contains* rule |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| L0 bare seller term | 11 | 11 | **0.18** | 0.18 | 0.09 | 0.01 | 0.18 |
+| L1 substituted head | 11 | 23 | **0.25** | 0.22 | 0.13 | 0.01 | 0.38 |
+| L2 head + 1 attribute | 11 | 45 | **0.55** | 0.69 | 0.51 | 0.00 | 0.73 |
+| L3 head + 2 attributes | 11 | 75 | **0.89** | 0.89 | 0.85 | 0.00 | 0.92 |
+| L4 head + brand + 2 attributes | 7 | 40 | **0.96** | 0.95 | 0.86 | 0.00 | 1.00 |
+
+**Original pairs, seller term also heads catalog rows**
+
+| Level | Pairs | Queries | R@5 macro | R@5 micro | R@1 macro | random R@5 | R@5 macro, *contains* rule |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| L0 bare seller term | 10 | 10 | **0.60** | 0.60 | 0.50 | 0.02 | 0.64 |
+| L1 substituted head | 10 | 27 | **0.67** | 0.59 | 0.53 | 0.01 | 0.77 |
+| L2 head + 1 attribute | 10 | 41 | **0.74** | 0.80 | 0.66 | 0.00 | 0.85 |
+| L3 head + 2 attributes | 10 | 69 | **0.92** | 0.91 | 0.85 | 0.00 | 0.99 |
+| L4 head + brand + 2 attributes | 5 | 36 | **1.00** | 1.00 | 0.98 | 0.00 | 1.00 |
+
+**Reversed pairs** (unrealistic direction; own slice)
+
+| Level | Pairs | Queries | R@5 macro | R@5 micro | R@1 macro | random R@5 | R@5 macro, *contains* rule |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| L0 bare seller term | 4 | 4 | **0.50** | 0.50 | 0.25 | 0.00 | 0.50 |
+| L1 substituted head | 4 | 4 | **0.50** | 0.50 | 0.25 | 0.00 | 0.38 |
+| L2 head + 1 attribute | 4 | 24 | **0.38** | 0.42 | 0.38 | 0.00 | 0.45 |
+| L3 head + 2 attributes | 4 | 30 | **0.69** | 0.80 | 0.54 | 0.00 | 0.72 |
+| L4 head + brand + 2 attributes | 3 | 29 | **1.00** | 1.00 | 0.87 | 0.00 | 1.00 |
+
+**What the ladder says:**
+- **Detail is what carries lexical retrieval over the synonym gap.** In the pure-mismatch slice,
+  R@5 rises from 0.18 (bare term) to 0.25 (head), 0.55 (+1 attribute), 0.89 (+2 attributes) and
+  0.96 (+brand).
+- **A seller who writes the head plus two attributes is mostly found by BM25 even through a
+  synonym. A seller who writes one or two words mostly is not.**
+- **Chance level is negligible** (random R@5 at most 0.02), so the large class labels are not what
+  produces the hits.
+- **Where a better retriever can show a difference:** L0–L2, and only there. L3–L4 are near
+  ceiling.
+- **Evidence limits:** 21 original pairs in the headline, 11 of them pure mismatch. Pairs are the
+  unit: queries within a pair are not independent. When comparing retrievers, compare pair by
+  pair. Only large differences will be detectable with this many pairs.
+
+### Per pair (prefix rule): R@5 per level, number of queries in brackets
+Source: `eval/results/silver_v2b_prefix_bm25_report.json`. Pair IDs are stable across list edits.
+The contains-rule table is in `eval/results/silver_v2b_bm25_report.json`.
+
+| pair | dir | catalog term → seller term | seller-headed rows | L0 | L1 | L2 | L3 | L4 |
+|---|---|---|---:|---:|---:|---:|---:|---:|
+| ca7d916e61 | ori | تلفن همراه → گوشی | 19 | 1.00 (1) | 1.00 (1) | 0.00 (1) | 0.60 (5) | n/a (0) |
+| 6175c97b41 | ori | تلفن همراه → موبایل | 0 | 0.00 (1) | 0.00 (1) | 0.00 (1) | 1.00 (5) | n/a (0) |
+| 9ba041ae85 | ori | رایانه قابل حمل → لپ تاپ | 1,419 | zero coverage |  |  |  |  |
+| 75a17561ba | ori | رایانه → کامپیوتر | 1 | 0.00 (1) | 0.57 (7) | 0.88 (8) | 0.89 (9) | 1.00 (4) |
+| e9647fa607 | ori | رایانه لوحی → تبلت | 0 | 1.00 (1) | 1.00 (1) | 1.00 (3) | 1.00 (6) | n/a (0) |
+| d0c2f148e1 | ori | چاپگر → پرینتر | 0 | 0.00 (1) | 0.20 (5) | 0.67 (6) | 0.86 (7) | 1.00 (4) |
+| 117211339f | ori | حافظه فلش → فلش مموری | 581 | zero coverage |  |  |  |  |
+| 75c23d66c8 | ori | دوربین عکاسی → دوربین | 4,988 | 1.00 (1) | 1.00 (1) | 1.00 (4) | 1.00 (8) | 1.00 (8) |
+| 3d8b74ada1 | ori | هدفون → هندزفری | 747 | zero coverage |  |  |  |  |
+| a1a95ec002 | ori | شارژر همراه → پاوربانک | 0 | 1.00 (1) | 1.00 (1) | 1.00 (2) | 1.00 (10) | 1.00 (10) |
+| 41b3e73ab2 | ori | تلویزیون → ال ای دی | 0 | 0.00 (1) | 0.00 (1) | 0.00 (1) | 0.17 (6) | 0.71 (7) |
+| dcae132067 | ori | کولر گازی → اسپلیت | 0 | 0.00 (1) | 0.00 (1) | 0.50 (4) | 0.83 (6) | n/a (0) |
+| 7ffb58a51b | ori | کولر آبی → کولر | 2,273 | 1.00 (1) | 1.00 (1) | 1.00 (2) | 1.00 (8) | n/a (0) |
+| 1859cf187d | ori | اجاق گاز → گاز | 124 | 0.00 (1) | 0.00 (2) | 0.67 (3) | 1.00 (7) | n/a (0) |
+| 24b6a8b86b | ori | ماشین لباسشویی → لباسشویی | 0 | 0.00 (1) | 0.00 (2) | 0.60 (5) | 0.89 (9) | 1.00 (4) |
+| b79fb23e13 | ori | مایکروویو → ماکروفر | 0 | zero coverage |  |  |  |  |
+| 7df7d49b68 | ori | یخچال فریزر → یخچال | 3,038 | 0.00 (1) | 0.00 (1) | 0.00 (4) | 1.00 (8) | n/a (0) |
+| 3dfb52f92b | ori | روغن موتور → روغن ماشین | 0 | 0.00 (1) | 0.00 (1) | 0.88 (8) | 1.00 (8) | 1.00 (10) |
+| c2da0529b5 | ori | لاستیک → تایر | 6,905 | 0.00 (1) | 0.50 (2) | 1.00 (3) | 1.00 (2) | n/a (0) |
+| 4866f9e8e4 | ori | باتری → باطری | 0 | 0.00 (1) | 0.50 (4) | 0.86 (7) | 1.00 (7) | 1.00 (3) |
+| a94b0a0c21 | ori | خودرو → ماشین | 5,855 | 1.00 (1) | 0.60 (10) | 0.89 (9) | 1.00 (9) | 1.00 (6) |
+| bcec63c2c1 | ori | کفش ورزشی → کتونی | 0 | zero coverage |  |  |  |  |
+| e8b64cedb8 | ori | شلوار جین → جین | 0 | zero coverage |  |  |  |  |
+| b078c5fb3e | ori | پوشاک → لباس | 49 | zero coverage |  |  |  |  |
+| ce1717abb0 | ori | نوشابه گازدار → نوشابه | 456 | zero coverage |  |  |  |  |
+| 1cb85cec47 | ori | آب آشامیدنی → آب معدنی | 68 | 1.00 (1) | 1.00 (1) | 1.00 (3) | 0.67 (9) | 1.00 (9) |
+| 5d69d20e0b | ori | دستمال کاغذی → دستمال | 356 | 1.00 (1) | 1.00 (1) | 1.00 (4) | 1.00 (4) | 1.00 (9) |
+| 57457811ae | ori | لامپ ال ای دی → لامپ کم مصرف | 4 | zero coverage |  |  |  |  |
+| 158bdd49d2 | ori | میلگرد → آرماتور | 0 | 0.00 (1) | 0.00 (5) | 0.57 (7) | 1.00 (9) | 1.00 (2) |
+| f95b0aa66d | ori | سیمان پرتلند → سیمان | 80 | zero coverage |  |  |  |  |
+| 35c46c6af3 | ori | صندلی اداری → صندلی گردان | 0 | zero coverage |  |  |  |  |
+| 6fab2affcb | ori | ماشین حساب → حساب گر | 0 | 0.00 (1) | 0.00 (1) | 0.00 (1) | 1.00 (2) | n/a (0) |
+| 5b3218fdd0 | rev | لپ تاپ → رایانه قابل حمل | 0 | 0.00 (1) | 0.00 (1) | 0.00 (7) | 0.43 (7) | 1.00 (9) |
+| 48ec5184ef | rev | فلش مموری → حافظه فلش | 0 | 0.00 (1) | 0.00 (1) | 0.00 (6) | 1.00 (10) | 1.00 (10) |
+| 41ffd1f1b9 | rev | هندزفری → هدفون | 0 | 1.00 (1) | 1.00 (1) | 0.50 (2) | 0.33 (3) | n/a (0) |
+| c9e270251e | rev | نوشابه → نوشابه گازدار | 0 | 1.00 (1) | 1.00 (1) | 1.00 (9) | 1.00 (10) | 1.00 (10) |
 
 ## Known limitations
 - **Optimistic by construction** (see the top). Seller wording, abbreviations, synonyms and

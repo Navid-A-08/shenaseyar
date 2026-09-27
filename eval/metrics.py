@@ -16,9 +16,21 @@ def rank_of(expected, results):
 
 
 def rank_of_any(expected_ids, results):
-    """Best 1-based rank of any ID in `expected_ids`, with rank_of's duplicate rule. None if none."""
-    ranks = [r for r in (rank_of(e, results) for e in expected_ids) if r is not None]
-    return min(ranks) if ranks else None
+    """Best 1-based rank of any ID in `expected_ids`, with rank_of's duplicate rule. None if none.
+
+    One pass over `results` with a set lookup, so class labels of 10k+ IDs stay cheap.
+    """
+    wanted = set(expected_ids)
+    seen = set()
+    rank = 0
+    for sstid in results:
+        if sstid in seen:
+            continue
+        seen.add(sstid)
+        rank += 1
+        if sstid in wanted:
+            return rank
+    return None
 
 
 def recall_at_k(ranks, k):
