@@ -31,7 +31,7 @@ The silver set exists to exercise the retrieval stack at volume until the golden
 | `eval/silver_v2.csv`, `eval/silver_v2_head.csv`, `eval/silver_v2_meta.csv` | **no** (gitignored) | silver-v2 sets and per-row meta |
 | `eval/results/silver_v2_*.json` | yes | build counts, BM25 results, per-pair table. No catalog text (terms come from the list). |
 | `tools/make_silver_v2b.py`, `tools/silver_v2b_report.py` | yes | builds silver-v2b (detail ladder); report per level / pair / slice |
-| `eval/silver_v2b*.csv`, `eval/silver_v2b*_meta.csv` | **no** (gitignored) | silver-v2b sets (contains and prefix rule) |
+| `eval/silver_v2b*.csv`, `eval/silver_v2b*_meta.csv` | **no** (gitignored) | silver-v2b sets: prefix rule (default) and `_contains` |
 | `eval/results/silver_v2b*_{build,bm25,bm25_report}.json` | yes | build counts, BM25 ranks, ladder report. No catalog text. |
 
 The two CSVs are an extract of the catalog, so they are never committed (the no-extracts rule in
@@ -391,9 +391,9 @@ realistic seller query, so reversed pairs are **their own slice and never enter 
   | L4 | L1 + brand + 2 attributes |
 
   Identical queries within a pair and level are kept once.
-- **Label (no cap, every level):** the ID's head matches the source head (catalog side) or starts
+- **Label (no cap, every level):** the ID's head starts with the source head (catalog side) or
   with the substituted head (seller side), AND its title contains the level's brand and attribute
-  tokens.
+  tokens. "Starts with" on the catalog side is the `prefix` class rule, the default (below).
 - **Re-runnable as the list grows:** pair IDs are hashes of the normalized terms and each pair has
   its own seed, so adding pairs never changes existing pairs' queries (tested).
 - **Report** (`tools/silver_v2b_report.py`):
@@ -401,7 +401,7 @@ realistic seller query, so reversed pairs are **their own slice and never enter 
   - **micro** = mean over queries.
   - **random** = expected Recall@5 of a uniform random retriever given the label sizes (chance level).
 
-### Label rule: *contains* vs *prefix* (a measured problem)
+### Label rule: *contains* vs *prefix* (a measured problem, decided 2026-09-28)
 The planned catalog-side rule was "the head **contains** the catalog term". Measured on the
 snapshot: **11,649 of 43,274 class rows (26.9%) do not start with the term**, and many of them are
 not the product:
@@ -417,9 +417,17 @@ run.
   starts with the term).
 - **Contains:** 554 queries, 10 zero-coverage pairs.
 
+**Decision (Navid, 2026-09-28): `prefix` is the default.** The contains rule was labelling
+non-products as correct answers. `--class-rule contains` stays available, and its results are
+kept in the `*_contains*` files.
+
+> **Methodological note: the label rule alone moves the numbers.** The same retriever (untuned
+> BM25) on the same pairs scores higher under the looser rule. Headline R@5 macro goes from
+> **0.45 to 0.57 at L1** and from **0.64 to 0.79 at L2**, because non-products such as cartridges
+> or car stereos count as hits. How a class is defined can change a reported recall by more than
+> a retriever change would, so the rule is part of the result and must be stated with it.
+
 **The tables below use prefix. The last column shows the contains number for comparison.**
-Contains inflates L1–L2 (headline L1 0.57 vs 0.45, L2 0.79 vs 0.64) through false class members.
-Which rule is the default is **open (Navid)**. The code default is still `contains`, as planned.
 
 ### BM25 (untuned) by detail level: prefix rule
 
@@ -478,8 +486,8 @@ Which rule is the default is **open (Navid)**. The code default is still `contai
   pair. Only large differences will be detectable with this many pairs.
 
 ### Per pair (prefix rule): R@5 per level, number of queries in brackets
-Source: `eval/results/silver_v2b_prefix_bm25_report.json`. Pair IDs are stable across list edits.
-The contains-rule table is in `eval/results/silver_v2b_bm25_report.json`.
+Source: `eval/results/silver_v2b_bm25_report.json`. Pair IDs are stable across list edits.
+The contains-rule table is in `eval/results/silver_v2b_contains_bm25_report.json`.
 
 | pair | dir | catalog term → seller term | seller-headed rows | L0 | L1 | L2 | L3 | L4 |
 |---|---|---|---:|---:|---:|---:|---:|---:|

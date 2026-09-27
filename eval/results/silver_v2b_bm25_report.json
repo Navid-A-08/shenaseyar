@@ -10,94 +10,94 @@
  "slices": {
   "headline": {
    "L0": {
-    "pairs": 22,
-    "queries": 22,
-    "macro_recall_at_1": 0.3182,
-    "macro_recall_at_5": 0.4091,
-    "micro_recall_at_1": 0.3182,
-    "micro_recall_at_5": 0.4091,
-    "random_macro_at_5": 0.0146
+    "pairs": 21,
+    "queries": 21,
+    "macro_recall_at_1": 0.2857,
+    "macro_recall_at_5": 0.381,
+    "micro_recall_at_1": 0.2857,
+    "micro_recall_at_5": 0.381,
+    "random_macro_at_5": 0.0124
    },
    "L1": {
-    "pairs": 22,
-    "queries": 99,
-    "macro_recall_at_1": 0.4412,
-    "macro_recall_at_5": 0.5712,
-    "micro_recall_at_1": 0.5253,
-    "micro_recall_at_5": 0.6061,
-    "random_macro_at_5": 0.0053
+    "pairs": 21,
+    "queries": 50,
+    "macro_recall_at_1": 0.3228,
+    "macro_recall_at_5": 0.4463,
+    "micro_recall_at_1": 0.3,
+    "micro_recall_at_5": 0.42,
+    "random_macro_at_5": 0.0064
    },
    "L2": {
-    "pairs": 22,
-    "queries": 128,
-    "macro_recall_at_1": 0.7258,
-    "macro_recall_at_5": 0.7937,
-    "micro_recall_at_1": 0.75,
-    "micro_recall_at_5": 0.8281,
-    "random_macro_at_5": 0.0013
+    "pairs": 21,
+    "queries": 86,
+    "macro_recall_at_1": 0.5821,
+    "macro_recall_at_5": 0.6429,
+    "micro_recall_at_1": 0.6628,
+    "micro_recall_at_5": 0.7442,
+    "random_macro_at_5": 0.002
    },
    "L3": {
-    "pairs": 22,
-    "queries": 140,
-    "macro_recall_at_1": 0.9157,
-    "macro_recall_at_5": 0.9533,
-    "micro_recall_at_1": 0.9071,
-    "micro_recall_at_5": 0.95,
-    "random_macro_at_5": 0.0006
+    "pairs": 21,
+    "queries": 144,
+    "macro_recall_at_1": 0.8506,
+    "macro_recall_at_5": 0.9001,
+    "micro_recall_at_1": 0.8542,
+    "micro_recall_at_5": 0.9028,
+    "random_macro_at_5": 0.0005
    },
    "L4": {
-    "pairs": 16,
-    "queries": 71,
-    "macro_recall_at_1": 0.95,
-    "macro_recall_at_5": 1.0,
-    "micro_recall_at_1": 0.9437,
-    "micro_recall_at_5": 1.0,
+    "pairs": 12,
+    "queries": 76,
+    "macro_recall_at_1": 0.9074,
+    "macro_recall_at_5": 0.9762,
+    "micro_recall_at_1": 0.8947,
+    "micro_recall_at_5": 0.9737,
     "random_macro_at_5": 0.0001
    }
   },
   "original_seller_headed": {
    "L0": {
-    "pairs": 11,
-    "queries": 11,
-    "macro_recall_at_1": 0.5455,
-    "macro_recall_at_5": 0.6364,
-    "micro_recall_at_1": 0.5455,
-    "micro_recall_at_5": 0.6364,
-    "random_macro_at_5": 0.0179
+    "pairs": 10,
+    "queries": 10,
+    "macro_recall_at_1": 0.5,
+    "macro_recall_at_5": 0.6,
+    "micro_recall_at_1": 0.5,
+    "micro_recall_at_5": 0.6,
+    "random_macro_at_5": 0.017
    },
    "L1": {
-    "pairs": 11,
-    "queries": 52,
-    "macro_recall_at_1": 0.6234,
-    "macro_recall_at_5": 0.765,
-    "micro_recall_at_1": 0.7115,
-    "micro_recall_at_5": 0.7885,
-    "random_macro_at_5": 0.0057
+    "pairs": 10,
+    "queries": 27,
+    "macro_recall_at_1": 0.5329,
+    "macro_recall_at_5": 0.6671,
+    "micro_recall_at_1": 0.4444,
+    "micro_recall_at_5": 0.5926,
+    "random_macro_at_5": 0.0076
    },
    "L2": {
-    "pairs": 11,
-    "queries": 61,
-    "macro_recall_at_1": 0.7866,
-    "macro_recall_at_5": 0.8535,
-    "micro_recall_at_1": 0.8197,
-    "micro_recall_at_5": 0.8689,
-    "random_macro_at_5": 0.0011
+    "pairs": 10,
+    "queries": 41,
+    "macro_recall_at_1": 0.6583,
+    "macro_recall_at_5": 0.7431,
+    "micro_recall_at_1": 0.7073,
+    "micro_recall_at_5": 0.8049,
+    "random_macro_at_5": 0.0015
    },
    "L3": {
-    "pairs": 11,
-    "queries": 63,
-    "macro_recall_at_1": 0.9659,
-    "macro_recall_at_5": 0.9886,
-    "micro_recall_at_1": 0.9524,
-    "micro_recall_at_5": 0.9841,
-    "random_macro_at_5": 0.0002
+    "pairs": 10,
+    "queries": 69,
+    "macro_recall_at_1": 0.8483,
+    "macro_recall_at_5": 0.9156,
+    "micro_recall_at_1": 0.8406,
+    "micro_recall_at_5": 0.913,
+    "random_macro_at_5": 0.0004
    },
    "L4": {
-    "pairs": 8,
-    "queries": 32,
-    "macro_recall_at_1": 1.0,
+    "pairs": 5,
+    "queries": 36,
+    "macro_recall_at_1": 0.9778,
     "macro_recall_at_5": 1.0,
-    "micro_recall_at_1": 1.0,
+    "micro_recall_at_1": 0.9722,
     "micro_recall_at_5": 1.0,
     "random_macro_at_5": 0.0
    }
@@ -110,43 +110,43 @@
     "macro_recall_at_5": 0.1818,
     "micro_recall_at_1": 0.0909,
     "micro_recall_at_5": 0.1818,
-    "random_macro_at_5": 0.0112
+    "random_macro_at_5": 0.0082
    },
    "L1": {
     "pairs": 11,
-    "queries": 47,
-    "macro_recall_at_1": 0.2591,
-    "macro_recall_at_5": 0.3773,
-    "micro_recall_at_1": 0.3191,
-    "micro_recall_at_5": 0.4043,
-    "random_macro_at_5": 0.0048
+    "queries": 23,
+    "macro_recall_at_1": 0.1318,
+    "macro_recall_at_5": 0.2455,
+    "micro_recall_at_1": 0.1304,
+    "micro_recall_at_5": 0.2174,
+    "random_macro_at_5": 0.0054
    },
    "L2": {
     "pairs": 11,
-    "queries": 67,
-    "macro_recall_at_1": 0.6649,
-    "macro_recall_at_5": 0.7338,
-    "micro_recall_at_1": 0.6866,
-    "micro_recall_at_5": 0.791,
-    "random_macro_at_5": 0.0015
+    "queries": 45,
+    "macro_recall_at_1": 0.5129,
+    "macro_recall_at_5": 0.5518,
+    "micro_recall_at_1": 0.6222,
+    "micro_recall_at_5": 0.6889,
+    "random_macro_at_5": 0.0024
    },
    "L3": {
     "pairs": 11,
-    "queries": 77,
-    "macro_recall_at_1": 0.8655,
-    "macro_recall_at_5": 0.9179,
-    "micro_recall_at_1": 0.8701,
-    "micro_recall_at_5": 0.9221,
-    "random_macro_at_5": 0.001
+    "queries": 75,
+    "macro_recall_at_1": 0.8527,
+    "macro_recall_at_5": 0.886,
+    "micro_recall_at_1": 0.8667,
+    "micro_recall_at_5": 0.8933,
+    "random_macro_at_5": 0.0005
    },
    "L4": {
-    "pairs": 8,
-    "queries": 39,
-    "macro_recall_at_1": 0.9,
-    "macro_recall_at_5": 1.0,
-    "micro_recall_at_1": 0.8974,
-    "micro_recall_at_5": 1.0,
-    "random_macro_at_5": 0.0001
+    "pairs": 7,
+    "queries": 40,
+    "macro_recall_at_1": 0.8571,
+    "macro_recall_at_5": 0.9592,
+    "micro_recall_at_1": 0.825,
+    "micro_recall_at_5": 0.95,
+    "random_macro_at_5": 0.0002
    }
   },
   "reversed": {
@@ -157,43 +157,43 @@
     "macro_recall_at_5": 0.5,
     "micro_recall_at_1": 0.25,
     "micro_recall_at_5": 0.5,
-    "random_macro_at_5": 0.0044
+    "random_macro_at_5": 0.0042
    },
    "L1": {
     "pairs": 4,
-    "queries": 8,
+    "queries": 4,
     "macro_recall_at_1": 0.25,
-    "macro_recall_at_5": 0.375,
-    "micro_recall_at_1": 0.125,
-    "micro_recall_at_5": 0.375,
-    "random_macro_at_5": 0.003
+    "macro_recall_at_5": 0.5,
+    "micro_recall_at_1": 0.25,
+    "micro_recall_at_5": 0.5,
+    "random_macro_at_5": 0.0042
    },
    "L2": {
     "pairs": 4,
     "queries": 24,
-    "macro_recall_at_1": 0.4504,
-    "macro_recall_at_5": 0.4504,
-    "micro_recall_at_1": 0.4583,
-    "micro_recall_at_5": 0.4583,
-    "random_macro_at_5": 0.0009
+    "macro_recall_at_1": 0.375,
+    "macro_recall_at_5": 0.375,
+    "micro_recall_at_1": 0.4167,
+    "micro_recall_at_5": 0.4167,
+    "random_macro_at_5": 0.001
    },
    "L3": {
     "pairs": 4,
-    "queries": 31,
-    "macro_recall_at_1": 0.6444,
-    "macro_recall_at_5": 0.7222,
-    "micro_recall_at_1": 0.7097,
-    "micro_recall_at_5": 0.8065,
-    "random_macro_at_5": 0.0006
+    "queries": 30,
+    "macro_recall_at_1": 0.544,
+    "macro_recall_at_5": 0.6905,
+    "micro_recall_at_1": 0.6333,
+    "micro_recall_at_5": 0.8,
+    "random_macro_at_5": 0.0007
    },
    "L4": {
     "pairs": 3,
-    "queries": 27,
-    "macro_recall_at_1": 0.9,
+    "queries": 29,
+    "macro_recall_at_1": 0.8667,
     "macro_recall_at_5": 1.0,
-    "micro_recall_at_1": 0.8889,
+    "micro_recall_at_1": 0.8621,
     "micro_recall_at_5": 1.0,
-    "random_macro_at_5": 0.0001
+    "random_macro_at_5": 0.0002
    }
   }
  },
@@ -203,7 +203,7 @@
    "catalog_term": "تلفن همراه",
    "seller_term": "گوشی",
    "direction": "original",
-   "class_rows": 662,
+   "class_rows": 634,
    "seller_head_rows": 19,
    "status": "ok",
    "levels": {
@@ -212,20 +212,20 @@
      "recall_at_5": 1.0
     },
     "L1": {
-     "queries": 7,
-     "recall_at_5": 0.8571
-    },
-    "L2": {
-     "queries": 9,
-     "recall_at_5": 0.8889
-    },
-    "L3": {
-     "queries": 4,
-     "recall_at_5": 1.0
-    },
-    "L4": {
      "queries": 1,
      "recall_at_5": 1.0
+    },
+    "L2": {
+     "queries": 1,
+     "recall_at_5": 0.0
+    },
+    "L3": {
+     "queries": 5,
+     "recall_at_5": 0.6
+    },
+    "L4": {
+     "queries": 0,
+     "recall_at_5": null
     }
    }
   },
@@ -234,7 +234,7 @@
    "catalog_term": "تلفن همراه",
    "seller_term": "موبایل",
    "direction": "original",
-   "class_rows": 662,
+   "class_rows": 634,
    "seller_head_rows": 0,
    "status": "ok",
    "levels": {
@@ -243,20 +243,20 @@
      "recall_at_5": 0.0
     },
     "L1": {
-     "queries": 7,
-     "recall_at_5": 0.7143
+     "queries": 1,
+     "recall_at_5": 0.0
     },
     "L2": {
-     "queries": 10,
-     "recall_at_5": 0.9
+     "queries": 1,
+     "recall_at_5": 0.0
     },
     "L3": {
-     "queries": 3,
+     "queries": 5,
      "recall_at_5": 1.0
     },
     "L4": {
-     "queries": 1,
-     "recall_at_5": 1.0
+     "queries": 0,
+     "recall_at_5": null
     }
    }
   },
@@ -296,7 +296,7 @@
    "catalog_term": "رایانه",
    "seller_term": "کامپیوتر",
    "direction": "original",
-   "class_rows": 532,
+   "class_rows": 525,
    "seller_head_rows": 1,
    "status": "ok",
    "levels": {
@@ -305,16 +305,16 @@
      "recall_at_5": 0.0
     },
     "L1": {
-     "queries": 8,
-     "recall_at_5": 0.625
+     "queries": 7,
+     "recall_at_5": 0.5714
     },
     "L2": {
      "queries": 8,
-     "recall_at_5": 0.75
+     "recall_at_5": 0.875
     },
     "L3": {
-     "queries": 8,
-     "recall_at_5": 0.875
+     "queries": 9,
+     "recall_at_5": 0.8889
     },
     "L4": {
      "queries": 4,
@@ -358,7 +358,7 @@
    "catalog_term": "چاپگر",
    "seller_term": "پرینتر",
    "direction": "original",
-   "class_rows": 983,
+   "class_rows": 635,
    "seller_head_rows": 0,
    "status": "ok",
    "levels": {
@@ -367,16 +367,16 @@
      "recall_at_5": 0.0
     },
     "L1": {
-     "queries": 7,
-     "recall_at_5": 0.2857
+     "queries": 5,
+     "recall_at_5": 0.2
     },
     "L2": {
-     "queries": 9,
-     "recall_at_5": 0.8889
+     "queries": 6,
+     "recall_at_5": 0.6667
     },
     "L3": {
-     "queries": 8,
-     "recall_at_5": 0.875
+     "queries": 7,
+     "recall_at_5": 0.8571
     },
     "L4": {
      "queries": 4,
@@ -513,7 +513,7 @@
    "catalog_term": "تلویزیون",
    "seller_term": "ال ای دی",
    "direction": "original",
-   "class_rows": 2556,
+   "class_rows": 2457,
    "seller_head_rows": 0,
    "status": "ok",
    "levels": {
@@ -522,20 +522,20 @@
      "recall_at_5": 0.0
     },
     "L1": {
-     "queries": 4,
-     "recall_at_5": 0.25
+     "queries": 1,
+     "recall_at_5": 0.0
     },
     "L2": {
-     "queries": 6,
-     "recall_at_5": 0.3333
+     "queries": 1,
+     "recall_at_5": 0.0
     },
     "L3": {
      "queries": 6,
-     "recall_at_5": 0.3333
+     "recall_at_5": 0.1667
     },
     "L4": {
-     "queries": 5,
-     "recall_at_5": 1.0
+     "queries": 7,
+     "recall_at_5": 0.7143
     }
    }
   },
@@ -544,7 +544,7 @@
    "catalog_term": "کولر گازی",
    "seller_term": "اسپلیت",
    "direction": "original",
-   "class_rows": 7187,
+   "class_rows": 1665,
    "seller_head_rows": 0,
    "status": "ok",
    "levels": {
@@ -553,16 +553,16 @@
      "recall_at_5": 0.0
     },
     "L1": {
-     "queries": 3,
+     "queries": 1,
      "recall_at_5": 0.0
     },
     "L2": {
-     "queries": 5,
-     "recall_at_5": 0.8
+     "queries": 4,
+     "recall_at_5": 0.5
     },
     "L3": {
-     "queries": 7,
-     "recall_at_5": 1.0
+     "queries": 6,
+     "recall_at_5": 0.8333
     },
     "L4": {
      "queries": 0,
@@ -606,7 +606,7 @@
    "catalog_term": "اجاق گاز",
    "seller_term": "گاز",
    "direction": "original",
-   "class_rows": 2012,
+   "class_rows": 1979,
    "seller_head_rows": 124,
    "status": "ok",
    "levels": {
@@ -615,20 +615,20 @@
      "recall_at_5": 0.0
     },
     "L1": {
-     "queries": 3,
-     "recall_at_5": 0.3333
+     "queries": 2,
+     "recall_at_5": 0.0
     },
     "L2": {
-     "queries": 4,
-     "recall_at_5": 0.75
+     "queries": 3,
+     "recall_at_5": 0.6667
     },
     "L3": {
-     "queries": 8,
+     "queries": 7,
      "recall_at_5": 1.0
     },
     "L4": {
-     "queries": 3,
-     "recall_at_5": 1.0
+     "queries": 0,
+     "recall_at_5": null
     }
    }
   },
@@ -761,24 +761,24 @@
    "catalog_term": "لاستیک",
    "seller_term": "تایر",
    "direction": "original",
-   "class_rows": 3281,
+   "class_rows": 7,
    "seller_head_rows": 6905,
    "status": "ok",
    "levels": {
     "L0": {
      "queries": 1,
-     "recall_at_5": 1.0
+     "recall_at_5": 0.0
     },
     "L1": {
-     "queries": 10,
-     "recall_at_5": 1.0
+     "queries": 2,
+     "recall_at_5": 0.5
     },
     "L2": {
-     "queries": 1,
+     "queries": 3,
      "recall_at_5": 1.0
     },
     "L3": {
-     "queries": 1,
+     "queries": 2,
      "recall_at_5": 1.0
     },
     "L4": {
@@ -792,7 +792,7 @@
    "catalog_term": "باتری",
    "seller_term": "باطری",
    "direction": "original",
-   "class_rows": 6059,
+   "class_rows": 5799,
    "seller_head_rows": 0,
    "status": "ok",
    "levels": {
@@ -801,15 +801,15 @@
      "recall_at_5": 0.0
     },
     "L1": {
-     "queries": 10,
-     "recall_at_5": 0.7
+     "queries": 4,
+     "recall_at_5": 0.5
     },
     "L2": {
-     "queries": 8,
-     "recall_at_5": 0.875
+     "queries": 7,
+     "recall_at_5": 0.8571
     },
     "L3": {
-     "queries": 8,
+     "queries": 7,
      "recall_at_5": 1.0
     },
     "L4": {
@@ -823,7 +823,7 @@
    "catalog_term": "خودرو",
    "seller_term": "ماشین",
    "direction": "original",
-   "class_rows": 7451,
+   "class_rows": 5644,
    "seller_head_rows": 5855,
    "status": "ok",
    "levels": {
@@ -837,14 +837,14 @@
     },
     "L2": {
      "queries": 9,
-     "recall_at_5": 1.0
+     "recall_at_5": 0.8889
     },
     "L3": {
-     "queries": 6,
+     "queries": 9,
      "recall_at_5": 1.0
     },
     "L4": {
-     "queries": 3,
+     "queries": 6,
      "recall_at_5": 1.0
     }
    }
@@ -916,29 +916,29 @@
    "catalog_term": "پوشاک",
    "seller_term": "لباس",
    "direction": "original",
-   "class_rows": 12,
+   "class_rows": 0,
    "seller_head_rows": 49,
-   "status": "ok",
+   "status": "zero_coverage",
    "levels": {
     "L0": {
-     "queries": 1,
-     "recall_at_5": 0.0
+     "queries": 0,
+     "recall_at_5": null
     },
     "L1": {
-     "queries": 5,
-     "recall_at_5": 1.0
+     "queries": 0,
+     "recall_at_5": null
     },
     "L2": {
-     "queries": 6,
-     "recall_at_5": 1.0
+     "queries": 0,
+     "recall_at_5": null
     },
     "L3": {
-     "queries": 3,
-     "recall_at_5": 1.0
+     "queries": 0,
+     "recall_at_5": null
     },
     "L4": {
-     "queries": 3,
-     "recall_at_5": 1.0
+     "queries": 0,
+     "recall_at_5": null
     }
    }
   },
@@ -978,7 +978,7 @@
    "catalog_term": "آب آشامیدنی",
    "seller_term": "آب معدنی",
    "direction": "original",
-   "class_rows": 111,
+   "class_rows": 87,
    "seller_head_rows": 68,
    "status": "ok",
    "levels": {
@@ -987,19 +987,19 @@
      "recall_at_5": 1.0
     },
     "L1": {
-     "queries": 3,
+     "queries": 1,
      "recall_at_5": 1.0
     },
     "L2": {
-     "queries": 9,
+     "queries": 3,
      "recall_at_5": 1.0
     },
     "L3": {
-     "queries": 3,
-     "recall_at_5": 1.0
+     "queries": 9,
+     "recall_at_5": 0.6667
     },
     "L4": {
-     "queries": 3,
+     "queries": 9,
      "recall_at_5": 1.0
     }
    }
@@ -1009,7 +1009,7 @@
    "catalog_term": "دستمال کاغذی",
    "seller_term": "دستمال",
    "direction": "original",
-   "class_rows": 165,
+   "class_rows": 155,
    "seller_head_rows": 356,
    "status": "ok",
    "levels": {
@@ -1018,19 +1018,19 @@
      "recall_at_5": 1.0
     },
     "L1": {
-     "queries": 3,
+     "queries": 1,
      "recall_at_5": 1.0
     },
     "L2": {
-     "queries": 5,
+     "queries": 4,
      "recall_at_5": 1.0
     },
     "L3": {
-     "queries": 6,
+     "queries": 4,
      "recall_at_5": 1.0
     },
     "L4": {
-     "queries": 7,
+     "queries": 9,
      "recall_at_5": 1.0
     }
    }
@@ -1071,7 +1071,7 @@
    "catalog_term": "میلگرد",
    "seller_term": "آرماتور",
    "direction": "original",
-   "class_rows": 1589,
+   "class_rows": 1512,
    "seller_head_rows": 0,
    "status": "ok",
    "levels": {
@@ -1080,15 +1080,15 @@
      "recall_at_5": 0.0
     },
     "L1": {
-     "queries": 10,
-     "recall_at_5": 0.2
+     "queries": 5,
+     "recall_at_5": 0.0
     },
     "L2": {
-     "queries": 10,
-     "recall_at_5": 0.8
+     "queries": 7,
+     "recall_at_5": 0.5714
     },
     "L3": {
-     "queries": 10,
+     "queries": 9,
      "recall_at_5": 1.0
     },
     "L4": {
@@ -1195,7 +1195,7 @@
    "catalog_term": "لپ تاپ",
    "seller_term": "رایانه قابل حمل",
    "direction": "reversed",
-   "class_rows": 1547,
+   "class_rows": 1419,
    "seller_head_rows": 0,
    "status": "ok",
    "levels": {
@@ -1204,16 +1204,16 @@
      "recall_at_5": 0.0
     },
     "L1": {
-     "queries": 2,
+     "queries": 1,
      "recall_at_5": 0.0
     },
     "L2": {
-     "queries": 9,
-     "recall_at_5": 0.4444
+     "queries": 7,
+     "recall_at_5": 0.0
     },
     "L3": {
-     "queries": 9,
-     "recall_at_5": 0.6667
+     "queries": 7,
+     "recall_at_5": 0.4286
     },
     "L4": {
      "queries": 9,
@@ -1288,7 +1288,7 @@
    "catalog_term": "نوشابه",
    "seller_term": "نوشابه گازدار",
    "direction": "reversed",
-   "class_rows": 476,
+   "class_rows": 456,
    "seller_head_rows": 0,
    "status": "ok",
    "levels": {
@@ -1297,19 +1297,19 @@
      "recall_at_5": 1.0
     },
     "L1": {
-     "queries": 4,
-     "recall_at_5": 0.5
+     "queries": 1,
+     "recall_at_5": 1.0
     },
     "L2": {
-     "queries": 7,
-     "recall_at_5": 0.8571
+     "queries": 9,
+     "recall_at_5": 1.0
     },
     "L3": {
-     "queries": 9,
-     "recall_at_5": 0.8889
+     "queries": 10,
+     "recall_at_5": 1.0
     },
     "L4": {
-     "queries": 8,
+     "queries": 10,
      "recall_at_5": 1.0
     }
    }

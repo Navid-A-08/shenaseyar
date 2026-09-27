@@ -12,13 +12,14 @@ Attributes are cut to 4 words, as in v1. A level that has nothing new for a row 
 Identical queries within a pair and level are kept once.
 
 Label (every level, no cap). An in-force ID is acceptable when BOTH hold:
-  head:  its head segment contains the source row's original head and is assigned to the same
-         catalog term (longest listed term wins), OR its head starts with the substituted head.
-         --class-rule prefix: "contains" becomes "starts with" on the catalog side too, which
-         keeps rows like کارتریج چاپگر or پخش خودرو out of the class (measured: 26.9% of
-         "contains" class rows do not start with the term).
-         For L0: its head is assigned to the catalog term, OR its head starts with the seller term.
+  head:  its head segment STARTS WITH the source row's original head (so it is assigned to the
+         same catalog term; longest listed term wins), OR its head starts with the substituted
+         head. For L0: its head starts with the catalog term, OR with the seller term.
   text:  its title contains every brand/attribute token the level adds.
+Class rule (--class-rule): `prefix` (default, above) or `contains`, where the catalog side only
+needs the term ANYWHERE in the head. `contains` let in non-products (measured: 26.9% of its class
+rows do not start with the term, e.g. کارتریج چاپگر, پخش خودرو, rubber parts under لاستیک) and
+inflates BM25 L1/L2 recall; kept for comparison (docs/silver_set.md).
 Exactly one ID -> tier S, otherwise tier C.
 
 Re-runnable as the list grows: a pair's ID is a hash of its normalized terms (not its row
@@ -26,7 +27,8 @@ position), and each pair samples with its own seed, so adding pairs never change
 existing pairs. Pairs whose note contains `direction=reversed` are tagged and reported apart.
 
 Outputs: eval/silver_v2b.csv + eval/silver_v2b_meta.csv (gitignored, catalog extract) and
-eval/results/silver_v2b_build.json (committed; counts, pair IDs, list terms, hashes).
+eval/results/silver_v2b_build.json (committed; counts, pair IDs, list terms, hashes). The contains
+variant is built with --class-rule contains into the *_contains files.
 Nothing in src/ or eval/ may import this file.
 """
 import argparse
@@ -49,7 +51,7 @@ REPO = Path(__file__).resolve().parents[1]
 LEVELS = ("L0", "L1", "L2", "L3", "L4")
 LEVEL_DESC = {"L0": "bare seller term", "L1": "substituted head", "L2": "head + 1 attribute",
               "L3": "head + 2 attributes", "L4": "head + brand + 2 attributes"}
-DEFAULTS = {"seed": 20260928, "k_rows": 10, "as_of": "1405-07-01", "class_rule": "contains"}
+DEFAULTS = {"seed": 20260928, "k_rows": 10, "as_of": "1405-07-01", "class_rule": "prefix"}
 CLASS_RULES = ("contains", "prefix")
 META_HEADER = ["row", "pair_id", "level", "direction", "source_id", "tier", "n_label"]
 
@@ -87,7 +89,7 @@ def _head_has(head, term, rule):
     return head[:len(term)] == term if rule == "prefix" else v2.find_span(head, term) >= 0
 
 
-def assign(head, cat_terms, rule="contains"):
+def assign(head, cat_terms, rule="prefix"):
     """The longest listed catalog term the head has under `rule` (ties: first listed), or None."""
     best = None
     for t in cat_terms:
@@ -99,7 +101,7 @@ def assign(head, cat_terms, rule="contains"):
 class Index:
     """Head tokens and head assignment for every in-force row of the snapshot."""
 
-    def __init__(self, snap, types, cat_terms, class_rule="contains"):
+    def __init__(self, snap, types, cat_terms, class_rule="prefix"):
         self.docs = snap.docs
         self.heads, self.assigned = [], []
         self.by_cat, self.by_first = defaultdict(list), defaultdict(list)
@@ -156,7 +158,7 @@ def pick_rows(rows_by_head, k, rng):
     return out
 
 
-def build(zip_path, pairs, seed, k_rows, as_of, class_rule="contains"):
+def build(zip_path, pairs, seed, k_rows, as_of, class_rule="prefix"):
     snap = load_snapshot(zip_path, as_of)
     per_id = Counter(i for i, _ in snap.docs)
     types = {}

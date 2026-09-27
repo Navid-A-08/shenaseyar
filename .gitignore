@@ -36,5 +36,5 @@ eval/silver_v2_head.csv
 eval/silver_v2_meta.csv
 eval/silver_v2b.csv
 eval/silver_v2b_meta.csv
-eval/silver_v2b_prefix.csv
-eval/silver_v2b_prefix_meta.csv
+eval/silver_v2b_contains.csv
+eval/silver_v2b_contains_meta.csv

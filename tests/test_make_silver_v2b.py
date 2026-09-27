@@ -91,8 +91,13 @@ def test_ladder_levels():
     assert long == ["یک", "دو", "سه", "چهار"]                                  # 4-word cut, as v1
 
 
-def test_levels_and_labels(tmp_path):
-    rows, meta, report = _build(tmp_path)
+def test_default_class_rule_is_prefix(tmp_path):
+    assert v2b.DEFAULTS["class_rule"] == "prefix"
+    assert _build(tmp_path)[2]["params"]["class_rule"] == "prefix"
+
+
+def test_levels_and_labels_contains_rule(tmp_path):
+    rows, meta, report = _build(tmp_path, class_rule="contains")
     phone = v2b.pair_id("تلفن همراه", "گوشی")
     got = _by(rows, meta)
     l0 = got[(phone, "L0", "گوشی")]
@@ -110,7 +115,7 @@ def test_levels_and_labels(tmp_path):
 
 
 def test_identical_queries_kept_once_per_level(tmp_path):
-    rows, meta, report = _build(tmp_path)
+    rows, meta, report = _build(tmp_path, class_rule="contains")
     phone = next(p for p in report["pair_details"] if p["seller_term"] == "گوشی")
     # rows 1 and 2 share head "تلفن همراه" -> L1 "گوشی" once (and it equals L0, a different level).
     # "قاب تلفن همراه" contains the catalog term, so the "contains" rule assigns it to the class
@@ -184,7 +189,7 @@ def test_src_and_eval_do_not_import_v2b_tools():
 
 
 def test_prefix_class_rule_keeps_accessories_out(tmp_path):
-    rows, meta, report = _build(tmp_path, class_rule="prefix")
+    rows, meta, report = _build(tmp_path)                     # default rule
     phone = v2b.pair_id("تلفن همراه", "گوشی")
     l0 = _by(rows, meta)[(phone, "L0", "گوشی")]
     assert "2900000000005" not in l0[1].split(";")          # قاب تلفن همراه: not at head start

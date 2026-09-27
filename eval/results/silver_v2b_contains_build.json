@@ -6,7 +6,7 @@
   "seed": 20260928,
   "k_rows": 10,
   "as_of": "1405-07-01",
-  "class_rule": "prefix"
+  "class_rule": "contains"
  },
  "snapshot": "rules R1-R4 (docs/data_quality.md); index = active rows in force on 1405-07-01",
  "index_ids": 943380,
@@ -25,42 +25,41 @@
   "b79fb23e13",
   "bcec63c2c1",
   "e8b64cedb8",
-  "b078c5fb3e",
   "ce1717abb0",
   "57457811ae",
   "f95b0aa66d",
   "35c46c6af3"
  ],
  "queries_per_level": {
-  "L0": 25,
-  "L1": 54,
-  "L2": 110,
-  "L3": 174,
-  "L4": 105
+  "L0": 26,
+  "L1": 107,
+  "L2": 152,
+  "L3": 171,
+  "L4": 98
  },
- "rows": 468,
+ "rows": 554,
  "pair_details": [
   {
    "pair_id": "ca7d916e61",
    "catalog_term": "تلفن همراه",
    "seller_term": "گوشی",
    "direction": "original",
-   "class_rows": 634,
+   "class_rows": 662,
    "seller_head_rows": 19,
-   "distinct_heads": 1,
+   "distinct_heads": 7,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 1,
-    "L2": 1,
-    "L3": 5,
-    "L4": 0
+    "L1": 7,
+    "L2": 9,
+    "L3": 4,
+    "L4": 1
    },
    "duplicates": {
     "L0": 0,
-    "L1": 9,
-    "L2": 9,
-    "L3": 5,
+    "L1": 3,
+    "L2": 1,
+    "L3": 0,
     "L4": 0
    }
   },
@@ -69,22 +68,22 @@
    "catalog_term": "تلفن همراه",
    "seller_term": "موبایل",
    "direction": "original",
-   "class_rows": 634,
+   "class_rows": 662,
    "seller_head_rows": 0,
-   "distinct_heads": 1,
+   "distinct_heads": 7,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 1,
-    "L2": 1,
-    "L3": 5,
-    "L4": 0
+    "L1": 7,
+    "L2": 10,
+    "L3": 3,
+    "L4": 1
    },
    "duplicates": {
     "L0": 0,
-    "L1": 9,
-    "L2": 9,
-    "L3": 5,
+    "L1": 3,
+    "L2": 0,
+    "L3": 0,
     "L4": 0
    }
   },
@@ -117,20 +116,20 @@
    "catalog_term": "رایانه",
    "seller_term": "کامپیوتر",
    "direction": "original",
-   "class_rows": 525,
+   "class_rows": 532,
    "seller_head_rows": 1,
-   "distinct_heads": 7,
+   "distinct_heads": 8,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 7,
+    "L1": 8,
     "L2": 8,
-    "L3": 9,
+    "L3": 8,
     "L4": 4
    },
    "duplicates": {
     "L0": 0,
-    "L1": 3,
+    "L1": 2,
     "L2": 1,
     "L3": 0,
     "L4": 0
@@ -165,23 +164,23 @@
    "catalog_term": "چاپگر",
    "seller_term": "پرینتر",
    "direction": "original",
-   "class_rows": 635,
+   "class_rows": 983,
    "seller_head_rows": 0,
-   "distinct_heads": 5,
+   "distinct_heads": 7,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 5,
-    "L2": 6,
-    "L3": 7,
+    "L1": 7,
+    "L2": 9,
+    "L3": 8,
     "L4": 4
    },
    "duplicates": {
     "L0": 0,
-    "L1": 5,
-    "L2": 4,
-    "L3": 3,
-    "L4": 1
+    "L1": 3,
+    "L2": 1,
+    "L3": 0,
+    "L4": 0
    }
   },
   {
@@ -285,23 +284,23 @@
    "catalog_term": "تلویزیون",
    "seller_term": "ال ای دی",
    "direction": "original",
-   "class_rows": 2457,
+   "class_rows": 2556,
    "seller_head_rows": 0,
-   "distinct_heads": 1,
+   "distinct_heads": 4,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 1,
-    "L2": 1,
+    "L1": 4,
+    "L2": 6,
     "L3": 6,
-    "L4": 7
+    "L4": 5
    },
    "duplicates": {
     "L0": 0,
-    "L1": 9,
-    "L2": 9,
-    "L3": 4,
-    "L4": 3
+    "L1": 6,
+    "L2": 4,
+    "L3": 2,
+    "L4": 1
    }
   },
   {
@@ -309,22 +308,22 @@
    "catalog_term": "کولر گازی",
    "seller_term": "اسپلیت",
    "direction": "original",
-   "class_rows": 1665,
+   "class_rows": 7187,
    "seller_head_rows": 0,
-   "distinct_heads": 1,
+   "distinct_heads": 3,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 1,
-    "L2": 4,
-    "L3": 6,
+    "L1": 3,
+    "L2": 5,
+    "L3": 7,
     "L4": 0
    },
    "duplicates": {
     "L0": 0,
-    "L1": 9,
-    "L2": 6,
-    "L3": 4,
+    "L1": 7,
+    "L2": 5,
+    "L3": 3,
     "L4": 0
    }
   },
@@ -357,22 +356,22 @@
    "catalog_term": "اجاق گاز",
    "seller_term": "گاز",
    "direction": "original",
-   "class_rows": 1979,
+   "class_rows": 2012,
    "seller_head_rows": 124,
-   "distinct_heads": 2,
+   "distinct_heads": 3,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 2,
-    "L2": 3,
-    "L3": 7,
-    "L4": 0
+    "L1": 3,
+    "L2": 4,
+    "L3": 8,
+    "L4": 3
    },
    "duplicates": {
     "L0": 0,
-    "L1": 8,
-    "L2": 7,
-    "L3": 3,
+    "L1": 7,
+    "L2": 6,
+    "L3": 2,
     "L4": 0
    }
   },
@@ -477,22 +476,22 @@
    "catalog_term": "لاستیک",
    "seller_term": "تایر",
    "direction": "original",
-   "class_rows": 7,
+   "class_rows": 3281,
    "seller_head_rows": 6905,
-   "distinct_heads": 2,
-   "sampled_rows": 7,
+   "distinct_heads": 976,
+   "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 2,
-    "L2": 3,
-    "L3": 2,
+    "L1": 10,
+    "L2": 1,
+    "L3": 1,
     "L4": 0
    },
    "duplicates": {
     "L0": 0,
-    "L1": 5,
-    "L2": 4,
-    "L3": 4,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
     "L4": 0
    }
   },
@@ -501,22 +500,22 @@
    "catalog_term": "باتری",
    "seller_term": "باطری",
    "direction": "original",
-   "class_rows": 5799,
+   "class_rows": 6059,
    "seller_head_rows": 0,
-   "distinct_heads": 4,
+   "distinct_heads": 13,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 4,
-    "L2": 7,
-    "L3": 7,
+    "L1": 10,
+    "L2": 8,
+    "L3": 8,
     "L4": 3
    },
    "duplicates": {
     "L0": 0,
-    "L1": 6,
-    "L2": 2,
-    "L3": 2,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
     "L4": 0
    }
   },
@@ -525,16 +524,16 @@
    "catalog_term": "خودرو",
    "seller_term": "ماشین",
    "direction": "original",
-   "class_rows": 5644,
+   "class_rows": 7451,
    "seller_head_rows": 5855,
-   "distinct_heads": 14,
+   "distinct_heads": 45,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
     "L1": 10,
     "L2": 9,
-    "L3": 9,
-    "L4": 6
+    "L3": 6,
+    "L4": 3
    },
    "duplicates": {
     "L0": 0,
@@ -597,20 +596,20 @@
    "catalog_term": "پوشاک",
    "seller_term": "لباس",
    "direction": "original",
-   "class_rows": 0,
+   "class_rows": 12,
    "seller_head_rows": 49,
-   "distinct_heads": 0,
-   "sampled_rows": 0,
+   "distinct_heads": 5,
+   "sampled_rows": 10,
    "queries": {
-    "L0": 0,
-    "L1": 0,
-    "L2": 0,
-    "L3": 0,
-    "L4": 0
+    "L0": 1,
+    "L1": 5,
+    "L2": 6,
+    "L3": 3,
+    "L4": 3
    },
    "duplicates": {
     "L0": 0,
-    "L1": 0,
+    "L1": 5,
     "L2": 0,
     "L3": 0,
     "L4": 0
@@ -645,22 +644,22 @@
    "catalog_term": "آب آشامیدنی",
    "seller_term": "آب معدنی",
    "direction": "original",
-   "class_rows": 87,
+   "class_rows": 111,
    "seller_head_rows": 68,
-   "distinct_heads": 1,
+   "distinct_heads": 3,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 1,
-    "L2": 3,
-    "L3": 9,
-    "L4": 9
+    "L1": 3,
+    "L2": 9,
+    "L3": 3,
+    "L4": 3
    },
    "duplicates": {
     "L0": 0,
-    "L1": 9,
-    "L2": 7,
-    "L3": 1,
+    "L1": 7,
+    "L2": 0,
+    "L3": 0,
     "L4": 0
    }
   },
@@ -669,22 +668,22 @@
    "catalog_term": "دستمال کاغذی",
    "seller_term": "دستمال",
    "direction": "original",
-   "class_rows": 155,
+   "class_rows": 165,
    "seller_head_rows": 356,
-   "distinct_heads": 1,
+   "distinct_heads": 3,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 1,
-    "L2": 4,
-    "L3": 4,
-    "L4": 9
+    "L1": 3,
+    "L2": 5,
+    "L3": 6,
+    "L4": 7
    },
    "duplicates": {
     "L0": 0,
-    "L1": 9,
-    "L2": 6,
-    "L3": 6,
+    "L1": 7,
+    "L2": 5,
+    "L3": 4,
     "L4": 1
    }
   },
@@ -717,22 +716,22 @@
    "catalog_term": "میلگرد",
    "seller_term": "آرماتور",
    "direction": "original",
-   "class_rows": 1512,
+   "class_rows": 1589,
    "seller_head_rows": 0,
-   "distinct_heads": 5,
+   "distinct_heads": 11,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 5,
-    "L2": 7,
-    "L3": 9,
+    "L1": 10,
+    "L2": 10,
+    "L3": 10,
     "L4": 2
    },
    "duplicates": {
     "L0": 0,
-    "L1": 5,
-    "L2": 3,
-    "L3": 1,
+    "L1": 0,
+    "L2": 0,
+    "L3": 0,
     "L4": 0
    }
   },
@@ -813,22 +812,22 @@
    "catalog_term": "لپ تاپ",
    "seller_term": "رایانه قابل حمل",
    "direction": "reversed",
-   "class_rows": 1419,
+   "class_rows": 1547,
    "seller_head_rows": 0,
-   "distinct_heads": 1,
+   "distinct_heads": 2,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 1,
-    "L2": 7,
-    "L3": 7,
+    "L1": 2,
+    "L2": 9,
+    "L3": 9,
     "L4": 9
    },
    "duplicates": {
     "L0": 0,
-    "L1": 9,
-    "L2": 3,
-    "L3": 3,
+    "L1": 8,
+    "L2": 1,
+    "L3": 1,
     "L4": 1
    }
   },
@@ -885,22 +884,22 @@
    "catalog_term": "نوشابه",
    "seller_term": "نوشابه گازدار",
    "direction": "reversed",
-   "class_rows": 456,
+   "class_rows": 476,
    "seller_head_rows": 0,
-   "distinct_heads": 1,
+   "distinct_heads": 4,
    "sampled_rows": 10,
    "queries": {
     "L0": 1,
-    "L1": 1,
-    "L2": 9,
-    "L3": 10,
-    "L4": 10
+    "L1": 4,
+    "L2": 7,
+    "L3": 9,
+    "L4": 8
    },
    "duplicates": {
     "L0": 0,
-    "L1": 9,
-    "L2": 1,
-    "L3": 0,
+    "L1": 6,
+    "L2": 3,
+    "L3": 1,
     "L4": 0
    }
   }
