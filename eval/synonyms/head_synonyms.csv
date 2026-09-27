@@ -32,3 +32,7 @@ catalog_term,seller_term,note
 سیمان پرتلند,سیمان,
 صندلی اداری,صندلی گردان,
 ماشین حساب,حساب گر,verify: may not exist
+لپ تاپ,رایانه قابل حمل,direction=reversed
+فلش مموری,حافظه فلش,direction=reversed
+هندزفری,هدفون,direction=reversed
+نوشابه,نوشابه گازدار,direction=reversed
