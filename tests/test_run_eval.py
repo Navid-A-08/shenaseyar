@@ -392,3 +392,18 @@ def test_cli_prints_file_and_silver_banner(tmp_path, capsys):
     assert out.splitlines()[0] == SILVER_BANNER
     assert f"golden file: {silver}   set: silver" in out
     assert res["set"] == "silver" and res["golden_file"] == str(silver)
+
+
+def test_silver_v2_tags_detected_but_plain_word_silver_is_not(tmp_path):
+    for note in ("silver-v2|pair:0|head+synonym_head|1", "silver-v2-head|pair:0|head_only|1"):
+        p = write_golden(tmp_path / "other.csv", [["q1", A, "S", note]])
+        assert is_silver(p, load_golden(p))
+    p = write_golden(tmp_path / "golden.csv", [["q1", A, "S", "silver spoon, paraphrased"]])
+    assert not is_silver(p, load_golden(p))                   # human note, not a machine tag
+    p = write_golden(tmp_path / "silver_v2_head.csv", [["q1", A, "S", ""]])
+    assert is_silver(p, load_golden(p))                       # name starts with "silver"
+
+
+def test_row_ranks_recorded_for_evaluated_rows_only(tmp_path):
+    res = _evaluate(tmp_path)
+    assert res["row_ranks"] == {1: 1, 2: 3, 3: 6, 4: None, 5: 2, 6: 6, 7: 1, 8: 2}

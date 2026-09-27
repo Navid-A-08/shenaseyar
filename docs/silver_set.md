@@ -26,6 +26,10 @@ The silver set exists to exercise the retrieval stack at volume until the golden
 | `eval/results/silver_*.json` | yes | `run_eval.py --out` results on the silver set. No query text. |
 | `tools/analyze_ambiguity.py` | yes | rebuilds the ambiguity table (§Finding) |
 | `eval/results/ambiguity.json` | yes | its output: counts and per-row categories by source ID. No text. |
+| `eval/synonyms/head_synonyms.csv` | yes | synonym pairs for silver-v2 (drafted by Claude, reviewed and edited by Navid) |
+| `tools/make_silver_v2.py` | yes | builds silver-v2 (main + head-only) |
+| `eval/silver_v2.csv`, `eval/silver_v2_head.csv`, `eval/silver_v2_meta.csv` | **no** (gitignored) | silver-v2 sets and per-row meta |
+| `eval/results/silver_v2_*.json` | yes | build counts, BM25 results, per-pair table. No catalog text (terms come from the list). |
 
 The two CSVs are an extract of the catalog, so they are never committed (the no-extracts rule in
 `CLAUDE.md`).
@@ -256,6 +260,111 @@ index and the normalizer work, and almost nothing about real accuracy. It is not
 > - **Consequence:** comparing retrievers requires queries whose wording is independent of the
 >   titles: the human golden set, or a variant that deliberately replaces title words (a
 >   silver-v2 with hand-written synonyms is proposed, not built).
+
+## Silver-v2: synonym head (measured 2026-09-27)
+
+> **Provenance of the synonym list.** `eval/synonyms/head_synonyms.csv` (32 pairs) was **drafted by
+> Claude and reviewed and edited by Navid**. It is **not independent human data**: the words reflect
+> an LLM's idea of how sellers write, checked by one person. Per-pair results are evidence about
+> these pairs, not about real sellers' vocabulary.
+
+**What changes from v1.** Rows are sampled per pair (10 per pair, seed 20260927) from in-force rows
+whose head segment contains the catalog term. The catalog term in the head is replaced by the
+seller term. No noise is added. Two files, reported separately:
+- **main** (`eval/silver_v2.csv`): v1 query rules with the substituted head.
+  - Acceptable IDs = matches of the original query ∪ matches of the substituted query. The second
+    part covers catalog rows that really use the seller's word.
+  - 1 ID → S, 2–20 → C, more → rejected.
+- **head-only slice** (`eval/silver_v2_head.csv`): one query per pair, the bare seller term.
+  - Label = every in-force ID whose head is assigned to the catalog term, plus every ID whose head
+    *starts with* the seller term. So a genuine `گوشی …` head counts, `قاب گوشی` does not.
+  - Classes are large (61 to 13,306 IDs). This isolates the synonym from brand and attribute
+    overlap, and it is the first data point for the query-detail-level idea.
+
+Head assignment uses whole normalized tokens in the head segment only, and the longest listed
+catalog term wins (`رایانه لوحی` beats `رایانه`). Build: `python tools/make_silver_v2.py`. It
+records the SHA-256 of the zip and of the list.
+
+### BM25 results (untuned; snapshot R1-R4, in force on 1405-07-01)
+
+| File | Rows evaluated | Tier S R@5 | Tier C R@5 | Combined R@1 | Combined R@5 | MRR@20 |
+|---|---:|---:|---:|---:|---:|---:|
+| main (`silver_v2_bm25.json`) | 99 (46 S, 53 C) | **1.0000** | 0.9434 | 0.9495 | 0.9697 | 0.9596 |
+| head-only (`silver_v2_head_bm25.json`) | 22 (all C) | n/a | **0.4091** | 0.3182 | 0.4091 | 0.3437 |
+
+- **The main file is saturated too** (tier S R@5 = 1.0000). With the head swapped, the brand and
+  the 1–2 attributes still overlap the title, so BM25 finds the row anyway. **The main v2 file
+  cannot measure the synonym effect.**
+- **The head-only slice can.** BM25 finds a class member in the top 5 for **9 of 22** pairs. Split
+  by whether the catalog itself heads rows with the seller's word:
+
+  | Head-only pairs | n | hits at 5 | R@5 |
+  |---|---:|---:|---:|
+  | seller term also heads catalog rows (lexical match possible) | 11 | 7 | 0.64 |
+  | seller term heads **no** catalog row (pure vocabulary mismatch) | 11 | 2 | **0.18** |
+
+  The 2 pure-mismatch hits: تبلت (rank 4) and پاوربانک (rank 1). The seller word appears
+  elsewhere in those titles.
+- **Small numbers.** 22 head-only queries: one query moves R@5 by 4.5 points.
+- Runtime as for v1: index build about 40 s, 3.5–12 ms per query, peak about 1.6 GB.
+
+### Per pair (BM25)
+Source: `eval/results/silver_v2_bm25_per_pair.json` (`tools/silver_v2_per_pair.py`).
+"Main rows 0" with coverage means every sampled row was rejected: more than 20 matching IDs, or a
+duplicate query.
+
+| # | catalog term → seller term | rows headed by catalog term | rows headed by seller term | main rows (S) | main R@5 | head-only rank (top 20) |
+|---:|---|---:|---:|---|---:|---:|
+| 0 | تلفن همراه → گوشی | 662 | 19 | 0 (0) | n/a | 1 |
+| 1 | تلفن همراه → موبایل | 662 | 0 | 2 (1) | 1.00 | miss |
+| 2 | رایانه قابل حمل → لپ تاپ | 0 | 1,419 | 0 (0) | n/a | — |
+| 3 | رایانه → کامپیوتر | 532 | 1 | 10 (4) | 1.00 | miss |
+| 4 | رایانه لوحی → تبلت | 63 | 0 | 6 (0) | 1.00 | 4 |
+| 5 | چاپگر → پرینتر | 983 | 0 | 2 (2) | 1.00 | miss |
+| 6 | حافظه فلش → فلش مموری | 0 | 581 | 0 (0) | n/a | — |
+| 7 | دوربین عکاسی → دوربین | 34 | 4,988 | 9 (6) | 1.00 | 1 |
+| 8 | هدفون → هندزفری | 0 | 747 | 0 (0) | n/a | — |
+| 9 | شارژر همراه → پاوربانک | 612 | 0 | 10 (6) | 1.00 | 1 |
+| 10 | تلویزیون → ال ای دی | 2,556 | 0 | 0 (0) | n/a | miss |
+| 11 | کولر گازی → اسپلیت | 7,187 | 0 | 0 (0) | n/a | 9 |
+| 12 | کولر آبی → کولر | 588 | 2,273 | 4 (0) | 1.00 | 5 |
+| 13 | اجاق گاز → گاز | 2,012 | 124 | 1 (0) | 1.00 | miss |
+| 14 | ماشین لباسشویی → لباسشویی | 1,576 | 0 | 0 (0) | n/a | miss |
+| 15 | مایکروویو → ماکروفر | 0 | 0 | 0 (0) | n/a | — |
+| 16 | یخچال فریزر → یخچال | 2,175 | 3,038 | 3 (0) | 1.00 | miss |
+| 17 | روغن موتور → روغن ماشین | 2,208 | 0 | 8 (5) | 1.00 | miss |
+| 18 | لاستیک → تایر | 3,281 | 6,905 | 7 (4) | 0.86 | 1 |
+| 19 | باتری → باطری | 6,059 | 0 | 3 (2) | 1.00 | miss |
+| 20 | خودرو → ماشین | 7,451 | 5,855 | 3 (1) | 1.00 | 1 |
+| 21 | کفش ورزشی → کتونی | 0 | 0 | 0 (0) | n/a | — |
+| 22 | شلوار جین → جین | 0 | 0 | 0 (0) | n/a | — |
+| 23 | پوشاک → لباس | 12 | 49 | 8 (6) | 1.00 | miss |
+| 24 | نوشابه گازدار → نوشابه | 0 | 456 | 0 (0) | n/a | — |
+| 25 | آب آشامیدنی → آب معدنی | 111 | 68 | 10 (5) | 0.80 | 1 |
+| 26 | دستمال کاغذی → دستمال | 165 | 356 | 6 (0) | 1.00 | 1 |
+| 27 | لامپ ال ای دی → لامپ کم مصرف | 0 | 4 | 0 (0) | n/a | — |
+| 28 | میلگرد → آرماتور | 1,589 | 0 | 6 (4) | 1.00 | miss |
+| 29 | سیمان پرتلند → سیمان | 0 | 80 | 0 (0) | n/a | — |
+| 30 | صندلی اداری → صندلی گردان | 0 | 0 | 0 (0) | n/a | — |
+| 31 | ماشین حساب → حساب گر | 67 | 0 | 1 (0) | 1.00 | miss |
+
+### Pairs with zero coverage (listed, not dropped): 10 of 32
+No in-force head contains the catalog term, so no row can be sampled. For several of them, the
+catalog uses the *seller* term as the head instead: the pair's direction does not fit this
+catalog. That is an observation for the list's author, not a change made here.
+
+| # | pair | rows headed by the seller term |
+|---:|---|---:|
+| 2 | رایانه قابل حمل → لپ تاپ | 1,419 |
+| 6 | حافظه فلش → فلش مموری | 581 |
+| 8 | هدفون → هندزفری | 747 |
+| 15 | مایکروویو → ماکروفر | 0 |
+| 21 | کفش ورزشی → کتونی | 0 |
+| 22 | شلوار جین → جین | 0 |
+| 24 | نوشابه گازدار → نوشابه | 456 |
+| 27 | لامپ ال ای دی → لامپ کم مصرف | 4 |
+| 29 | سیمان پرتلند → سیمان | 80 |
+| 30 | صندلی اداری → صندلی گردان | 0 |
 
 ## Known limitations
 - **Optimistic by construction** (see the top). Seller wording, abbreviations, synonyms and

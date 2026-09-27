@@ -1,0 +1,118 @@
+{
+ "provisional": "PROVISIONAL: catalog may be truncated (1,000,000-row export cap)",
+ "retriever": "bm25",
+ "seed": 0,
+ "golden": "eval/silver_v2_head.csv",
+ "catalog": "data/catalog/product_all_2026-09-22T19-49-07_part_1_0df81806-5d13-4353-99a2-dbf3a308c5c9.zip",
+ "counts": {
+  "total": 22,
+  "evaluated": 22,
+  "missing_from_catalog": 0,
+  "quarantined_only": 0,
+  "not_in_index": 0,
+  "invalid": 0
+ },
+ "quarantine_check": "checked",
+ "index_check": "checked",
+ "rows": {
+  "missing_from_catalog": [],
+  "quarantined_only": [],
+  "not_in_index": [],
+  "invalid": {},
+  "partially_missing": {},
+  "partially_quarantined": {},
+  "partially_not_in_index": {}
+ },
+ "k": 20,
+ "metrics": {
+  "tier_S": {
+   "evaluated": 0,
+   "recall_at_1": null,
+   "recall_at_5": null,
+   "mrr_at_20": null
+  },
+  "tier_C": {
+   "evaluated": 22,
+   "recall_at_1": 0.3181818181818182,
+   "recall_at_5": 0.4090909090909091,
+   "mrr_at_20": 0.34368686868686865
+  },
+  "combined": {
+   "evaluated": 22,
+   "recall_at_1": 0.3181818181818182,
+   "recall_at_5": 0.4090909090909091,
+   "mrr_at_20": 0.34368686868686865
+  }
+ },
+ "row_ranks": {
+  "1": 1,
+  "2": null,
+  "3": null,
+  "4": 4,
+  "5": null,
+  "6": 1,
+  "7": 1,
+  "8": null,
+  "9": 9,
+  "10": 5,
+  "11": null,
+  "12": null,
+  "13": null,
+  "14": null,
+  "15": 1,
+  "16": null,
+  "17": 1,
+  "18": null,
+  "19": 1,
+  "20": 1,
+  "21": null,
+  "22": null
+ },
+ "set": "silver",
+ "exit_criterion": {
+  "tier": "S",
+  "metric": "recall_at_5",
+  "threshold": 0.85,
+  "min_rows": 60,
+  "evaluated": 0,
+  "status": "not_applicable"
+ },
+ "golden_file": "eval/silver_v2_head.csv",
+ "catalog_snapshot": {
+  "rules": "R1-R4 (docs/data_quality.md)",
+  "as_of": "1405-07-01",
+  "describe": "rules R1-R4 (docs/data_quality.md); index = active rows in force on 1405-07-01",
+  "counts": {
+   "raw_rows": 1000000,
+   "rows_after_r1": 999900,
+   "r1_extra_copies": 100,
+   "r2_keys": 41,
+   "r2_rows": 82,
+   "r3_rows": 71,
+   "r4_rows": 1,
+   "rows_with_several_reasons": 7,
+   "raw_ids": 966156,
+   "active_ids": 966089,
+   "quarantined_only_ids": 67,
+   "index_rows": 943383,
+   "index_ids": 943380
+  }
+ },
+ "runtime": {
+  "snapshot_s": 15.1,
+  "index_build_s": 40.0,
+  "queries": 22,
+  "search_total_s": 0.076,
+  "search_ms_per_query": 3.47,
+  "process_peak_mb": 1575,
+  "index": {
+   "docs": 943383,
+   "vocab": 501371,
+   "postings": 22757220,
+   "avg_doc_tokens": 26.45,
+   "k1": 1.5,
+   "b": 0.75,
+   "index_arrays_mb": 179.4
+  }
+ }
+}

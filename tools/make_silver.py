@@ -215,19 +215,20 @@ def sha256(path):
     return h.hexdigest()
 
 
-def match_ids(rows, queries, cap, exclude_ids=frozenset()):
+def match_ids(rows, queries, cap, exclude_ids=frozenset(), tokenizer=None):
     """For each query, the IDs whose title contains every query token (a plain subset test).
 
     `rows` is a callable returning a fresh iterator of catalog records (it is streamed twice).
     `queries` maps query -> tokens(query). At most `cap` IDs are kept per query, so "cap IDs"
     means "cap or more". Each query is indexed on its rarest token, so only rows containing that
-    token are tested.
+    token are tested. `tokenizer` (default: tokens()) must be the one that produced `queries`.
     """
+    tokenizer = tokenizer or tokens
     vocab = set().union(*queries.values()) if queries else set()
     df = Counter()
     for rec in rows():
         if rec["ID"] not in exclude_ids:
-            df.update(tokens(rec["DescriptionOfID"]) & vocab)
+            df.update(tokenizer(rec["DescriptionOfID"]) & vocab)
     by_key = defaultdict(list)
     for q, toks in queries.items():
         if toks:
@@ -236,7 +237,7 @@ def match_ids(rows, queries, cap, exclude_ids=frozenset()):
     for rec in rows():
         if rec["ID"] in exclude_ids:
             continue
-        toks = tokens(rec["DescriptionOfID"])
+        toks = tokenizer(rec["DescriptionOfID"])
         for key in toks & by_key.keys():
             for q in by_key[key]:
                 if len(matches[q]) < cap and queries[q] <= toks:

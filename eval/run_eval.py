@@ -3,7 +3,8 @@
 Usage: python eval/run_eval.py --retriever {random,bm25} --catalog <catalog.csv|catalog.zip>
                               [--golden eval/golden.csv | eval/silver.csv] [--as-of 1405-07-01]
 
---golden picks the file. A SILVER file (named silver.csv, or any notes starting `silver|`) is
+--golden picks the file. A SILVER file (name starting `silver`, e.g. silver_v2.csv, or any notes
+starting `silver`, e.g. `silver|`, `silver-v2|`) is
 machine-generated and optimistic: the report prints a loud banner and the exit criterion reads
 NOT APPLICABLE. golden.csv containing a silver row is an error. See docs/silver_set.md.
 
@@ -34,6 +35,7 @@ never prints 0 for a check that did not run. Through main(), both checks always 
 import argparse
 import csv
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -58,7 +60,7 @@ SILVER_BANNER = (
     " scores favour lexical retrieval and are NOT an accuracy estimate. Never gates Phase 1."
     " See docs/silver_set.md."
 )
-SILVER_NOTE_PREFIX = "silver|"
+SILVER_NOTE_TAG = re.compile(r"silver(-[a-z0-9]+)*\|")  # silver|, silver-v2|, silver-v2-head|
 QUARANTINE_NOT_CHECKED = (
     "WARNING quarantined_only: NOT CHECKED. No snapshot was given: catalog IDs are raw (R1-R4 not"
     " applied), so an ID whose rows are all quarantined is counted as present."
@@ -96,7 +98,11 @@ def normalize_sstid(value):
 
 
 def load_golden(path):
-    """Return a list of dicts with 1-based `row` (data row, header excluded)."""
+    """Return a list of dicts with 1-based `row` (data row, header excluded).
+
+    The csv field limit is raised: silver-v2 head-only rows carry class labels of 10k+ IDs.
+    """
+    csv.field_size_limit(2**31 - 1)
     with open(path, encoding="utf-8-sig", newline="") as f:
         reader = csv.reader(f)
         header = next(reader, None)
@@ -133,14 +139,15 @@ def _metrics(ranks, k):
 
 
 def is_silver(path, golden_rows):
-    """A file is silver if it is named silver.csv or any row's notes start with `silver|`.
+    """A file is silver if its name starts with `silver` or any row's notes start with a silver tag
+    (`silver|`, `silver-v2|`, ...). A human note that merely starts with the word "silver" is not one.
 
     Machine rows must never enter the human set: golden.csv with a silver row is an error.
     """
-    tagged = [g["row"] for g in golden_rows if g["notes"].startswith(SILVER_NOTE_PREFIX)]
+    tagged = [g["row"] for g in golden_rows if SILVER_NOTE_TAG.match(g["notes"])]
     if Path(path).name == "golden.csv" and tagged:
         raise ValueError(f"{path}: golden set contains machine-generated silver rows {tagged}")
-    return Path(path).name == "silver.csv" or bool(tagged)
+    return Path(path).name.startswith("silver") or bool(tagged)
 
 
 def exit_criterion(tier_s, silver=False):
@@ -171,6 +178,7 @@ def evaluate(golden_rows, retriever, catalog_ids, k=20, quarantined_only_ids=Non
     invalid, missing, quarantined, not_in_index = {}, [], [], []
     part_missing, part_quarantined, part_not_in_index = {}, {}, {}
     ranks = {t: [] for t in TIERS}
+    row_ranks = {}  # evaluated row -> 1-based rank (None = not in top k); IDs and text not stored
     for g in golden_rows:
         tier, ids, reason = parse_row(g)
         if reason:
@@ -198,7 +206,9 @@ def evaluate(golden_rows, retriever, catalog_ids, k=20, quarantined_only_ids=Non
         results = list(retriever.search(g["query_text"], k))[:k]
         if not all(isinstance(r, str) for r in results):
             raise TypeError("retriever.search must return a list of sstid strings")
-        ranks[tier].append(rank_of_any(usable, results))
+        rank = rank_of_any(usable, results)
+        ranks[tier].append(rank)
+        row_ranks[g["row"]] = rank
     metrics = {"tier_S": _metrics(ranks["S"], k), "tier_C": _metrics(ranks["C"], k),
                "combined": _metrics(ranks["S"] + ranks["C"], k)}
     return {
@@ -223,6 +233,7 @@ def evaluate(golden_rows, retriever, catalog_ids, k=20, quarantined_only_ids=Non
         },
         "k": k,
         "metrics": metrics,
+        "row_ranks": row_ranks,
         "set": "silver" if silver else "golden",
         "exit_criterion": exit_criterion(metrics["tier_S"], silver),
     }
