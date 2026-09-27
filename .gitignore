@@ -31,3 +31,6 @@ data/catalog/
 # Silver set: derived from the catalog, rebuilt by tools/make_silver.py (never committed)
 eval/silver.csv
 eval/silver_meta.csv
+eval/silver_v2.csv
+eval/silver_v2_head.csv
+eval/silver_v2_meta.csv
