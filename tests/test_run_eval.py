@@ -1,14 +1,14 @@
 """Harness tests. They build their own golden files in tmp_path and never read eval/golden.csv."""
 import csv
 import json
-import zipfile
 from pathlib import Path
 
 import pytest
 
-from eval.run_eval import (EXIT_MIN_TIER_S, GOLDEN_HEADER, LEGEND, PROVISIONAL_BANNER,
-                           QUARANTINE_NOT_CHECKED, SILVER_BANNER, TIER_C_LOWER_BOUND, evaluate,
-                           format_report, is_silver, load_catalog_ids, load_golden, main)
+from eval.run_eval import (DEFAULT_AS_OF, EXIT_MIN_TIER_S, GOLDEN_HEADER, INDEX_NOT_CHECKED, LEGEND,
+                           PROVISIONAL_BANNER, QUARANTINE_NOT_CHECKED, SILVER_BANNER,
+                           TIER_C_LOWER_BOUND, evaluate, format_report, is_silver, load_golden, main)
+from src.retrieval.catalog import HEADER, load_snapshot
 
 FAKE_CATALOG = Path(__file__).resolve().parents[1] / "data" / "sample" / "fake_catalog.csv"
 
@@ -79,16 +79,19 @@ def _evaluate(tmp_path, rows=GOLDEN_ROWS, **kw):
 def test_evaluate_fixture_buckets(tmp_path):
     res = _evaluate(tmp_path, k=20)
     assert res["counts"] == {"total": 16, "evaluated": 8, "missing_from_catalog": 1,
-                             "quarantined_only": None, "invalid": 7}
+                             "quarantined_only": None, "not_in_index": None, "invalid": 7}
     assert res["rows"] == {
         "missing_from_catalog": [9],
         "quarantined_only": None,
+        "not_in_index": None,
         "invalid": {10: "empty_query", 11: "bad_id", 12: "multi_id_tier_s", 13: "bad_tier",
                     14: "bad_id", 15: "duplicate_id", 16: "bad_tier"},
         "partially_missing": {8: [NOT_IN_CATALOG]},
         "partially_quarantined": None,
+        "partially_not_in_index": None,
     }
     assert res["quarantine_check"] == "not_checked"
+    assert res["index_check"] == "not_checked"
 
 
 def test_three_way_metrics(tmp_path):
@@ -185,9 +188,9 @@ def test_report_names_partially_missing_ids_and_invalid_reasons(tmp_path):
 
 def test_quarantine_not_checked_is_loud_not_zero(tmp_path):
     report = format_report(_evaluate(tmp_path), "stub")
-    assert QUARANTINE_NOT_CHECKED in report
-    assert "quarantined_only: NOT CHECKED" in report
-    assert "quarantined_only: 0" not in report
+    assert QUARANTINE_NOT_CHECKED in report and INDEX_NOT_CHECKED in report
+    assert "quarantined_only: NOT CHECKED" in report and "not_in_index: NOT CHECKED" in report
+    assert "quarantined_only: 0" not in report and "not_in_index: 0" not in report
 
 
 def test_quarantined_only_bucket_when_checked(tmp_path):
@@ -195,7 +198,7 @@ def test_quarantined_only_bucket_when_checked(tmp_path):
     res = _evaluate(tmp_path, quarantined_only_ids={B})
     assert res["quarantine_check"] == "checked"
     assert res["counts"] == {"total": 16, "evaluated": 7, "missing_from_catalog": 1,
-                             "quarantined_only": 1, "invalid": 7}
+                             "quarantined_only": 1, "not_in_index": None, "invalid": 7}
     assert res["rows"]["quarantined_only"] == [2]            # S row, only B
     assert res["rows"]["partially_quarantined"] == {5: [B]}  # C row {D, B}: scored on D
     # tier S left: rank 1, rank 6, miss.  Row 5 on D alone: rank 3.
@@ -211,7 +214,7 @@ def test_report_legend_says_not_in_force_cannot_occur(tmp_path):
     report = format_report(_evaluate(tmp_path, []), "stub")
     for line in LEGEND:
         assert line in report
-    assert "not_in_force / ambiguous: CANNOT OCCUR" in report
+    assert "rate_at statuses NOT_IN_FORCE / AMBIGUOUS: CANNOT OCCUR" in report
     assert "NOT a passing result" in report
 
 
@@ -250,30 +253,54 @@ def test_exit_met_and_not_met_at_min_rows(tmp_path):
 
 # --- catalog and CLI -----------------------------------------------------------------------
 
-def test_catalog_ids_from_csv_and_zip_agree(tmp_path):
-    from_csv = load_catalog_ids(FAKE_CATALOG)
-    zpath = tmp_path / "cat.zip"
-    with zipfile.ZipFile(zpath, "w") as z:
-        z.write(FAKE_CATALOG, "fake_catalog.csv")
-    assert load_catalog_ids(zpath) == from_csv
-    assert len(from_csv) == 44  # 50 rows, 4 IDs with history
+def test_not_in_index_bucket_and_partial(tmp_path):
+    rows = [["q1", A, "S", ""],                  # A: in catalog, not in index -> bucket
+            ["qc1", f"{D};{B}", "C", ""],         # B out of index -> scored on D (rank 3)
+            ["q2", B, "S", ""]]
+    res = evaluate(load_golden(write_golden(tmp_path / "g.csv", rows)), StubRetriever(), CATALOG,
+                   quarantined_only_ids=set(), index_ids=CATALOG - {A, B})
+    assert res["counts"]["not_in_index"] == 2 and res["rows"]["not_in_index"] == [1, 3]
+    assert res["rows"]["partially_not_in_index"] == {2: [B]}
+    assert res["metrics"]["tier_C"]["mrr_at_20"] == pytest.approx(1 / 3)
+    report = format_report(res, "stub")
+    assert "not_in_index: 2" in report and INDEX_NOT_CHECKED not in report
+    assert f"partially_not_in_index (scored; these IDs ignored): row 2: {B}" in report
+
+
+def test_quarantine_beats_not_in_index_and_missing_beats_both(tmp_path):
+    rows = [["q1", A, "S", ""], ["q2", f"{A};{NOT_IN_CATALOG}", "C", ""], ["q3", f"{A};{B}", "C", ""]]
+    res = evaluate(load_golden(write_golden(tmp_path / "g.csv", rows)), StubRetriever(), CATALOG,
+                   quarantined_only_ids={A}, index_ids=CATALOG - {A, B})
+    assert res["rows"]["quarantined_only"] == [1]
+    assert res["rows"]["missing_from_catalog"] == [2]
+    assert res["rows"]["not_in_index"] == [3]
+
+
+def _fake_zip_ids():
+    snap = load_snapshot(FAKE_CATALOG, DEFAULT_AS_OF)
+    expired = sorted(snap.active_ids - snap.index_ids)
+    return sorted(snap.index_ids), expired, snap
 
 
 def test_end_to_end_random_retriever(tmp_path, capsys):
-    ids = sorted(load_catalog_ids(FAKE_CATALOG))
+    ids, expired, _ = _fake_zip_ids()
+    assert expired, "fake catalog should have an ID with no row in force on the default as_of"
     golden = write_golden(tmp_path / "g.csv", [
         ["نمونه یک", ids[0], "S", ""],
         ["نمونه دو", f"{ids[1]};{ids[2]}", "C", ""],
         ["نمونه سه", NOT_IN_CATALOG, "S", ""],
+        ["نمونه چهار", expired[0], "S", ""],
     ])
     out = tmp_path / "r.json"
     args = ["--retriever", "random", "--catalog", str(FAKE_CATALOG), "--golden", str(golden),
             "--seed", "7", "--out", str(out)]
     first = main(args)
     second = main(args)
+    for r in (first, second):
+        r.pop("runtime")
     assert first == second  # deterministic for a fixed seed
-    assert first["counts"] == {"total": 3, "evaluated": 2, "missing_from_catalog": 1,
-                               "quarantined_only": None, "invalid": 0}
+    assert first["counts"] == {"total": 4, "evaluated": 2, "missing_from_catalog": 1,
+                               "quarantined_only": 0, "not_in_index": 1, "invalid": 0}
     assert first["metrics"]["tier_S"]["evaluated"] == 1
     assert first["metrics"]["tier_C"]["evaluated"] == 1
     assert capsys.readouterr().out.startswith(PROVISIONAL_BANNER)
@@ -281,6 +308,39 @@ def test_end_to_end_random_retriever(tmp_path, capsys):
     assert saved["counts"] == first["counts"] and saved["retriever"] == "random"
     assert saved["metrics"] == first["metrics"]
     assert saved["exit_criterion"]["status"] == "not_yet_measurable"
+    assert saved["catalog_snapshot"]["as_of"] == DEFAULT_AS_OF
+
+
+def test_report_states_measured_quarantine_as_of_and_rules(tmp_path, capsys):
+    ids, _, snap = _fake_zip_ids()
+    golden = write_golden(tmp_path / "g.csv", [["نمونه", ids[0], "S", ""]])
+    main(["--retriever", "random", "--catalog", str(FAKE_CATALOG), "--golden", str(golden)])
+    out = capsys.readouterr().out
+    assert QUARANTINE_NOT_CHECKED not in out and INDEX_NOT_CHECKED not in out
+    assert f"catalog snapshot: rules R1-R4 (docs/data_quality.md); index = active rows in force on {DEFAULT_AS_OF}" in out
+    assert "Measured: 0 quarantined-only IDs" in out          # zero, measured
+    assert "quarantined_only: 0" in out
+    assert "runtime: snapshot" in out
+
+
+def test_quarantined_id_reported_not_scored_end_to_end(tmp_path):
+    # Invented catalog: Q has only an R3 row, so it is quarantined-only and never indexed.
+    rows = [["2900000000001", "لیوان شیشه ای", "10", "مشمول", "1404-01-01", "", "1404-01-01",
+             "1404-01-01", "شناسه اختصاصی تولید داخل", ""],
+            ["2900000000002", "لیوان پلاستیکی", "10", "مشمول", "1404-05-01", "1404-04-30",
+             "1404-01-01", "1404-01-01", "شناسه اختصاصی تولید داخل", ""]]
+    cat = tmp_path / "cat.csv"
+    with open(cat, "w", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(HEADER)
+        w.writerows(rows)
+    golden = write_golden(tmp_path / "g.csv", [["لیوان شیشه", "2900000000001", "S", ""],
+                                               ["لیوان پلاستیکی", "2900000000002", "S", ""]])
+    res = main(["--retriever", "bm25", "--catalog", str(cat), "--golden", str(golden)])
+    assert res["rows"]["quarantined_only"] == [2]
+    assert res["metrics"]["tier_S"] == {"evaluated": 1, "recall_at_1": 1.0, "recall_at_5": 1.0,
+                                        "mrr_at_20": 1.0}
+    assert res["runtime"]["index"]["docs"] == 1
 
 
 # --- silver set ----------------------------------------------------------------------------
@@ -325,7 +385,7 @@ def test_golden_report_has_no_silver_banner(tmp_path):
 
 
 def test_cli_prints_file_and_silver_banner(tmp_path, capsys):
-    ids = sorted(load_catalog_ids(FAKE_CATALOG))
+    ids, _, _ = _fake_zip_ids()
     silver = write_golden(tmp_path / "silver.csv", [["نمونه", ids[0], "S", SILVER_NOTE]])
     res = main(["--retriever", "random", "--catalog", str(FAKE_CATALOG), "--golden", str(silver)])
     out = capsys.readouterr().out

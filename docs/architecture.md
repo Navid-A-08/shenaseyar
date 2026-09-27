@@ -185,6 +185,9 @@ Golden rows have a tier: S = exactly one correct ID, C = a class query with seve
 (`;`-separated; a hit is any of them in the top k). Metrics are reported for S, C and combined. C is a
 lower bound (the acceptable set is hand-made, never complete). The Phase 1 exit criterion gates on
 tier S only, and only with at least 60 evaluated tier S rows. Why tiers: data_dictionary.md §10.
+The harness loads the catalog as a snapshot (`src/retrieval/catalog.py`: R1-R4, then rows in force on
+`--as-of`), the same rows retrievers index. Expected IDs outside it are reported as
+missing / quarantined_only / not_in_index, never scored as misses.
 A machine-generated SILVER set (docs/silver_set.md) is reported with a loud banner, is optimistic
 (queries derived from catalog titles), and never gates a phase.
 Risk: PR-AUC, Precision@2%, recall per T-type (group split).

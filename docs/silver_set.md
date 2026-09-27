@@ -220,9 +220,27 @@ Method for table 2 (`tools/analyze_ambiguity.py`; output `eval/results/ambiguity
 
 ## Metrics so far
 
-| Retriever | File | Tier S R@5 | Tier C R@5 | Combined R@5 |
-|---|---|---:|---:|---:|
-| `random` (harness check, not a baseline) | `eval/results/silver_random_seed0.json` | 0.0000 | 0.0000 | 0.0000 |
+All runs: snapshot = rules R1-R4, active rows in force on 1405-07-01 (943,383 rows, 943,380 IDs;
+67 quarantined-only IDs). On the silver set: missing 0, quarantined_only 0 (measured), not_in_index 0.
+
+| Retriever | File | Tier S R@1 | Tier S R@5 | Tier C R@1 | Tier C R@5 | Combined R@5 | MRR@20 (combined) |
+|---|---|---:|---:|---:|---:|---:|---:|
+| `random` (harness check, not a baseline) | `eval/results/silver_random_seed0.json` | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
+| `bm25` (k1 1.5, b 0.75, untuned) | `eval/results/silver_bm25.json` | 0.9569 | **1.0000** | 0.9457 | 0.9728 | 0.9833 | 0.9619 |
+
+**Read the BM25 row as a sanity check, not as a result.** The silver set is built with the same
+token-subset test that BM25 rewards: a tier S row is, by construction, the only in-force title
+containing every query token. BM25 finding it is close to guaranteed, so this number says the
+index and the normalizer work, and almost nothing about real accuracy. It is not leakage
+(nothing is trained); it is circularity by design (see the top of this page).
+
+- **Misses at 5: 4 of 300, all tier C.** 3 are `noise_typo` rows and 1 is a clean row.
+- **Noise that `normalize()` removes is not a test for BM25.** `noise_arabic_yk` and
+  `noise_fa_digits` rows become identical to their clean versions after normalization. By noise
+  type (R@5): clean 0.9952 (n=210), arabic_yk 0.9706 (n=34), fa_digits 1.0000 (n=18), typo
+  0.9211 (n=38). This breakdown was a one-off; the harness does not report it yet.
+- Runtime (i7-14700K, CPU only): snapshot 10.1 s, BM25 index build 23.6 s, 5.5 ms per query,
+  process peak memory 1,573 MB. Index: 501,371 terms, 22,757,220 postings, 179 MB of arrays.
 
 ## Known limitations
 - **Optimistic by construction** (see the top). Seller wording, abbreviations, synonyms and
