@@ -242,6 +242,21 @@ index and the normalizer work, and almost nothing about real accuracy. It is not
 - Runtime (i7-14700K, CPU only): snapshot 10.1 s, BM25 index build 23.6 s, 5.5 ms per query,
   process peak memory 1,573 MB. Index: 501,371 terms, 22,757,220 postings, 179 MB of arrays.
 
+> **⚠ CEILING WARNING: this set can no longer compare retrievers**
+>
+> - **Tier S is saturated.** Untuned BM25 already reaches **Recall@5 = 1.0000 on tier S**. No
+>   later retriever can score higher. The set can still reveal a retriever that does *worse*
+>   than BM25, but it can never show one that does better. Tier C (0.9728, 5 misses at 5) has
+>   almost no headroom either. **An ablation table built on this set (BM25 → dense → hybrid →
+>   reranker) would show no improvements and would mean nothing.**
+> - **Root cause:** silver queries are derived from title tokens, so the set can only ever test
+>   token overlap. **Vocabulary mismatch cannot occur in a set built this way**: a seller writing
+>   گوشی where the catalog says تلفن همراه is never generated. So the silver set can never show
+>   whether dense or hybrid retrieval beats lexical retrieval.
+> - **Consequence:** comparing retrievers requires queries whose wording is independent of the
+>   titles: the human golden set, or a variant that deliberately replaces title words (a
+>   silver-v2 with hand-written synonyms is proposed, not built).
+
 ## Known limitations
 - **Optimistic by construction** (see the top). Seller wording, abbreviations, synonyms and
   missing words are not modelled; only 4 kinds of character noise are.
