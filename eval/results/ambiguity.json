@@ -1,0 +1,1685 @@
+{
+ "catalog_zip": "product_all_2026-09-22T19-49-07_part_1_0df81806-5d13-4353-99a2-dbf3a308c5c9.zip",
+ "catalog_sha256": "b0703c8b5fea42a6e8590184a24090b13f5bdfd0d1b950f344615fad917957ba",
+ "silver_meta_sha256": "1cc8f367a4b6532997abef9021cb676456f5cabd135849d6954edb27b9542767",
+ "as_of": "1405-07-01",
+ "tier_C_rows": 184,
+ "missing_from_catalog": [],
+ "categories": {
+  "unique_with_all_attrs": 103,
+  "needs_mfr_or_partno": 46,
+  "unique_under_none": 35
+ },
+ "shares": {
+  "unique_with_all_attrs": 0.5598,
+  "needs_mfr_or_partno": 0.25,
+  "unique_under_none": 0.1902
+ },
+ "needs_mfr_or_partno_split": {
+  "mfr_only": 14,
+  "partno_only": 29,
+  "either": 3
+ },
+ "segments_present": {
+  "mfr": 168,
+  "partno": 57
+ },
+ "rows": [
+  {
+   "source_id": "2902241300025",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2903764100888",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2906649605133",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902405510574",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901141403720",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901359200128",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2908813400421",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902251000441",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2903385110358",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2904663200396",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2900477900903",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2907957400175",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2904709601248",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902300300102",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2220460870038",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901242102263",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2904078507011",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901486909581",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902606804052",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2905788404829",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901826153650",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2904286701317",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902164000675",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2900869400752",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901521400226",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2907065702000",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902544100773",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902400700116",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901274515246",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902608300118",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902293200045",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901688300568",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2905404400280",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902822200966",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901433600882",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2906351202118",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2906164700603",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2907790300380",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902230700355",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901232502141",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902135500418",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2900168100421",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2903654908341",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901116000398",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2906493602654",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902434700038",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2903703529916",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2907768200087",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901169203616",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902574600151",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902242900026",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2900881701240",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2900202700648",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901385006855",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902752300019",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901003074747",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2902386500236",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2905389460903",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2900761000166",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902811905742",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2902504100010",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902457408669",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2901501720009",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2904946600257",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2900098200239",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2908130303672",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2905348707551",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2900505801288",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901708000355",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902390801848",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2900578601068",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901853437501",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2902822200027",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2905389466462",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2902717200071",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2902369809523",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901273300010",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2901914088369",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2902081887779",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2905389475174",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2906360305206",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2902856800026",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2330004165305",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2330004607720",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2330004341747",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2330003305184",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2330003090622",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2330003273513",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2330004214447",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2330004030337",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800014984833",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800010324862",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800015892625",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800015279198",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800016810840",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800017018399",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800015784166",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800015464846",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800011818155",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800017312640",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800014798843",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800015522850",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800016090730",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800011818582",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800013574844",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800011086424",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800002374080",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800014915936",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800016147267",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800015091257",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800013772301",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800014051436",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800017700683",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800018196232",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800015439684",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800014947333",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800017060565",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800012581614",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800014741184",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800016390120",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800017298241",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800016358304",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800016175734",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800014903001",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800013936239",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800018192371",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800008455998",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800018351143",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800015059080",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2003542802433",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800011398213",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800017302733",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800014067871",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800015318941",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800013649436",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800015273028",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800017448707",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800015430872",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800016691838",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800016263660",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800014265048",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800016302918",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800017900229",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800014818978",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800015019657",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800016079551",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800018213748",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800017152345",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800016687633",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800014431474",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800017555979",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800017264192",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800016301126",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800014921852",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800017501457",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800017316730",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800014742655",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800015587101",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800015501299",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800017011710",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800016866601",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800014839911",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800014654620",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800016057153",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800013799872",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800014790595",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2800015671077",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800014850107",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800014174968",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800016674862",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800014506462",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2800016149957",
+   "category": "needs_mfr_or_partno",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": true
+   }
+  },
+  {
+   "source_id": "2720000256457",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2720000101412",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2720000195367",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2720000050475",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2720000205707",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2330000163008",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2330002753375",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2330001003334",
+   "category": "unique_with_all_attrs",
+   "unique": {
+    "all_attrs": true,
+    "all_attrs+mfr": true,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2710000209898",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2710000092544",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2710000188896",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  },
+  {
+   "source_id": "2710000195320",
+   "category": "unique_under_none",
+   "unique": {
+    "all_attrs": false,
+    "all_attrs+mfr": false,
+    "all_attrs+partno": false
+   }
+  }
+ ]
+}
