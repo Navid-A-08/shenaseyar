@@ -13,6 +13,9 @@ never a verdict**. Full design: `docs/architecture.md`. Read it before any desig
 the harness says so instead of printing a pass/fail.
 The machine-generated silver set (`eval/silver.csv`, `docs/silver_set.md`) is optimistic and
 never gates: the exit criterion reads NOT APPLICABLE on it. It is gitignored (catalog extract).
+Dense retrieval: fp32 BGE-M3 only (int8 failed its pre-registered bar, see `docs/silver_set.md`).
+The full dense index build (~7.7 h CPU) is POSTPONED until `eval/golden.csv` has at least 60
+tier S rows.
 (Update this section whenever the phase changes.)
 
 Phase 0 exit met 2026-09-22 (see `docs/data_dictionary.md`, `docs/data_quality.md`).

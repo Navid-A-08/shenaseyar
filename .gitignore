@@ -12,6 +12,7 @@ __pycache__/
 # Large or sensitive artifacts — never commit
 data/raw/
 data/interim/
+data/index/
 data/catalog/
 models/
 *.gguf

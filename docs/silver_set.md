@@ -640,6 +640,18 @@ batch 1 and batch 64).
 On 2026-09-28 the same models, sample and default threads measured 87.3 titles/s (int8) and 35.7
 titles/s (fp32), a roughly 4–6× difference that is **unexplained**.
 
+**fp32 speed (re-timed 2026-09-28, two fresh runs).** Same 2,000 titles, graph optimization ALL
+(`eval/results/fp32_speed_run1.json`, `fp32_speed_run2.json`). Fastest setting in both runs:
+onnxruntime default threads, batch 64: **33.6 and 34.4 titles/s**, projecting **7.80 h and
+7.61 h** for the 943,383-row index. Every other setting (8 / 16 / 28 threads, batch 128) was
+slower (8.0–12.3 h). The vectors were identical across all settings.
+
+**Full index build: postponed (decided 2026-09-28).** `eval/golden.csv` is empty, so the Phase 1
+exit criterion cannot be measured with any retriever yet, and the silver comparison above never
+gates. The build (`python tools/build_dense_index.py`, resumable, writes `data/index/dense-fp32/`)
+runs once the golden set has at least 60 tier S rows, so one build serves both the silver
+comparison and the golden evaluation.
+
 ## Known limitations
 - **Optimistic by construction** (see the top). Seller wording, abbreviations, synonyms and
   missing words are not modelled; only 4 kinds of character noise are.

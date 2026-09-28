@@ -9,7 +9,7 @@ in-force titles (normalized) are encoded by fp32 and by each int8 variant.
 No silver query is read.
 
 Speed: throughput on the same 2,000 titles for each (threads, batch) setting at graph
-optimization ALL, on one int8 model. Each setting's vectors are compared with a reference
+optimization ALL, on one model (an int8 variant or fp32). Each setting's vectors are compared with a reference
 setting's vectors, to check that speed settings leave the vectors unchanged.
 
 Writes eval/results/int8_agreement.json (numbers only, no text). fp32 vectors are cached in the
@@ -88,7 +88,7 @@ def main(argv=None):
     p.add_argument("--variants", default=",".join(VARIANTS))
     p.add_argument("--agree-threads", type=int, default=None)
     p.add_argument("--agree-batch", type=int, default=64)
-    p.add_argument("--speed-model", default="per_tensor")
+    p.add_argument("--speed-model", default="per_tensor", choices=["fp32", *VARIANTS])
     p.add_argument("--threads", default="8,16,28")
     p.add_argument("--batches", default="64,128")
     p.add_argument("--cache", type=Path, required=True, help="scratch dir for fp32 vectors")
@@ -125,7 +125,8 @@ def main(argv=None):
     if a.part in ("speed", "both"):
         speed, ref_vec = {}, None
         for th in [int(x) for x in a.threads.split(",")]:
-            enc = OnnxEncoder.from_dir(VARIANTS[a.speed_model], a.max_length, 64, th)
+            model_dir = MODELS / "onnx" if a.speed_model == "fp32" else VARIANTS[a.speed_model]
+            enc = OnnxEncoder.from_dir(model_dir, a.max_length, 64, th)
             for bs in [int(x) for x in a.batches.split(",")]:
                 enc.batch_size = bs
                 vec, sec = timed_encode(enc, titles)
