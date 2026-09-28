@@ -56,6 +56,30 @@ this is resolved is provisional.
 - If you are unsure, say so. Don't guess.
 - Scraping: never fetch more than a handful of pages without my explicit approval. Respect robots.txt.
 
+## Autonomy
+
+Proceed without asking for: creating branches, committing, pushing, merging into main
+after `pytest -q` passes, refactors, new tests, doc updates, and any change that git
+can revert.
+
+Ask first ONLY when:
+- a pre-registered rule, metric definition or acceptance criterion would change;
+- something irreversible or external happens (downloads, deletions, network fetches
+  beyond a few pages);
+- a run will take more than 1 hour of compute;
+- eval/golden.csv or the synonym list is involved;
+- the honest interpretation of a result is in question, or a number would go into the
+  docs that you are not confident is right.
+
+Batch work: several related small tasks per session is fine. Don't stop after each one
+for approval — do them, then report once.
+
+Plans: still plan before non-trivial code, but for reversible work state the plan and
+proceed in the same turn. Wait for approval only for the cases listed above.
+
+Reports: lead with the numbers and anything that surprised you. Skip restating what was
+built unless it changed the design.
+
 ## Stack
 Python 3.12 (venv: CPython 3.12.8) · jdatetime (pinned; all Jalali date arithmetic) · hazm · BGE-M3 (dense+sparse) · bge-reranker-v2-m3 · Qdrant · PostgreSQL ·
 LightGBM + SHAP · LangGraph · llama.cpp (Dorna2-Llama3.1-8B Q4_K_M, compared later with a
