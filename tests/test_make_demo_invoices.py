@@ -27,7 +27,8 @@ def rows():
 def test_committed_file_is_the_seeded_output(tmp_path):
     out = tmp_path / "d.csv"
     mdi.main(["--out", str(out)])
-    assert out.read_bytes() == COMMITTED.read_bytes()
+    # line-ending agnostic: git (core.autocrlf) may rewrite the committed file's newlines
+    assert out.read_bytes().splitlines() == COMMITTED.read_bytes().splitlines()
 
 
 def test_same_seed_same_rows_other_seed_differs(rows):
