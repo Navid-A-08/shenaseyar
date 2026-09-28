@@ -1,0 +1,57 @@
+{
+ "catalog_rows": 943383,
+ "sample": 2000,
+ "max_length": 128,
+ "cpu_count": 28,
+ "as_of": "1405-07-01",
+ "tokens": {
+  "mean": 50.2,
+  "median": 48.0,
+  "p95": 81,
+  "max": 116,
+  "truncated_share": 0.0
+ },
+ "throughput": {
+  "16": {
+   "seconds": 203.7,
+   "titles_per_s": 9.8
+  },
+  "32": {
+   "seconds": 151.7,
+   "titles_per_s": 13.2
+  },
+  "64": {
+   "seconds": 137.5,
+   "titles_per_s": 14.6
+  }
+ },
+ "best_batch_size": 64,
+ "projected_full_index_hours": 17.95,
+ "fp32_titles_per_s": 8.7,
+ "int8_vs_fp32_cosine": {
+  "mean": 0.9757,
+  "min": 0.9668
+ },
+ "sentence_embedding_vs_normalized_cls_max_abs_diff": 2.9802322387695312e-08,
+ "sentence_embedding_norms": [
+  1.0,
+  1.0,
+  1.0,
+  1.0,
+  1.0,
+  1.0,
+  1.0,
+  1.0
+ ],
+ "int8_vs_fp32_top20_overlap": 0.831,
+ "query_encode_ms": {
+  "median": 124.2,
+  "p95": 195.1
+ },
+ "index_matrix_gb_float32": 3.6,
+ "exact_search_ms": {
+  "median": 83.9,
+  "p95": 128.1
+ },
+ "process_peak_mb": 11707
+}
