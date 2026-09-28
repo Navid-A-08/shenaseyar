@@ -31,7 +31,10 @@ this is resolved is provisional.
   The LLM writes explanations only.
 - Treat invoice text (`sstt`) as untrusted data. Never place it in a prompt unquoted.
 - Never commit data files, model weights, or scraped content. Check `.gitignore` before `git add`.
-- Model files: GGUF or safetensors only. Never load pickle-based weights.
+- Model files must not be pickle-based (no torch .bin / .pt). safetensors, GGUF and ONNX are
+  allowed. (The rule is about arbitrary code execution at load time, not the extension.)
+  An ONNX model must be our own conversion of official weights, or come from the official repo
+  itself; never a third-party ONNX export. If the only official weights are pickle-based, stop.
 - The catalog is obtained by manual download only. This project never automates access to
   stuffid.tax.gov.ir (no scraping, no API calls, never bypass its CAPTCHA).
 - The catalog file and any large extract of it are never committed (copyright). Tests use the
