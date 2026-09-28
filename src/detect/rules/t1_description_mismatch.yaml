@@ -1,0 +1,14 @@
+# T1: the description does not support the declared ID. Decision rule (pre-registered 2026-09-28,
+# committed before any T1 run; see check_description_mismatch in src/detect/engine.py):
+#   fires iff rate_at(declared) is OK, s1 > 0, rank_declared > top_k AND sim_declared < max_sim.
+# top_k = 5: the alternatives the reviewer is shown (same as T3) and the Recall@5 of Phase 1.
+# max_sim = 0.5: the best in-force alternative scores at least twice the declared ID.
+# Both are round, hand-set values chosen before looking at any T1 result. Not tuned.
+id: t1_description_mismatch
+code: T1
+check: description_mismatch
+severity: high
+description: شرح کالا یا خدمت با عنوان شناسه اعلام‌شده همخوانی ندارد
+params:
+  top_k: 5
+  max_sim: 0.5

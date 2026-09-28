@@ -3,7 +3,7 @@
 A rule file (src/detect/rules/*.yaml) names a registered Python check and gives its parameters:
 
     id: t6_vat_arithmetic      # unique
-    code: T6                   # T2 | T3 | T4 | T6 | ID_STATUS
+    code: T6                   # T1 | T2 | T3 | T4 | T6 | ID_STATUS
     check: vat_arithmetic      # a name in CHECKS
     severity: high             # high | medium | low | none   (ID_STATUS sets it per status)
     description: ...           # one line, shown in the UI
@@ -29,7 +29,7 @@ from src.retrieval.bm25 import tokenize
 
 RULES_DIR = Path(__file__).resolve().parent / "rules"
 RULE_KEYS = {"id", "code", "check", "severity", "description", "params"}
-CODES = {"T2", "T3", "T4", "T6", "ID_STATUS"}
+CODES = {"T1", "T2", "T3", "T4", "T6", "ID_STATUS"}
 SEVERITIES = {"high", "medium", "low", "none"}
 ID_STATUSES = {s.value for s in Status if s is not Status.OK}
 
@@ -96,7 +96,7 @@ class Hit:
 @dataclass
 class Context:
     table: object                        # rates.RateTable
-    retrieval: object = None             # features.RetrievalFeatures (T3 needs it)
+    retrieval: object = None             # features.RetrievalFeatures (T1 and T3 need it)
 
 
 # ---- checks --------------------------------------------------------------------------------
@@ -153,6 +153,44 @@ def check_general_with_specific(line, ctx, p):
                           "best_specific_title": better[0].version.title})]
 
 
+def check_description_mismatch(line, ctx, p):
+    """T1: the text does not support the declared ID (architecture.md §3).
+
+    DECISION RULE (pre-registered 2026-09-28, stated and committed before any T1 run; the
+    boundaries were NOT chosen by looking at results). With BM25 over the catalog titles
+    (src/detect/features.py), T1 fires iff ALL of:
+      (a) rate_at(declared, issue_date) is OK. Otherwise the ID-status finding reports the line.
+      (b) s1 > 0: the text matches at least one ID in force on the date. A text that matches
+          nothing gives no evidence either way.
+      (c) rank_declared > top_k (5): the declared ID is not among the alternatives the reviewer
+          is shown. Rank alone is not enough: the catalog often has many near-identical titles
+          for one text (architecture.md §3, Finding), so the declared ID can rank 8th while
+          being as good a match as the 1st.
+      (d) sim_declared < max_sim (0.5): the best in-force alternative scores at least TWICE the
+          declared ID. This is the "relative to the top alternative" part, and it guards (c).
+    Consequences accepted in advance:
+      - A declared ID that shares a head noun and most words with the text (a close neighbor)
+        passes (c) or (d) and is NOT flagged. T1 catches gross mismatches, not near-misses.
+      - A vague-only text (T4 territory) usually shares no word with the declared title, so
+        T1 fires on it too. No abstention was added for that; the eval reports it.
+      - No rate or tax status is used: T1 is about the text, T2 about the rate.
+    """
+    res = ctx.table.rate_at(line.sstid, line.issue_date)
+    if res.status is not Status.OK:
+        return []
+    r = ctx.retrieval
+    if r is None:
+        raise RuleError("T1 needs retrieval features in the context")
+    if not r.ranked or r.ranked[0].score <= 0:
+        return []
+    if r.rank_declared <= p["top_k"] or r.sim_declared >= p["max_sim"]:
+        return []
+    best = r.ranked[0]
+    return [("T1", None, {"rank_declared": r.rank_declared, "sim_declared": r.sim_declared,
+                          "top_k": p["top_k"], "best_sstid": best.sstid,
+                          "best_title": best.version.title})]
+
+
 def check_vague_high_amount(line, ctx, p):
     vague = {normalize(w) for w in p["vague_words"]}
     toks = tokenize(line.sstt)
@@ -169,6 +207,7 @@ CHECKS = {
     "rate_mismatch": (check_rate_mismatch, set()),
     "vat_arithmetic": (check_vat_arithmetic, {"tolerance_rial"}),
     "general_with_specific": (check_general_with_specific, {"top_k"}),
+    "description_mismatch": (check_description_mismatch, {"top_k", "max_sim"}),
     "vague_high_amount": (check_vague_high_amount, {"vague_words", "min_amount_rial"}),
 }
 
