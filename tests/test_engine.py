@@ -1,4 +1,5 @@
-"""src/detect/engine.py: rule loading/validation and the T2, T3, T4, T6 and ID-status checks."""
+"""src/detect/engine.py: rule loading/validation and the T2, T3, T4, T6 and ID-status checks
+(T1: tests/test_t1.py)."""
 from decimal import Decimal
 
 import pytest
@@ -40,7 +41,7 @@ def codes(ln, table=TABLE):
 # ---- loading ---------------------------------------------------------------------------------
 
 def test_committed_rules_load():
-    assert {r.code for r in RULES} == {"T2", "T3", "T4", "T6", "ID_STATUS"}
+    assert {r.code for r in RULES} == {"T1", "T2", "T3", "T4", "T6", "ID_STATUS"}
 
 
 def _write(tmp_path, **over):

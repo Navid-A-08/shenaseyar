@@ -19,14 +19,14 @@ This keeps CPU cost low and every decision traceable.
 ## 3. Error types (targets)
 | Code | Meaning | Detected by |
 |---|---|---|
-| T1 | Description doesn't match declared ID (e.g. a good that charges VAT filed under an ID with `charges_vat = false`) | retrieval + risk model (core NLP) |
+| T1 | Description doesn't match declared ID (e.g. a good that charges VAT filed under an ID with `charges_vat = false`) | retrieval + rule (v0.1: `rank_declared > 5` and `sim_declared < 0.5`, pre-registered 2026-09-28, `src/detect/rules/t1_description_mismatch.yaml`); later retrieval + risk model (core NLP) |
 | T2 | Declared rate ≠ reference rate of the ID on invoice date | rule |
 | T3 | Generic/"other" ID used where a specific ID exists | retrieval + rule |
 | T4 | Vague description ("کالا", "خدمات") with high amount | rule + feature |
 | T5 | Unit price far outside the ID group's distribution | feature (robust z-score) |
 | T6 | `vam` ≠ base × `vra` | rule |
-| `NOT_IN_CATALOG` | Separate from T1–T6. **Severity: high.** The declared `sstid` does not exist in the catalog. Rationale: an invoice quoting a non-existent ID is the seller's error, and an error in itself, not a rate question. | rule (`rate_at` → `NOT_IN_CATALOG`) |
-| `NOT_IN_FORCE` | Separate from T1–T6. **Severity: medium.** The `sstid` exists, but no version is in force on the invoice date (a gap between versions, or a date before the first version). Rationale: it could be a genuinely wrong ID, or just a lag around a version change. It warrants review, but is not a strong signal on its own. | rule (`rate_at` → `NOT_IN_FORCE`) |
+| `NOT_IN_CATALOG` | Separate from T1–T6. **Hard flag** (below). **Severity: high.** The declared `sstid` does not exist in the catalog. Rationale: an invoice quoting a non-existent ID is the seller's error, and an error in itself, not a rate question. | rule (`rate_at` → `NOT_IN_CATALOG`) |
+| `NOT_IN_FORCE` | Separate from T1–T6. **Hard flag** (below). **Severity: medium.** The `sstid` exists, but no version is in force on the invoice date (a gap between versions, or a date before the first version). Rationale: it could be a genuinely wrong ID, or just a lag around a version change. It warrants review, but is not a strong signal on its own. | rule (`rate_at` → `NOT_IN_FORCE`) |
 
 | `AMBIGUOUS` | Separate from T1–T6. **Severity: none (informational). Do not upgrade.** Several versions are in force on the invoice date and tie on the latest `valid_from` (§5). Rationale: this is **our** data problem (two catalog rows in force for one ID), not the seller's. It must **never raise a line's risk score**. It is logged as a catalog-maintenance issue with its own counter in the run report. | rule (`rate_at` → `AMBIGUOUS`) |
 
@@ -39,6 +39,18 @@ ID-status findings (`NOT_IN_CATALOG`, `NOT_IN_FORCE`, `AMBIGUOUS`):
   may be caused by missing catalog rows, not by the invoice.
 - OPEN (Navid): which status applies to an ID whose rows were **all** quarantined
   (`docs/data_quality.md`). Such an ID is not in the active index but does exist in the source.
+  Until decided it is reported as its own status, `QUARANTINED_ONLY`, and is a hard flag.
+
+**Hard flags (DECIDED, Navid, 2026-09-28): `NOT_IN_CATALOG`, `NOT_IN_FORCE` and
+`QUARANTINED_ONLY` bypass the risk score entirely.** They are facts about the declared ID, not
+risk. This supersedes the earlier design, in which they were scored (weights in `score.py` and the
+`id_status` model feature in §6).
+- A line with a hard flag gets **no score** (`None`), not a high one. It always goes to review,
+  and the flag is shown above everything else in the reviewer view.
+- The other rules still run on the line and are listed with it (e.g. T6 arithmetic).
+- They have no weight in the score, and passing one to the scorer is an error.
+- The severities above still order the flags for the reviewer. They do not feed any score.
+- `AMBIGUOUS` is **not** a hard flag: it is our data problem, informational, weight 0.
 
 Tax status: the catalog separates three statuses, `taxable` (مشمول), `exempt` (معاف) and
 `out_of_scope` (غیر مشمول). **Detection** (rules, features such as `exempt_flip`, the risk model)
@@ -124,7 +136,8 @@ Field names must be checked against the current Moadian spec in phase 0.
 - `sstid` not in the catalog at all: return an explicit **`NOT_IN_CATALOG`** result, not a rate.
 - Never pick arbitrarily, never silently take the first row, and never fall back to the nearest version.
 - How `NOT_IN_FORCE`, `NOT_IN_CATALOG` and `AMBIGUOUS` are treated (no fallback, T2 does not fire,
-  own finding, raw status shown to the reviewer, counted in the run report): see §3.
+  own finding, raw status shown to the reviewer, counted in the run report): see §3. The first two
+  (and `QUARANTINED_ONLY`) are hard flags that bypass the score (§3).
 
 The tie rule applies to the 3 IDs that have more than one row in force (`docs/data_quality.md`).
 Catalog source columns and their mapping: `docs/data_dictionary.md` §5. Rows that fail the
@@ -133,21 +146,22 @@ data-quality rules are not in `goods_catalog`. They go to a quarantine list with
 
 ## 6. Risk-model features
 `sim_declared`, `rank_declared` (21 if absent), `margin_top1`, `exempt_flip`, `is_general_id`,
-`specific_exists`, `desc_specificity`, `price_z` (median-based), `injection_flag`, `rule_hits`,
-`id_status` (categorical: `ok` | `not_in_force` | `not_in_catalog` | `ambiguous`, from `rate_at`;
-`ambiguous` is the §5 tie case).
-**DECIDED (Navid, 2026-09-25): the model never sees `ambiguous`.** At the feature boundary it is mapped
-to `ok`, and it is recorded only in the catalog-maintenance counter. So the model's `id_status`
-values are `ok` | `not_in_force` | `not_in_catalog`. Rationale: `ambiguous` is a defect in our data
-(3 known IDs), and it carries no signal about the seller. A monotone constraint would add complexity
-to guard against a value the model should never receive in the first place.
+`specific_exists`, `desc_specificity`, `price_z` (median-based), `injection_flag`, `rule_hits`.
+**No `id_status` feature (2026-09-28).** Lines with a hard flag (`NOT_IN_CATALOG`, `NOT_IN_FORCE`,
+`QUARANTINED_ONLY`, §3) are never scored, so the model never sees them. The earlier categorical
+`id_status` feature (`ok` | `not_in_force` | `not_in_catalog`) is withdrawn.
+**DECIDED (Navid, 2026-09-25), still in force: the model never sees `ambiguous`.** It is recorded only
+in the catalog-maintenance counter and never raises a score. Rationale: `ambiguous` is a defect in
+our data (3 known IDs), and it carries no signal about the seller.
 Threshold is set by **review capacity** (e.g. top 2% per period); report Precision@k at that point.
 
 ## 7. Synthetic data
 Seeded, reproducible generator: stratified ID sampling (weight groups mixing exempt/taxable),
 realistic descriptions (templates + offline LLM paraphrase + noise: typos, Arabic ي/ك, missing
 half-space, abbreviations, mixed script), log-normal prices, ~15% injected errors T1–T6. T1 is built
-from "misleading neighbors" (lexically close, different rate). Random **and** group-based splits.
+from "misleading neighbors" (lexically close, different rate). v0.1 (`tools/make_demo_invoices.py`):
+"close" = same head word, drawn at random among those; "different rate" becomes "different
+`charges_vat`" on the real catalog while its `Vat` column is `TODO(legal)`. Random **and** group-based splits.
 **Golden set: 300 lines written and labeled by hand, independent of the generator** (two tiers, S and C; §10). It's the final
 reference for accuracy. Known weakness: evaluating on self-generated data is circular. Real
 anonymized lines, even 100, would be the biggest improvement.

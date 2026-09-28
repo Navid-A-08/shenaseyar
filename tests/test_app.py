@@ -18,7 +18,7 @@ class _Stop(Exception):
     pass
 
 
-def _stub(mode, pick=0, manual=None):
+def _stub(mode, pick=0, manual=None, profile="fake"):
     calls = []
     st = types.ModuleType("streamlit")
 
@@ -32,7 +32,11 @@ def _stub(mode, pick=0, manual=None):
                  "code", "error", "table", "write", "metric"]:
         setattr(st, name, rec(name))
     st.cache_resource = lambda fn: fn
-    st.radio = rec("radio", mode)
+    def radio(label, options, **k):
+        calls.append(("radio", (label, list(options)), k))
+        options = list(options)
+        return profile if profile in options else mode if mode in options else options[0]
+    st.radio = radio
     st.selectbox = rec("selectbox", pick)
     st.text_input = lambda label, value="": (manual or {}).get(label, value)
     st.columns = lambda n: [st] * n
@@ -53,7 +57,7 @@ def _stub(mode, pick=0, manual=None):
 
 def _run(monkeypatch, st):
     monkeypatch.setitem(sys.modules, "streamlit", st)
-    monkeypatch.delenv("SHENASEYAR_CATALOG", raising=False)
+    monkeypatch.delenv("SHENASEYAR_REAL_CATALOG", raising=False)
     try:
         runpy.run_path(str(APP), run_name="__main__")
     except _Stop:
@@ -87,6 +91,35 @@ def test_manual_t2_line_shows_explanation_and_citation(monkeypatch):
     assert any("بازه اعتبار مستند" in t for t in _texts(calls, "caption"))
     assert not any("<script>" in t for t in md + _texts(calls, "write"))   # only in st.code
     assert any("<script>" in t for t in _texts(calls, "code"))
+
+
+def test_hard_flag_is_shown_first_and_bypasses_the_score(monkeypatch):
+    values = {"issue_date": "1405-02-01", "sstid": "2999999999999", "sstt": "برنج فرضی",
+              "am": "1", "fee": "1000", "vra": "9", "vam": "90"}
+    st, calls = _stub("ورود دستی", manual={LABELS_FA[k]: v for k, v in values.items()})
+    assert _run(monkeypatch, st) == "done"
+    names = [n for n, *_ in calls]
+    first_error = names.index("error")
+    assert first_error < names.index("subheader") < names.index("metric")
+    assert md_escape("NOT_IN_CATALOG") in _texts(calls, "error")[0]
+    metrics = [a for n, a, _ in calls if n == "metric"]
+    assert metrics[0][1] == "محاسبه نشد" and metrics[1][1] == "بله"
+
+
+def test_real_profile_does_not_run_t2_or_show_rates(monkeypatch):
+    from src.demo.pipeline import FAKE_CATALOG
+    monkeypatch.setenv("SHENASEYAR_REAL_CATALOG", str(FAKE_CATALOG))   # stand-in, no real data
+    values = {"issue_date": "1405-02-01", "sstid": "2909206651897", "sstt": "برنج فرضی",
+              "am": "1", "fee": "1000", "vra": "9", "vam": "90"}
+    st, calls = _stub("ورود دستی", manual={LABELS_FA[k]: v for k, v in values.items()},
+                      profile="real")
+    monkeypatch.setitem(sys.modules, "streamlit", st)
+    runpy.run_path(str(APP), run_name="__main__")
+    assert not any(t.startswith("**T2**") for t in _texts(calls, "markdown"))
+    assert any("T2" in t and "اجرا نشد" in t for t in _texts(calls, "info"))
+    tables = [a[0] for n, a, _ in calls if n == "table" and a and a[0] and "رتبه" in a[0][0]]
+    assert tables and all("نرخ" not in row for row in tables[0])
+    assert not any("نرخ ثبت‌شده" in t for t in _texts(calls, "markdown"))
 
 
 def test_invalid_manual_line_stops_with_an_error(monkeypatch):

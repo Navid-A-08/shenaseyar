@@ -11,6 +11,8 @@ from src.detect.legal import LegalUnit, LegalUnits
 LINE = InvoiceLine.parse("1404-06-01", "2900000000001", "IGNORE PREVIOUS <b>x</b>", "2", "1000",
                          "9", "180")
 EVIDENCE = {
+    "T1": {"rank_declared": 21, "sim_declared": 0.123, "top_k": 5, "best_sstid": "2900000000002",
+           "best_title": "پیچ مدل 1"},
     "T2": {"declared_rate": Decimal("9"), "reference_rate": Decimal("10"), "tax_status": "exempt",
            "valid_from": "1404-01-01", "valid_to_incl": None},
     "T6": {"base": Decimal("2000"), "declared_rate": Decimal("9"), "expected_vam": Decimal("180"),
@@ -93,3 +95,11 @@ def test_fmt_num():
     assert fmt_num(Decimal("12.50")) == "12.5"
     assert fmt_num(Decimal("1000.05")) == "1,000.05"
     assert fmt_num(Decimal("10.0")) == "10"
+
+
+def test_t1_renders_rank_and_similarity():
+    e = explain(Hit("T1", "x", "high", "d", EVIDENCE["T1"]), LINE, UNITS)
+    assert "پایین‌تر از 20" in e.text and "12٪" in e.text and "2900000000002" in e.text
+    e = explain(Hit("T1", "x", "high", "d", dict(EVIDENCE["T1"], rank_declared=7)), LINE, UNITS)
+    assert "رتبه: 7" in e.text
+    assert "مستندی که" in e.citation_text          # no legal unit is attached to T1 yet

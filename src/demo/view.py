@@ -35,19 +35,36 @@ def contribution_rows(result):
             for k, v in result.contributions.items() if v]
 
 
-def alternative_rows(result):
-    return [{"رتبه": i, "شناسه": c.sstid, "عنوان": c.version.title.replace("\n", " "),
-             "نرخ": fmt_num(c.version.rate), "وضعیت": TAX_STATUS_FA[c.version.tax_status],
-             "نوع": c.version.id_type, "امتیاز BM25": round(c.score, 2),
-             "اعلام‌شده": "✓" if c.sstid == result.line.sstid else ""}
-            for i, c in enumerate(result.alternatives, 1)]
+def alternative_rows(result, show_rate=True):
+    """show_rate=False on the real profile: its Vat column is not a known rate (TODO(legal))."""
+    rows = []
+    for i, c in enumerate(result.alternatives, 1):
+        row = {"رتبه": i, "شناسه": c.sstid, "عنوان": c.version.title.replace("\n", " ")}
+        if show_rate:
+            row["نرخ"] = fmt_num(c.version.rate)
+        row.update({"وضعیت": TAX_STATUS_FA[c.version.tax_status], "نوع": c.version.id_type,
+                    "امتیاز BM25": round(c.score, 2),
+                    "اعلام‌شده": "✓" if c.sstid == result.line.sstid else ""})
+        rows.append(row)
+    return rows
 
 
-def rate_status_text(result):
+def rate_status_text(result, show_rate=True):
     r = result.rate
     if r.version is None:
         return f"وضعیت شناسه در تاریخ صدور: {r.status.value}"
     v = r.version
     end = v.valid_to_incl or "اکنون"
+    if not show_rate:
+        return (f"شناسه در تاریخ صدور معتبر است ({TAX_STATUS_FA[v.tax_status]}، معتبر از "
+                f"{v.valid_from} تا {end}). نرخ نمایش داده نمی‌شود: معنای ستون Vat در فهرست "
+                f"واقعی هنوز روشن نیست (TODO(legal)).")
     return (f"نرخ ثبت‌شده برای شناسه در تاریخ صدور: {fmt_num(v.rate)}٪ "
             f"({TAX_STATUS_FA[v.tax_status]}، معتبر از {v.valid_from} تا {end})")
+
+
+def hard_flag_texts(result):
+    """One line per hard flag (NOT_IN_CATALOG / NOT_IN_FORCE / QUARANTINED_ONLY): a fact about
+    the declared ID, shown above the score, which is not computed for such a line."""
+    by_code = {e.code: e.text for e in result.explanations}
+    return [f"پرچم قطعی {h.code}: {by_code.get(h.code, h.description)}" for h in result.hard_flags]

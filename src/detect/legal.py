@@ -12,7 +12,7 @@ from src.detect.rates import RateTableError, next_day, parse_jalali
 
 UNITS_PATH = Path(__file__).resolve().parents[2] / "data" / "legal" / "units.json"
 KINDS = {"article", "note", "clause"}
-CODES = {"T2", "T3", "T4", "T6", "NOT_IN_CATALOG", "NOT_IN_FORCE"}
+CODES = {"T1", "T2", "T3", "T4", "T6", "NOT_IN_CATALOG", "NOT_IN_FORCE"}
 STATUSES = {"reviewed", "TODO(legal)"}
 FIELDS = {"id", "kind", "title", "body", "valid_from", "valid_to", "source_url", "applies_to",
           "status"}
