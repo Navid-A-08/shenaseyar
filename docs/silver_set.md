@@ -584,6 +584,29 @@ shown with its own bootstrap interval.
 - Silver sets are optimistic. A verdict here is a direction for the human golden set, not a
   replacement for it.
 
+## Acceptance bar: int8 vs full precision (pre-registered 2026-09-28, before any variant is tested)
+
+Written before any quantization variant is tested, so the results cannot shape the bar. It
+decides which int8 model (if any) the dense retriever in the rule above may use.
+
+**Data.** The same seeded sample of **2,000 in-force titles** (normalized, seed 20260928, as_of
+1405-07-01), encoded by each int8 variant and by the full-precision (fp32) official ONNX model.
+**No silver query is involved.**
+
+**Metrics, both against fp32 on the same 2,000 titles:**
+- **Mean cosine:** mean over the 2,000 titles of cos(int8 vector, fp32 vector).
+- **Top-20 overlap:** each of the 2,000 titles queries the other 1,999 (itself excluded). For
+  each title, overlap = |top-20 under int8 ∩ top-20 under fp32| / 20; the metric is the mean over
+  the 2,000 titles.
+
+**Bar.** An int8 variant is acceptable only if **mean cosine ≥ 0.99 AND top-20 overlap ≥ 0.95**.
+
+- Judged **only on agreement with full precision**, never on silver (or golden) recall.
+- **If no variant reaches the bar,** the closest one is used and its disagreement rate
+  (1 − top-20 overlap) is stated next to the verdict. It is not called acceptable.
+- Speed settings that leave the vectors unchanged (threads, graph optimization, batch size) are
+  not judged by this bar, but any setting that changes the vectors is.
+
 ## Known limitations
 - **Optimistic by construction** (see the top). Seller wording, abbreviations, synonyms and
   missing words are not modelled; only 4 kinds of character noise are.
