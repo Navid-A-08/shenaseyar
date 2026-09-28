@@ -607,6 +607,39 @@ decides which int8 model (if any) the dense retriever in the rule above may use.
 - Speed settings that leave the vectors unchanged (threads, graph optimization, batch size) are
   not judged by this bar, but any setting that changes the vectors is.
 
+### Result (measured 2026-09-28): no int8 variant met the bar
+
+Same 2,000 titles, batch 64, onnxruntime default threads, graph optimization ALL
+(`eval/results/int8_agreement.json`, built by `tools/bench_int8_agreement.py`).
+
+| Variant | Mean cosine | Top-20 overlap | Disagreement | Meets bar |
+|---|---:|---:|---:|---|
+| per-tensor (original) | 0.9756 | 0.8489 | 0.1511 | no |
+| per-channel | 0.9839 | 0.8675 | 0.1325 | no |
+| per-channel after `quant_pre_process` | 0.9839 | 0.8675 | 0.1325 | no |
+| per-channel, MatMul only (embeddings float32) | 0.9840 | 0.8677 | 0.1323 | no |
+
+- **No variant met the pre-registered bar** (mean cosine ≥ 0.99 AND top-20 overlap ≥ 0.95).
+- MatMul-only is nominally closest, but its margin over per-channel (0.0002 in overlap) is within
+  noise, so **no meaningful winner exists**.
+- **The "use the closest variant" clause is not invoked.** The dense index uses **fp32**; int8
+  is not used at all.
+- `quant_pre_process` ran without its symbolic shape pass (it needs sympy, not a project
+  dependency). The full preprocessing is **untested**; it is moot since int8 is not used.
+
+**Batch dependence (the substantive reason int8 is dropped).** Dynamic int8 quantization scales
+activations per batch, so an int8 vector depends on which other texts share its batch: the
+same titles differ by up to 0.034 (max absolute difference) between batch 64 and batch 128. A
+text therefore has no single well-defined int8 vector, and a query encoded alone can disagree
+with the index encoding of the same text. At batch 1 the MatMul-only variant reaches cosine
+0.9865 and overlap 0.8782, still below the bar. fp32 is batch-invariant (difference 0.0 between
+batch 1 and batch 64).
+
+**Earlier speed numbers are superseded.** The first benchmark (`eval/results/dense_bench.json`:
+14.6 titles/s int8, 8.7 titles/s fp32, 18 h projected) is superseded by the runs recorded here.
+On 2026-09-28 the same models, sample and default threads measured 87.3 titles/s (int8) and 35.7
+titles/s (fp32), a roughly 4–6× difference that is **unexplained**.
+
 ## Known limitations
 - **Optimistic by construction** (see the top). Seller wording, abbreviations, synonyms and
   missing words are not modelled; only 4 kinds of character noise are.
