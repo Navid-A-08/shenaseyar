@@ -1,0 +1,11 @@
+# T4: every word of the description is a vague word, and the base amount (am x fee) is high.
+# Both the word list and the threshold are hand-set demo constants, NOT derived from law or data.
+# min_amount_rial = 1,000,000,000 Rial (100,000,000 Toman): an arbitrary review threshold.
+id: t4_vague_high_amount
+code: T4
+check: vague_high_amount
+severity: medium
+description: شرح کالا یا خدمت مبهم است و مبلغ آن بالاست
+params:
+  vague_words: [کالا, کالاها, خدمات, خدمت, اجناس, جنس, متفرقه, اقلام, سایر, موارد, لوازم, فروش, بابت]
+  min_amount_rial: 1000000000

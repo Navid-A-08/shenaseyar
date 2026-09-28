@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "_doc": [
+    "Legal units (article / note / clause) cited by the explanation templates. Filled BY HAND (Navid).",
+    "Claude never writes legal text here. Entries with status TODO(legal) are placeholders.",
+    "Fields per unit:",
+    "  id          unique string, e.g. 'VAT1400-A9-C1' (free form, never reused)",
+    "  kind        'article' | 'note' | 'clause'  (ماده / تبصره / بند)",
+    "  title       short Persian title shown with the citation",
+    "  body        the unit's text, copied verbatim from the source",
+    "  valid_from  first day in force, Jalali YYYY-MM-DD (inclusive)",
+    "  valid_to    LAST day in force, Jalali YYYY-MM-DD (INCLUSIVE, same convention as the catalog's",
+    "              ExpirationDate), or null if still in force. The loader converts it to a half-open end.",
+    "  source_url  where the text was taken from",
+    "  applies_to  list of finding codes this unit may be cited for: T2 T3 T4 T6 NOT_IN_CATALOG NOT_IN_FORCE",
+    "  status      'reviewed' once checked by a human, or 'TODO(legal)' for a placeholder",
+    "Target: about 20 units."
+  ],
+  "units": [
+    {
+      "id": "EXAMPLE-RATE-1",
+      "kind": "article",
+      "title": "TODO(legal): عنوان ماده مربوط به نرخ مالیات بر ارزش افزوده",
+      "body": "TODO(legal): متن ماده از منبع رسمی اینجا کپی شود.",
+      "valid_from": "1400-01-01",
+      "valid_to": null,
+      "source_url": "",
+      "applies_to": ["T2", "T6"],
+      "status": "TODO(legal)"
+    },
+    {
+      "id": "EXAMPLE-ID-1",
+      "kind": "clause",
+      "title": "TODO(legal): عنوان بند مربوط به درج شناسه کالا یا خدمت در صورتحساب",
+      "body": "TODO(legal): متن بند از منبع رسمی اینجا کپی شود.",
+      "valid_from": "1400-01-01",
+      "valid_to": null,
+      "source_url": "",
+      "applies_to": ["T3", "T4", "NOT_IN_CATALOG", "NOT_IN_FORCE"],
+      "status": "TODO(legal)"
+    }
+  ]
+}

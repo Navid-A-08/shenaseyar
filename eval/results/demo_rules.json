@@ -1,0 +1,78 @@
+{
+  "per_code": {
+    "T2": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 10,
+      "tp": 10,
+      "fp": 0,
+      "fn": 0,
+      "fp_lines": [],
+      "fn_lines": [],
+      "bar": 1.0,
+      "meets_bar": true
+    },
+    "T3": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 10,
+      "tp": 10,
+      "fp": 0,
+      "fn": 0,
+      "fp_lines": [],
+      "fn_lines": []
+    },
+    "T4": {
+      "precision": 1.0,
+      "recall": 0.9,
+      "support": 10,
+      "tp": 9,
+      "fp": 0,
+      "fn": 1,
+      "fp_lines": [],
+      "fn_lines": [
+        "L190"
+      ]
+    },
+    "T6": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 10,
+      "tp": 10,
+      "fp": 0,
+      "fn": 0,
+      "fp_lines": [],
+      "fn_lines": [],
+      "bar": 1.0,
+      "meets_bar": true
+    },
+    "NOT_IN_CATALOG": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 4,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "fp_lines": [],
+      "fn_lines": []
+    },
+    "NOT_IN_FORCE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 4,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "fp_lines": [],
+      "fn_lines": []
+    }
+  },
+  "id_status_lines_with_t2": 0,
+  "mean_score": {
+    "flagged": 0.5295,
+    "clean": 0.0178
+  },
+  "n_lines": 200,
+  "invoices": "demo_invoices.csv",
+  "catalog": "fake_catalog.csv"
+}

@@ -83,30 +83,28 @@ class Snapshot:
         return f"rules {self.rules}; index = active rows in force on {self.as_of}"
 
 
-def load_snapshot(path, as_of):
-    """Apply R1-R4 and the in-force filter. Returns a Snapshot."""
-    _check_date(as_of, "as_of")
+def classify_rows(path, stats=None):
+    """Apply R1-R4 (two streamed passes). Yield (row_number, row, reasons) for every raw row:
+    reasons is None for an R1 extra copy (a later exact duplicate), else the list of R2-R4 codes
+    (empty = active row). If `stats` is a Counter, R1/R2 counts are added to it."""
     # Pass 1: R1 digests and (ID, RunDate) counts over distinct rows.
-    seen, per_key, raw_rows = set(), Counter(), 0
+    seen, per_key = set(), Counter()
     for _, row in iter_rows(path):
-        raw_rows += 1
         d = _digest(row)
         if d in seen:
             continue
         seen.add(d)
         per_key[(row[0], row[4])] += 1
+    if stats is not None:
+        stats["r2_keys"] += sum(1 for v in per_key.values() if v > 1)
 
     # Pass 2: classify each distinct row.
-    snap = Snapshot(as_of=as_of)
     emitted = set()
-    has_active, has_quarantined = set(), set()
-    c = Counter()
     for n, row in iter_rows(path):
-        id_, title, run, exp = row[0], row[1], row[4], row[5]
-        snap.raw_ids.add(id_)
+        id_, run, exp = row[0], row[4], row[5]
         d = _digest(row)
         if d in emitted:
-            c["r1_extra_copies"] += 1
+            yield n, row, None
             continue
         emitted.add(d)
         where = f"row {n} (ID {id_})"
@@ -120,6 +118,24 @@ def load_snapshot(path, as_of):
                 reasons.append("R3")
         if len(id_) != 13:
             reasons.append("R4")
+        yield n, row, reasons
+
+
+def load_snapshot(path, as_of):
+    """Apply R1-R4 and the in-force filter. Returns a Snapshot."""
+    _check_date(as_of, "as_of")
+    snap = Snapshot(as_of=as_of)
+    has_active, has_quarantined = set(), set()
+    c = Counter()
+    raw_rows = 0
+    for _, row, reasons in classify_rows(path, stats=c):
+        raw_rows += 1
+        id_, title, run, exp = row[0], row[1], row[4], row[5]
+        snap.raw_ids.add(id_)
+        if reasons is None:
+            c["r1_extra_copies"] += 1
+            continue
+        c["distinct_rows"] += 1
         for r in reasons:
             c[f"{r.lower()}_rows"] += 1
         if len(reasons) > 1:
@@ -134,8 +150,7 @@ def load_snapshot(path, as_of):
 
     snap.active_ids = has_active
     snap.quarantined_only_ids = has_quarantined - has_active
-    c["r2_keys"] = sum(1 for v in per_key.values() if v > 1)
-    snap.counts = {"raw_rows": raw_rows, "rows_after_r1": len(emitted),
+    snap.counts = {"raw_rows": raw_rows, "rows_after_r1": c["distinct_rows"],
                    "r1_extra_copies": c["r1_extra_copies"], "r2_keys": c["r2_keys"],
                    "r2_rows": c["r2_rows"], "r3_rows": c["r3_rows"], "r4_rows": c["r4_rows"],
                    "rows_with_several_reasons": c["rows_with_several_reasons"],
