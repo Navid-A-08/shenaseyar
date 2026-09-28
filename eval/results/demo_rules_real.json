@@ -1,0 +1,156 @@
+{
+  "per_code": {
+    "T1": {
+      "precision": 0.2381,
+      "recall": 1.0,
+      "support": 10,
+      "tp": 10,
+      "fp": 32,
+      "fn": 0,
+      "fp_lines": [
+        "L006",
+        "L010",
+        "L011",
+        "L018",
+        "L030",
+        "L031",
+        "L040",
+        "L044",
+        "L047",
+        "L053",
+        "L054",
+        "L061",
+        "L062",
+        "L069",
+        "L079",
+        "L088",
+        "L094",
+        "L096",
+        "L107",
+        "L126",
+        "L127",
+        "L131",
+        "L138",
+        "L143",
+        "L147",
+        "L148",
+        "L152",
+        "L161",
+        "L163",
+        "L177",
+        "L181",
+        "L199"
+      ],
+      "fn_lines": [],
+      "fp_by_label": {
+        "T3": 10,
+        "T4": 10,
+        "clean": 12
+      }
+    },
+    "T3": {
+      "precision": 0.9091,
+      "recall": 1.0,
+      "support": 10,
+      "tp": 10,
+      "fp": 1,
+      "fn": 0,
+      "fp_lines": [
+        "L101"
+      ],
+      "fn_lines": [],
+      "fp_by_label": {
+        "T1": 1
+      }
+    },
+    "T4": {
+      "precision": 1.0,
+      "recall": 0.9,
+      "support": 10,
+      "tp": 9,
+      "fp": 0,
+      "fn": 1,
+      "fp_lines": [],
+      "fn_lines": [
+        "L161"
+      ],
+      "fp_by_label": {}
+    },
+    "T6": {
+      "precision": null,
+      "recall": null,
+      "support": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "fp_lines": [],
+      "fn_lines": [],
+      "fp_by_label": {}
+    },
+    "NOT_IN_CATALOG": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 4,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "fp_lines": [],
+      "fn_lines": [],
+      "fp_by_label": {}
+    },
+    "NOT_IN_FORCE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 4,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "fp_lines": [],
+      "fn_lines": [],
+      "fp_by_label": {}
+    }
+  },
+  "not_run": [
+    "T2"
+  ],
+  "id_status_lines_with_t2": 0,
+  "hard_flagged_by_label": {
+    "NOT_IN_CATALOG": 4,
+    "NOT_IN_FORCE": 4
+  },
+  "hard_flagged_lines_with_a_score": 0,
+  "score_by_label": {
+    "T1": {
+      "n": 10,
+      "mean": 0.2778,
+      "min": 0.2287,
+      "max": 0.5425,
+      "high_risk": 1
+    },
+    "T3": {
+      "n": 10,
+      "mean": 0.5299,
+      "min": 0.513,
+      "max": 0.5388,
+      "high_risk": 10
+    },
+    "T4": {
+      "n": 10,
+      "mean": 0.5207,
+      "min": 0.25,
+      "max": 0.5522,
+      "high_risk": 9
+    },
+    "clean": {
+      "n": 162,
+      "mean": 0.0232,
+      "min": 0.0,
+      "max": 0.2552,
+      "high_risk": 0
+    }
+  },
+  "n_lines": 200,
+  "profile": "real",
+  "invoices": "demo_invoices_real.csv",
+  "catalog": "product_all_2026-09-22T19-49-07_part_1_0df81806-5d13-4353-99a2-dbf3a308c5c9.zip"
+}

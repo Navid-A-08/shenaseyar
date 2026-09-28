@@ -8,14 +8,20 @@ never a verdict**. Full design: `docs/architecture.md`. Read it before any desig
 
 ## Demo scope (v0.1)
 **Decided 2026-09-28: the project builds a DEMO, not the production system.** One Streamlit page
-(`app.py`) checks one invoice line end to end with rules T2, T3, T4, T6, the rate_at ID-status
+(`app.py`) checks one invoice line end to end with rules T1, T2, T3, T4, T6, the rate_at ID-status
 findings, BM25-only retrieval, a hand-weighted risk score and template explanations.
-It runs on the **invented** `data/sample/fake_catalog.csv` and the synthetic
-`data/sample/demo_invoices.csv` (`tools/make_demo_invoices.py`). Report: `docs/demo.md`.
+Two **catalog profiles** (`src/demo/pipeline.py`, 2026-09-28), chosen per run because a line
+declares one ID: `fake` = the **invented** `data/sample/fake_catalog.csv` + the committed
+`data/sample/demo_invoices.csv`, every rule; `real` = the manual catalog download + synthetic
+lines in `data/interim/` (never committed), every rule **except T2** (reported as "not run").
+Lines come from `tools/make_demo_invoices.py [--profile real]`. Report: `docs/demo.md`.
 Pre-registered bar (2026-09-28, before any rule code): **T2 and T6 precision and recall both
-1.00 on the 200 synthetic lines.** They are arithmetic and lookup, so anything less is a bug.
-T3 and T4 have no bar; they are reported only.
-Commands: `python tools/eval_demo_rules.py` · `streamlit run app.py`
+1.00 on the 200 synthetic fake-profile lines.** They are arithmetic and lookup, so anything less
+is a bug. T1, T3 and T4 have no bar; they are reported only. T1's decision rule
+(`rank_declared > 5` and `sim_declared < 0.5`) was pre-registered in commit d96472f.
+Hard flags (2026-09-28): NOT_IN_CATALOG, NOT_IN_FORCE, QUARANTINED_ONLY bypass the risk score
+(no score, always reviewed, shown first). T1 has score weight 0; other weights unchanged.
+Commands: `python tools/eval_demo_rules.py [--profile real]` · `streamlit run app.py`
 (Update this section whenever the scope changes.)
 
 The retrieval-baseline work (Phase 1) stays as it was: the harness, the silver set and the
@@ -25,7 +31,8 @@ and the silver set still never gates.
 Phase 0 exit met 2026-09-22 (see `docs/data_dictionary.md`, `docs/data_quality.md`).
 Still open: `TODO(legal)`, what the catalog's `Vat` column means (values like 65 / 50 / 90,
 see `docs/data_dictionary.md` §8). T2 is built, but **only against the fake catalog**. Running
-T2 against the real catalog still requires this to be resolved first.
+T2 against the real catalog still requires this to be resolved first (then set
+`rates_trusted=True` in `real_profile()`).
 
 ## Descoped (postponed, not abandoned)
 Deliberately not built for v0.1. Each item has the condition under which it restarts. Nothing
@@ -47,9 +54,9 @@ here was dropped because it failed, except where stated.
 - **T5 (unit price outside the ID group's distribution).** Needs per-group price distributions,
   which need real invoice prices; synthetic prices would only test the generator. Restart: real
   anonymized invoice lines with prices.
-- **T1 (description vs declared ID).** Only surfaced as retrieval features in the score
-  (`sim_declared`, `rank_declared`, `margin_top1`); no T1 rule or label. Restart: with the risk
-  model (see the OPEN framing question in architecture.md §3).
+- **T1 as a learned model.** v0.1 has a T1 *rule* over BM25 features (2026-09-28, see Demo scope);
+  the learned T1 (risk model) waits for it. Restart: with the risk model (see the OPEN framing
+  question in architecture.md §3).
 - **Qdrant, PostgreSQL, Redis/RQ, Docker Compose, FastAPI.** One process, in-memory tables.
   Restart: more than one user, or a batch run too large for memory.
 

@@ -1,5 +1,34 @@
 {
   "per_code": {
+    "T1": {
+      "precision": 0.3636,
+      "recall": 0.4,
+      "support": 10,
+      "tp": 4,
+      "fp": 7,
+      "fn": 6,
+      "fp_lines": [
+        "L001",
+        "L030",
+        "L075",
+        "L111",
+        "L130",
+        "L180",
+        "L188"
+      ],
+      "fn_lines": [
+        "L024",
+        "L027",
+        "L051",
+        "L058",
+        "L106",
+        "L128"
+      ],
+      "fp_by_label": {
+        "clean": 4,
+        "T4": 3
+      }
+    },
     "T2": {
       "precision": 1.0,
       "recall": 1.0,
@@ -9,30 +38,44 @@
       "fn": 0,
       "fp_lines": [],
       "fn_lines": [],
+      "fp_by_label": {},
       "bar": 1.0,
       "meets_bar": true
     },
     "T3": {
-      "precision": 1.0,
+      "precision": 0.5882,
       "recall": 1.0,
       "support": 10,
       "tp": 10,
-      "fp": 0,
+      "fp": 7,
       "fn": 0,
-      "fp_lines": [],
-      "fn_lines": []
+      "fp_lines": [
+        "L024",
+        "L034",
+        "L044",
+        "L051",
+        "L058",
+        "L087",
+        "L106"
+      ],
+      "fn_lines": [],
+      "fp_by_label": {
+        "T1": 7
+      }
     },
     "T4": {
       "precision": 1.0,
-      "recall": 0.9,
+      "recall": 0.8,
       "support": 10,
-      "tp": 9,
+      "tp": 8,
       "fp": 0,
-      "fn": 1,
+      "fn": 2,
       "fp_lines": [],
       "fn_lines": [
-        "L190"
-      ]
+        "L019",
+        "L180"
+      ],
+      "fp_by_label": {}
     },
     "T6": {
       "precision": 1.0,
@@ -43,6 +86,7 @@
       "fn": 0,
       "fp_lines": [],
       "fn_lines": [],
+      "fp_by_label": {},
       "bar": 1.0,
       "meets_bar": true
     },
@@ -54,7 +98,8 @@
       "fp": 0,
       "fn": 0,
       "fp_lines": [],
-      "fn_lines": []
+      "fn_lines": [],
+      "fp_by_label": {}
     },
     "NOT_IN_FORCE": {
       "precision": 1.0,
@@ -64,15 +109,63 @@
       "fp": 0,
       "fn": 0,
       "fp_lines": [],
-      "fn_lines": []
+      "fn_lines": [],
+      "fp_by_label": {}
     }
   },
+  "not_run": [],
   "id_status_lines_with_t2": 0,
-  "mean_score": {
-    "flagged": 0.5295,
-    "clean": 0.0178
+  "hard_flagged_by_label": {
+    "NOT_IN_CATALOG": 4,
+    "NOT_IN_FORCE": 4
+  },
+  "hard_flagged_lines_with_a_score": 0,
+  "score_by_label": {
+    "T1": {
+      "n": 10,
+      "mean": 0.336,
+      "min": 0.0203,
+      "max": 0.5479,
+      "high_risk": 1
+    },
+    "T2": {
+      "n": 10,
+      "mean": 0.6,
+      "min": 0.6,
+      "max": 0.6,
+      "high_risk": 10
+    },
+    "T3": {
+      "n": 10,
+      "mean": 0.4139,
+      "min": 0.3931,
+      "max": 0.4418,
+      "high_risk": 0
+    },
+    "T4": {
+      "n": 10,
+      "mean": 0.4341,
+      "min": 0.25,
+      "max": 0.55,
+      "high_risk": 5
+    },
+    "T6": {
+      "n": 10,
+      "mean": 0.501,
+      "min": 0.5,
+      "max": 0.505,
+      "high_risk": 10
+    },
+    "clean": {
+      "n": 142,
+      "mean": 0.0193,
+      "min": 0.0,
+      "max": 0.2605,
+      "high_risk": 0
+    }
   },
   "n_lines": 200,
+  "profile": "fake",
   "invoices": "demo_invoices.csv",
   "catalog": "fake_catalog.csv"
 }

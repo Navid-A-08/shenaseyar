@@ -1,15 +1,33 @@
 """Synthetic demo invoice lines with ground-truth labels. Seeded and reproducible.
 
-    python tools/make_demo_invoices.py [--seed 1405] [--n 200] [--catalog data/sample/fake_catalog.csv]
-                                       [--out data/sample/demo_invoices.csv]
+    python tools/make_demo_invoices.py [--profile fake|real] [--seed 1405] [--n 200]
+                                       [--catalog PATH] [--out PATH]
 
-Mix (for n = 200): 10 each of injected T2, T3, T4, T6 (20%), 4 NOT_IN_CATALOG, 4 NOT_IN_FORCE,
-and the rest clean, of which 12 are vague descriptions with a LOW amount (hard negatives for T4).
+Two catalog profiles (src/demo/pipeline.py):
+  fake  data/sample/fake_catalog.csv -> data/sample/demo_invoices.csv (committed).
+        Mix for n = 200: 10 each of T1, T2, T3, T4, T6, 4 NOT_IN_CATALOG, 4 NOT_IN_FORCE,
+        12 vague lines with a LOW amount (hard negatives for T4, labeled clean), the rest clean
+        (130; 142 lines labeled clean in all).
+  real  the manually downloaded catalog -> data/interim/demo_invoices_real.csv (NOT committed:
+        the lines carry real catalog titles). Same mix WITHOUT T2 and T6 (150 clean; 162 labeled
+        clean in all).
+        T2 cannot be labeled: what the Vat column means is TODO(legal). T6 does not depend on
+        the catalog and is measured on the fake profile.
 Every line has exactly one label or none. Issue dates fall in [1402-01-01, 1405-12-29].
 
 How each kind is built (rates always come from rate_at on the line's date, never from literals):
   clean           an ID in force on the date, seller-style text from its title, vra = its rate,
                   vam = base x vra / 100 rounded to a whole Rial (half-up, floor or ceiling at random)
+  T1              "misleading neighbor" (architecture.md §7), never a random ID. Text written from
+                  an ID A in force on the date; the DECLARED ID is a neighbor B that
+                    - is in force on the same date,
+                    - shares A's head word (first token of the normalized title): lexically close,
+                    - does not contain every word of the text (else the text supports B as well),
+                    - differs from A in its tax consequence: a different rate on the fake profile;
+                      a different charges_vat (Taxable: مشمول vs معاف / غیر مشمول) on the real
+                      profile, because the real Vat column is unresolved (TODO(legal)).
+                  B is drawn at random among such neighbors (not the closest one).
+                  vra / vam are consistent with B, so the line is otherwise clean (no T2, no T6).
   T2              as clean, but vra = another rate that exists in the table; vam consistent with it
   T6              as clean, but vam moved by at least 2 Rial (small absolute or 1-50% relative)
   T3              a general ID G declared, text written from a specific ID whose title starts with
@@ -18,9 +36,12 @@ How each kind is built (rates always come from rate_at on the line's date, never
   NOT_IN_CATALOG  a 13-digit ID absent from the catalog
   NOT_IN_FORCE    an ID of the catalog on a date where none of its versions is in force
 
+On the real profile, vra is the version's raw Vat value: a placeholder number that no rule reads
+as a rate there (T2 does not run; T6 only compares vam with the line's own vra).
+
 Seller text: the title, company part dropped half the time, then light noise the normalizer is
 meant to undo (Arabic ي/ك, Persian digits, a ZWNJ for a space). Circularity warning: the labels
-come from this generator, which knows what the rules look for; T3/T4 numbers measure agreement
+come from this generator, which knows what the rules look for; T1/T3/T4 numbers measure agreement
 with it, not real-world accuracy.
 
 The T4 threshold is read from its rule file so the label means "vague and above the threshold".
@@ -48,6 +69,11 @@ VAGUE_PHRASES = ["کالا", "خدمات", "اقلام متفرقه", "کالا�
                  "خدمات متفرقه", "اجناس فروش رفته"]
 ZWNJ = "‌"
 ROUNDINGS = [ROUND_HALF_UP, ROUND_FLOOR, ROUND_CEILING]
+MAX_TRIES = 100_000
+NEIGHBOR_SAMPLE = 200        # neighbors examined per T1 attempt (random subset of the head group)
+DEFAULTS = {"fake": (ROOT / "data" / "sample" / "fake_catalog.csv",
+                     ROOT / "data" / "sample" / "demo_invoices.csv"),
+            "real": (None, ROOT / "data" / "interim" / "demo_invoices_real.csv")}
 
 
 def days(lo=DATE_MIN, hi=DATE_MAX):
@@ -68,23 +94,92 @@ def fmt(d):
     return str(int(d)) if d == d.to_integral_value() else f"{d.normalize():f}"
 
 
+def charges_vat(version):
+    """Derived boolean (architecture.md §3): only مشمول charges VAT."""
+    return version.tax_status == "taxable"
+
+
 class Gen:
-    def __init__(self, table, seed):
+    def __init__(self, table, seed, rates_trusted=True):
         self.t, self.rng = table, random.Random(seed)
+        self.rates_trusted = rates_trusted
         self.all_days = days()
-        ids = sorted(table.ids())
-        self.ok_days = {i: [d for d in self.all_days if table.rate_at(i, d).status is Status.OK]
-                        for i in ids}
-        self.ok_ids = [i for i in ids if self.ok_days[i]]
-        self.gap_days = {i: [d for d in self.all_days
-                             if table.rate_at(i, d).status is Status.NOT_IN_FORCE] for i in ids}
+        self.ids = sorted(table.ids())
+        self._ok, self._gap, self._rates = {}, {}, None
+        self._heads = self._pairs = None
         self.t4_min = t4_threshold()
+
+    # --- lazy per-ID lookups (the real catalog has ~1M IDs) ---------------------------------
+    def ok_days(self, sid):
+        if sid not in self._ok:
+            self._ok[sid] = [d for d in self.all_days
+                             if self.t.rate_at(sid, d).status is Status.OK]
+        return self._ok[sid]
+
+    def gap_days(self, sid):
+        if sid not in self._gap:
+            self._gap[sid] = [d for d in self.all_days
+                              if self.t.rate_at(sid, d).status is Status.NOT_IN_FORCE]
+        return self._gap[sid]
+
+    def rates(self):
+        if self._rates is None:
+            self._rates = self.t.distinct_rates()
+        return self._rates
+
+    def differs(self, va, vb):
+        """Different tax consequence: rate if rates are trusted, else charges_vat."""
+        if self.rates_trusted:
+            return va.rate != vb.rate
+        return charges_vat(va) != charges_vat(vb)
+
+    def _index(self):
+        """One pass over the titles: head word -> IDs (any version), and T3 (general, specific)
+        pairs where the specific's first-version title extends the general's."""
+        general = {}
+        for g in self.ids:
+            vg = self.t.versions(g)[0]
+            if vg.is_general:
+                general.setdefault(tuple(tokenize(vg.title)), []).append(g)
+        lengths = sorted({len(k) for k in general})
+        heads, pairs = {}, []
+        for sid in self.ids:
+            vs = self.t.versions(sid)
+            for v in vs:
+                toks = tokenize(v.title)
+                if toks:
+                    group = heads.setdefault(toks[0], [])
+                    if not group or group[-1] != sid:
+                        group.append(sid)
+            if vs[0].is_general:
+                continue
+            ts = tuple(tokenize(vs[0].title))
+            for n in lengths:
+                if n >= len(ts):
+                    break
+                pairs.extend((g, sid) for g in general.get(ts[:n], ()))
+        self._heads, self._pairs = heads, pairs
+
+    def heads(self):
+        if self._heads is None:
+            self._index()
+        return self._heads
+
+    def t3_pairs(self):
+        if self._pairs is None:
+            self._index()
+        return self._pairs
 
     # --- pieces ---------------------------------------------------------------------------
     def pick_ok(self, ids=None):
-        sid = self.rng.choice(ids or self.ok_ids)
-        d = self.rng.choice(self.ok_days[sid])
-        return sid, d, self.t.rate_at(sid, d).version
+        pool = ids or self.ids
+        for _ in range(MAX_TRIES):
+            sid = self.rng.choice(pool)
+            ok = self.ok_days(sid)
+            if ok:
+                d = self.rng.choice(ok)
+                return sid, d, self.t.rate_at(sid, d).version
+        raise SystemExit("no ID in force on any date in range")
 
     def seller_text(self, title, drop_company=True):
         r = self.rng
@@ -123,10 +218,30 @@ class Gen:
         am, fee = self.amounts()
         return self.line(d, sid, self.seller_text(v.title), am, fee, v.rate)
 
+    def t1(self):
+        heads = self.heads()
+        for _ in range(MAX_TRIES):
+            a, d, va = self.pick_ok()
+            toks = tokenize(va.title)
+            group = [b for b in heads.get(toks[0], ()) if b != a] if toks else []
+            if not group:
+                continue
+            text = self.seller_text(va.title)
+            words = set(tokenize(text))
+            for b in self.rng.sample(group, min(len(group), NEIGHBOR_SAMPLE)):
+                res = self.t.rate_at(b, d)
+                if res.status is not Status.OK or not self.differs(va, res.version):
+                    continue
+                if words <= set(tokenize(res.version.title)):
+                    continue
+                am, fee = self.amounts()
+                return self.line(d, b, text, am, fee, res.version.rate, label="T1")
+        raise SystemExit("catalog has no misleading neighbor for T1")
+
     def t2(self):
         sid, d, v = self.pick_ok()
         am, fee = self.amounts()
-        wrong = self.rng.choice([x for x in self.t.distinct_rates() if x != v.rate])
+        wrong = self.rng.choice([x for x in self.rates() if x != v.rate])
         return self.line(d, sid, self.seller_text(v.title), am, fee, wrong, label="T2")
 
     def t6(self):
@@ -142,27 +257,17 @@ class Gen:
             delta = -delta
         return self.line(d, sid, self.seller_text(v.title), am, fee, v.rate, good + delta, "T6")
 
-    def t3_pairs(self):
-        """(general, specific) pairs: the specific title extends the general one, and both are in
-        force on at least one common date."""
-        pairs = []
-        for g in self.ok_ids:
-            vg = self.t.versions(g)[0]
-            if not vg.is_general:
-                continue
-            tg = tokenize(vg.title)
-            for s in self.ok_ids:
-                vs = self.t.versions(s)[0]
-                ts = tokenize(vs.title)
-                if vs.is_general or len(ts) <= len(tg) or ts[:len(tg)] != tg:
-                    continue
-                if set(self.ok_days[g]) & set(self.ok_days[s]):
-                    pairs.append((g, s))
-        return pairs
-
-    def t3(self, pairs):
-        g, s = self.rng.choice(pairs)
-        both = sorted(set(self.ok_days[g]) & set(self.ok_days[s]))
+    def t3(self):
+        pairs = self.t3_pairs()
+        if not pairs:
+            raise SystemExit("catalog has no general/specific pair for T3")
+        for _ in range(MAX_TRIES):
+            g, s = self.rng.choice(pairs)
+            both = sorted(set(self.ok_days(g)) & set(self.ok_days(s)))
+            if both:
+                break
+        else:
+            raise SystemExit("no general/specific pair in force on a common date")
         d = self.rng.choice(both)
         vg, vs = self.t.rate_at(g, d).version, self.t.rate_at(s, d).version
         am, fee = self.amounts()
@@ -193,29 +298,36 @@ class Gen:
         _, _, v = self.pick_ok()
         am, fee = self.amounts()
         return self.line(r.choice(self.all_days), sid, self.seller_text(v.title), am, fee,
-                         r.choice(self.t.distinct_rates()), label="NOT_IN_CATALOG")
+                         r.choice(self.rates()), label="NOT_IN_CATALOG")
 
     def not_in_force(self):
-        ids = sorted(i for i, ds in self.gap_days.items() if ds)
-        sid = self.rng.choice(ids)
-        d = self.rng.choice(self.gap_days[sid])
+        for _ in range(MAX_TRIES):
+            sid = self.rng.choice(self.ids)
+            gaps = self.gap_days(sid)
+            if gaps:
+                break
+        else:
+            raise SystemExit("no ID has a date out of force in range")
+        d = self.rng.choice(gaps)
         vs = self.t.versions(sid)
         am, fee = self.amounts()
         return self.line(d, sid, self.seller_text(vs[0].title), am, fee,
                          self.rng.choice([v.rate for v in vs]), label="NOT_IN_FORCE")
 
 
-def generate(table, n=200, seed=1405):
-    g = Gen(table, seed)
+def generate(table, n=200, seed=1405, rates_trusted=True):
+    """rates_trusted=False is the real profile: no T2 or T6 lines, T1 neighbors by charges_vat."""
+    g = Gen(table, seed, rates_trusted)
     each, status, vague_neg = round(n * 0.05), round(n * 0.02), round(n * 0.06)
-    pairs = g.t3_pairs()
-    if not pairs:
-        raise SystemExit("catalog has no general/specific pair for T3")
-    rows = ([g.t2() for _ in range(each)] + [g.t3(pairs) for _ in range(each)]
-            + [g.vague(True) for _ in range(each)] + [g.t6() for _ in range(each)]
-            + [g.not_in_catalog() for _ in range(status)]
-            + [g.not_in_force() for _ in range(status)]
-            + [g.vague(False) for _ in range(vague_neg)])
+    rows = [g.t1() for _ in range(each)]
+    if rates_trusted:
+        rows += [g.t2() for _ in range(each)]
+    rows += [g.t3() for _ in range(each)] + [g.vague(True) for _ in range(each)]
+    if rates_trusted:
+        rows += [g.t6() for _ in range(each)]
+    rows += ([g.not_in_catalog() for _ in range(status)]
+             + [g.not_in_force() for _ in range(status)]
+             + [g.vague(False) for _ in range(vague_neg)])
     rows += [g.clean() for _ in range(n - len(rows))]
     g.rng.shuffle(rows)
     for i, row in enumerate(rows, 1):
@@ -224,6 +336,7 @@ def generate(table, n=200, seed=1405):
 
 
 def write(rows, out):
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=COLUMNS, lineterminator="\n")
         w.writeheader()
@@ -232,17 +345,24 @@ def write(rows, out):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--profile", choices=sorted(DEFAULTS), default="fake")
     ap.add_argument("--seed", type=int, default=1405)
     ap.add_argument("--n", type=int, default=200)
-    ap.add_argument("--catalog", default=str(ROOT / "data" / "sample" / "fake_catalog.csv"))
-    ap.add_argument("--out", default=str(ROOT / "data" / "sample" / "demo_invoices.csv"))
+    ap.add_argument("--catalog")
+    ap.add_argument("--out")
     a = ap.parse_args(argv)
-    rows = generate(RateTable.from_catalog(a.catalog), a.n, a.seed)
-    write(rows, a.out)
+    if a.profile == "real":
+        from src.demo.pipeline import real_profile
+        catalog = a.catalog or real_profile().path
+    else:
+        catalog = a.catalog or DEFAULTS["fake"][0]
+    out = a.out or DEFAULTS[a.profile][1]
+    rows = generate(RateTable.from_catalog(catalog), a.n, a.seed, a.profile == "fake")
+    write(rows, out)
     labels = {}
     for r in rows:
         labels[r["labels"] or "clean"] = labels.get(r["labels"] or "clean", 0) + 1
-    print(f"wrote {len(rows)} lines to {a.out}: {dict(sorted(labels.items()))}")
+    print(f"wrote {len(rows)} lines ({a.profile} profile) to {out}: {dict(sorted(labels.items()))}")
 
 
 if __name__ == "__main__":

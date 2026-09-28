@@ -21,6 +21,17 @@ def test_bar_on_committed_lines(tmp_path):
         assert (m["precision"], m["recall"], m["meets_bar"]) == (1.0, 1.0, True), m
         assert m["support"] == 10
     assert res["id_status_lines_with_t2"] == 0
+    assert res["hard_flagged_lines_with_a_score"] == 0
+    assert res["hard_flagged_by_label"] == {"NOT_IN_CATALOG": 4, "NOT_IN_FORCE": 4}
+    assert res["per_code"]["T1"]["support"] == 10 and res["not_run"] == []
+
+
+def test_untrusted_rates_report_t2_as_not_run():
+    from src.demo.pipeline import FAKE, CatalogProfile
+    checker = Checker.from_profile(CatalogProfile("real", FAKE.path, False, FAKE.invoices))
+    res = ev.evaluate(checker, ev.read_lines(FAKE.invoices))
+    assert res["not_run"] == ["T2"] and "T2" not in res["per_code"]
+    assert all("bar" not in m for m in res["per_code"].values())     # the bar is fake-only
 
 
 def test_metric_arithmetic():

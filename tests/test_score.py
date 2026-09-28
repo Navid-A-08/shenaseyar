@@ -30,7 +30,7 @@ def test_findings_add_their_weights():
 
 def test_duplicate_codes_count_once_and_score_is_capped():
     assert risk_score(["T6", "T6"], BEST)[0] == pytest.approx(WEIGHTS["T6"])
-    assert risk_score(["T2", "T6", "NOT_IN_CATALOG"], WORST)[0] == 1.0
+    assert risk_score(["T2", "T6", "T3"], WORST)[0] == 1.0
 
 
 def test_retrieval_signals():
@@ -47,8 +47,22 @@ def test_ambiguous_never_raises_the_score():
     assert risk_score(["AMBIGUOUS"], BEST)[0] == risk_score([], BEST)[0]
 
 
-def test_severity_order_is_respected():
-    assert WEIGHTS["NOT_IN_CATALOG"] > WEIGHTS["NOT_IN_FORCE"] > WEIGHTS["AMBIGUOUS"]
+def test_hand_set_weights_unchanged():
+    # pinned: the weights were not touched when T1 and the hard flags were added (2026-09-28)
+    assert WEIGHTS == {"T2": 0.60, "T6": 0.50, "T3": 0.30, "T4": 0.30, "T1": 0.0,
+                       "AMBIGUOUS": 0.0, "text_mismatch": 0.15, "rank_declared": 0.10,
+                       "confident_alternative": 0.05}
+
+
+@pytest.mark.parametrize("code", sorted(score.HARD_FLAGS))
+def test_hard_flags_bypass_the_score(code):
+    assert code not in WEIGHTS
+    with pytest.raises(ValueError, match="hard flag"):
+        risk_score([code], BEST)
+
+
+def test_hard_flags_are_the_three_id_facts():
+    assert score.HARD_FLAGS == {"NOT_IN_CATALOG", "NOT_IN_FORCE", "QUARANTINED_ONLY"}
 
 
 def test_unknown_code_and_out_of_range_feature_fail():

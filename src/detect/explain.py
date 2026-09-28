@@ -12,10 +12,16 @@ range it was valid for. Tax status keeps its three values apart (مشمول / م
 from dataclasses import dataclass
 from decimal import Decimal
 
+from src.detect.features import RANK_ABSENT
+
 TAX_STATUS_FA = {"taxable": "مشمول", "exempt": "معاف", "out_of_scope": "غیر مشمول"}
 FOOTER = "این یک پیشنهاد برای بررسی انسانی است، نه حکم."
 
 TEMPLATES = {
+    "T1": ("شرح این ردیف با عنوان شناسه اعلام‌شده {sstid} همخوانی ندارد: این شناسه در میان "
+           "{top_k} شناسه منطبق‌تر با شرح نیست (رتبه: {rank_text}) و امتیاز انطباق آن {sim_pct}٪ "
+           "امتیاز بهترین شناسه معتبر در تاریخ {issue_date} است. نزدیک‌ترین شناسه: {best_sstid} "
+           "با عنوان «{best_title}»."),
     "T2": ("نرخ اعلام‌شده در این ردیف {declared_rate}٪ است، اما برای شناسه {sstid} در تاریخ "
            "{issue_date} نرخ {reference_rate}٪ ثبت شده است (وضعیت در فهرست شناسه‌ها: {tax_status_fa}؛ "
            "این نسخه از {valid_from} تا {valid_to} معتبر است)."),
@@ -71,6 +77,10 @@ def _fields(hit, line):
         f["tax_status_fa"] = TAX_STATUS_FA[hit.evidence["tax_status"]]
     if "valid_from" in hit.evidence:
         f["valid_to"] = hit.evidence.get("valid_to_incl") or "اکنون (بدون تاریخ پایان)"
+    if "rank_declared" in hit.evidence:
+        rank = hit.evidence["rank_declared"]
+        f["rank_text"] = f"پایین‌تر از {RANK_ABSENT - 1}" if rank >= RANK_ABSENT else str(rank)
+        f["sim_pct"] = str(round(100 * hit.evidence["sim_declared"]))
     if "tied_rates" in hit.evidence:
         f["tied_rates"] = "، ".join(f"{fmt_num(r)}٪" for r in hit.evidence["tied_rates"])
     return f
