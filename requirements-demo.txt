@@ -1,0 +1,4 @@
+# Demo UI only (app.py). Not installed in the test venv; tests stub it.
+# Unpinned on purpose: no version was installed or tested in this repo yet. Pin after first install.
+-r requirements.txt
+streamlit

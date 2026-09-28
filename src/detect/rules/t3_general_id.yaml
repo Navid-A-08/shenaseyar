@@ -1,0 +1,12 @@
+# T3: a general (عمومی) ID is declared, and a specific (اختصاصی) ID in force on the invoice date
+# matches the text strictly better under BM25 and is in the top_k.
+# The declared ID must itself match the text (BM25 > 0); if it does not match at all, the line is a
+# description/ID mismatch (T1 territory), not a general-vs-specific choice.
+# top_k = 5, the number of alternatives shown to the reviewer. Hand-set, not tuned.
+id: t3_general_id
+code: T3
+check: general_with_specific
+severity: medium
+description: شناسه عمومی درج شده، در حالی که شناسه اختصاصی منطبق‌تری وجود دارد
+params:
+  top_k: 5

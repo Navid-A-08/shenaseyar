@@ -1,0 +1,9 @@
+# T2: declared rate (vra) differs from the rate of the declared ID in force on the invoice date.
+# Reads the rate only via rate_at(sstid, issue_date); fires only when rate_at is OK.
+# Comparison is exact on Decimal values (10 == 10.0). No tolerance: a rate is a looked-up value.
+id: t2_rate_mismatch
+code: T2
+check: rate_mismatch
+severity: high
+description: نرخ اعلام‌شده با نرخ ثبت‌شده برای شناسه در تاریخ صدور متفاوت است
+params: {}

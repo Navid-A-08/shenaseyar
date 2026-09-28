@@ -1,0 +1,13 @@
+# T6: vam differs from base x vra / 100, with base = am x fee (no discount field in the demo line).
+# Arithmetic is exact (Decimal from the text of each number), so the only legitimate difference is
+# the rounding of vam to a whole Rial. Whether the rule is round-half-up, floor or ceiling is not
+# assumed (TODO(legal) if it ever matters): any of them leaves |vam - exact| < 1 Rial. So:
+#   tolerance = 1 Rial, inclusive (|difference| <= 1 is accepted, anything above fires).
+# Absolute, not relative: rounding error does not grow with the amount.
+id: t6_vat_arithmetic
+code: T6
+check: vat_arithmetic
+severity: high
+description: مبلغ مالیات با حاصل‌ضرب مبلغ پایه در نرخ اعلام‌شده نمی‌خواند
+params:
+  tolerance_rial: 1

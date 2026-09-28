@@ -1,0 +1,14 @@
+# ID-status findings from rate_at (architecture.md §3). Distinct from T1-T6: never reported as T2.
+# Severities are the ones decided in architecture.md §3. QUARANTINED_ONLY is OPEN there, so it is
+# informational (none) until decided.
+id: id_status
+code: ID_STATUS
+check: id_status
+severity: none
+description: وضعیت شناسه در تاریخ صدور صورتحساب
+params:
+  severity:
+    NOT_IN_CATALOG: high
+    NOT_IN_FORCE: medium
+    AMBIGUOUS: none
+    QUARANTINED_ONLY: none
