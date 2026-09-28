@@ -1,0 +1,82 @@
+{
+ "catalog_rows": 943383,
+ "sample": 2000,
+ "max_length": 128,
+ "as_of": "1405-07-01",
+ "bar": {
+  "mean_cosine": 0.99,
+  "top20_overlap": 0.95
+ },
+ "graph_opt": "all",
+ "speed": {
+  "model": "fp32",
+  "settings": {
+   "threads0_batch64": {
+    "threads": 0,
+    "batch": 64,
+    "seconds": 58.1,
+    "titles_per_s": 34.4,
+    "projected_full_index_hours": 7.61,
+    "max_abs_diff_vs_first_setting": 0.0
+   },
+   "threads0_batch128": {
+    "threads": 0,
+    "batch": 128,
+    "seconds": 61.2,
+    "titles_per_s": 32.7,
+    "projected_full_index_hours": 8.02,
+    "max_abs_diff_vs_first_setting": 0.0
+   },
+   "threads8_batch64": {
+    "threads": 8,
+    "batch": 64,
+    "seconds": 73.5,
+    "titles_per_s": 27.2,
+    "projected_full_index_hours": 9.63,
+    "max_abs_diff_vs_first_setting": 0.0
+   },
+   "threads8_batch128": {
+    "threads": 8,
+    "batch": 128,
+    "seconds": 77.3,
+    "titles_per_s": 25.9,
+    "projected_full_index_hours": 10.13,
+    "max_abs_diff_vs_first_setting": 0.0
+   },
+   "threads16_batch64": {
+    "threads": 16,
+    "batch": 64,
+    "seconds": 63.7,
+    "titles_per_s": 31.4,
+    "projected_full_index_hours": 8.34,
+    "max_abs_diff_vs_first_setting": 0.0
+   },
+   "threads16_batch128": {
+    "threads": 16,
+    "batch": 128,
+    "seconds": 65.7,
+    "titles_per_s": 30.4,
+    "projected_full_index_hours": 8.61,
+    "max_abs_diff_vs_first_setting": 0.0
+   },
+   "threads28_batch64": {
+    "threads": 28,
+    "batch": 64,
+    "seconds": 67.7,
+    "titles_per_s": 29.5,
+    "projected_full_index_hours": 8.87,
+    "max_abs_diff_vs_first_setting": 0.0
+   },
+   "threads28_batch128": {
+    "threads": 28,
+    "batch": 128,
+    "seconds": 67.5,
+    "titles_per_s": 29.6,
+    "projected_full_index_hours": 8.84,
+    "max_abs_diff_vs_first_setting": 0.0
+   }
+  },
+  "best": "threads0_batch64"
+ },
+ "process_peak_mb": 4511
+}

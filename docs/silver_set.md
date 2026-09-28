@@ -584,6 +584,74 @@ shown with its own bootstrap interval.
 - Silver sets are optimistic. A verdict here is a direction for the human golden set, not a
   replacement for it.
 
+## Acceptance bar: int8 vs full precision (pre-registered 2026-09-28, before any variant is tested)
+
+Written before any quantization variant is tested, so the results cannot shape the bar. It
+decides which int8 model (if any) the dense retriever in the rule above may use.
+
+**Data.** The same seeded sample of **2,000 in-force titles** (normalized, seed 20260928, as_of
+1405-07-01), encoded by each int8 variant and by the full-precision (fp32) official ONNX model.
+**No silver query is involved.**
+
+**Metrics, both against fp32 on the same 2,000 titles:**
+- **Mean cosine:** mean over the 2,000 titles of cos(int8 vector, fp32 vector).
+- **Top-20 overlap:** each of the 2,000 titles queries the other 1,999 (itself excluded). For
+  each title, overlap = |top-20 under int8 ∩ top-20 under fp32| / 20; the metric is the mean over
+  the 2,000 titles.
+
+**Bar.** An int8 variant is acceptable only if **mean cosine ≥ 0.99 AND top-20 overlap ≥ 0.95**.
+
+- Judged **only on agreement with full precision**, never on silver (or golden) recall.
+- **If no variant reaches the bar,** the closest one is used and its disagreement rate
+  (1 − top-20 overlap) is stated next to the verdict. It is not called acceptable.
+- Speed settings that leave the vectors unchanged (threads, graph optimization, batch size) are
+  not judged by this bar, but any setting that changes the vectors is.
+
+### Result (measured 2026-09-28): no int8 variant met the bar
+
+Same 2,000 titles, batch 64, onnxruntime default threads, graph optimization ALL
+(`eval/results/int8_agreement.json`, built by `tools/bench_int8_agreement.py`).
+
+| Variant | Mean cosine | Top-20 overlap | Disagreement | Meets bar |
+|---|---:|---:|---:|---|
+| per-tensor (original) | 0.9756 | 0.8489 | 0.1511 | no |
+| per-channel | 0.9839 | 0.8675 | 0.1325 | no |
+| per-channel after `quant_pre_process` | 0.9839 | 0.8675 | 0.1325 | no |
+| per-channel, MatMul only (embeddings float32) | 0.9840 | 0.8677 | 0.1323 | no |
+
+- **No variant met the pre-registered bar** (mean cosine ≥ 0.99 AND top-20 overlap ≥ 0.95).
+- MatMul-only is nominally closest, but its margin over per-channel (0.0002 in overlap) is within
+  noise, so **no meaningful winner exists**.
+- **The "use the closest variant" clause is not invoked.** The dense index uses **fp32**; int8
+  is not used at all.
+- `quant_pre_process` ran without its symbolic shape pass (it needs sympy, not a project
+  dependency). The full preprocessing is **untested**; it is moot since int8 is not used.
+
+**Batch dependence (the substantive reason int8 is dropped).** Dynamic int8 quantization scales
+activations per batch, so an int8 vector depends on which other texts share its batch: the
+same titles differ by up to 0.034 (max absolute difference) between batch 64 and batch 128. A
+text therefore has no single well-defined int8 vector, and a query encoded alone can disagree
+with the index encoding of the same text. At batch 1 the MatMul-only variant reaches cosine
+0.9865 and overlap 0.8782, still below the bar. fp32 is batch-invariant (difference 0.0 between
+batch 1 and batch 64).
+
+**Earlier speed numbers are superseded.** The first benchmark (`eval/results/dense_bench.json`:
+14.6 titles/s int8, 8.7 titles/s fp32, 18 h projected) is superseded by the runs recorded here.
+On 2026-09-28 the same models, sample and default threads measured 87.3 titles/s (int8) and 35.7
+titles/s (fp32), a roughly 4–6× difference that is **unexplained**.
+
+**fp32 speed (re-timed 2026-09-28, two fresh runs).** Same 2,000 titles, graph optimization ALL
+(`eval/results/fp32_speed_run1.json`, `fp32_speed_run2.json`). Fastest setting in both runs:
+onnxruntime default threads, batch 64: **33.6 and 34.4 titles/s**, projecting **7.80 h and
+7.61 h** for the 943,383-row index. Every other setting (8 / 16 / 28 threads, batch 128) was
+slower (8.0–12.3 h). The vectors were identical across all settings.
+
+**Full index build: postponed (decided 2026-09-28).** `eval/golden.csv` is empty, so the Phase 1
+exit criterion cannot be measured with any retriever yet, and the silver comparison above never
+gates. The build (`python tools/build_dense_index.py`, resumable, writes `data/index/dense-fp32/`)
+runs once the golden set has at least 60 tier S rows, so one build serves both the silver
+comparison and the golden evaluation.
+
 ## Known limitations
 - **Optimistic by construction** (see the top). Seller wording, abbreviations, synonyms and
   missing words are not modelled; only 4 kinds of character noise are.

@@ -13,6 +13,9 @@ never a verdict**. Full design: `docs/architecture.md`. Read it before any desig
 the harness says so instead of printing a pass/fail.
 The machine-generated silver set (`eval/silver.csv`, `docs/silver_set.md`) is optimistic and
 never gates: the exit criterion reads NOT APPLICABLE on it. It is gitignored (catalog extract).
+Dense retrieval: fp32 BGE-M3 only (int8 failed its pre-registered bar, see `docs/silver_set.md`).
+The full dense index build (~7.7 h CPU) is POSTPONED until `eval/golden.csv` has at least 60
+tier S rows.
 (Update this section whenever the phase changes.)
 
 Phase 0 exit met 2026-09-22 (see `docs/data_dictionary.md`, `docs/data_quality.md`).
@@ -55,6 +58,30 @@ this is resolved is provisional.
 - If a metric improves suspiciously, check for train/test leakage before reporting it.
 - If you are unsure, say so. Don't guess.
 - Scraping: never fetch more than a handful of pages without my explicit approval. Respect robots.txt.
+
+## Autonomy
+
+Proceed without asking for: creating branches, committing, pushing, merging into main
+after `pytest -q` passes, refactors, new tests, doc updates, and any change that git
+can revert.
+
+Ask first ONLY when:
+- a pre-registered rule, metric definition or acceptance criterion would change;
+- something irreversible or external happens (downloads, deletions, network fetches
+  beyond a few pages);
+- a run will take more than 1 hour of compute;
+- eval/golden.csv or the synonym list is involved;
+- the honest interpretation of a result is in question, or a number would go into the
+  docs that you are not confident is right.
+
+Batch work: several related small tasks per session is fine. Don't stop after each one
+for approval — do them, then report once.
+
+Plans: still plan before non-trivial code, but for reversible work state the plan and
+proceed in the same turn. Wait for approval only for the cases listed above.
+
+Reports: lead with the numbers and anything that surprised you. Skip restating what was
+built unless it changed the design.
 
 ## Stack
 Python 3.12 (venv: CPython 3.12.8) · jdatetime (pinned; all Jalali date arithmetic) · hazm · BGE-M3 (dense+sparse) · bge-reranker-v2-m3 · Qdrant · PostgreSQL ·
