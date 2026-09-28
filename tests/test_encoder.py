@@ -5,7 +5,7 @@ from tokenizers import Tokenizer
 from tokenizers.models import WordLevel
 from tokenizers.pre_tokenizers import Whitespace
 
-from src.retrieval.encoder import PROVIDERS, OnnxEncoder
+from src.retrieval.encoder import PROVIDERS, OnnxEncoder, session_options
 
 
 def _tokenizer():
@@ -64,3 +64,18 @@ def test_empty_input_and_cpu_only():
     enc = OnnxEncoder(FakeSession(), _tokenizer())
     assert enc.encode([]).shape == (0, 3)
     assert PROVIDERS == ["CPUExecutionProvider"]
+
+
+def test_session_options_threads_and_graph_opt():
+    ort = pytest.importorskip("onnxruntime")
+    o = session_options(threads=8, graph_opt="all")
+    assert o.intra_op_num_threads == 8
+    assert o.graph_optimization_level == ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+    assert session_options(graph_opt="basic").graph_optimization_level == ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
+    assert session_options().intra_op_num_threads == 0          # onnxruntime picks
+
+
+def test_session_options_rejects_unknown_level():
+    pytest.importorskip("onnxruntime")
+    with pytest.raises(ValueError):
+        session_options(graph_opt="max")

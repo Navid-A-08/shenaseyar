@@ -17,6 +17,22 @@ from tokenizers import Tokenizer
 
 PROVIDERS = ["CPUExecutionProvider"]
 OUTPUT = "sentence_embedding"
+GRAPH_OPT = {"disable": "ORT_DISABLE_ALL", "basic": "ORT_ENABLE_BASIC",
+             "extended": "ORT_ENABLE_EXTENDED", "all": "ORT_ENABLE_ALL"}
+
+
+def session_options(threads=None, graph_opt="all"):
+    """onnxruntime SessionOptions: intra-op threads (None = onnxruntime's default) and graph
+    optimization level (one of GRAPH_OPT; "all" is also onnxruntime's own default)."""
+    import onnxruntime as ort
+
+    if graph_opt not in GRAPH_OPT:
+        raise ValueError(f"graph_opt must be one of {sorted(GRAPH_OPT)}, got {graph_opt!r}")
+    opts = ort.SessionOptions()
+    if threads:
+        opts.intra_op_num_threads = threads
+    opts.graph_optimization_level = getattr(ort.GraphOptimizationLevel, GRAPH_OPT[graph_opt])
+    return opts
 
 
 class OnnxEncoder:
@@ -31,13 +47,11 @@ class OnnxEncoder:
         self.truncated = 0                       # texts cut at max_length, over this encoder's life
 
     @classmethod
-    def from_dir(cls, model_dir, max_length=128, batch_size=32, threads=None):
+    def from_dir(cls, model_dir, max_length=128, batch_size=32, threads=None, graph_opt="all"):
         import onnxruntime as ort
 
         model_dir = Path(model_dir)
-        opts = ort.SessionOptions()
-        if threads:
-            opts.intra_op_num_threads = threads
+        opts = session_options(threads, graph_opt)
         session = ort.InferenceSession(str(model_dir / "model.onnx"), opts, providers=PROVIDERS)
         tokenizer = Tokenizer.from_file(str(model_dir / "tokenizer.json"))
         return cls(session, tokenizer, max_length, batch_size)
