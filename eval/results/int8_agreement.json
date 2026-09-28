@@ -1,0 +1,166 @@
+{
+ "catalog_rows": 943383,
+ "sample": 2000,
+ "max_length": 128,
+ "as_of": "1405-07-01",
+ "bar": {
+  "mean_cosine": 0.99,
+  "top20_overlap": 0.95
+ },
+ "graph_opt": "all",
+ "fp32_titles_per_s": 35.7,
+ "variants": {
+  "per_tensor": {
+   "mean_cosine": 0.9756,
+   "min_cosine": 0.9649,
+   "top20_overlap": 0.8489,
+   "top20_overlap_min": 0.5,
+   "disagreement_rate": 0.1511,
+   "acceptable": false,
+   "titles_per_s": 87.3,
+   "model_bytes": 568765638
+  },
+  "per_channel": {
+   "mean_cosine": 0.9839,
+   "min_cosine": 0.976,
+   "top20_overlap": 0.8675,
+   "top20_overlap_min": 0.6,
+   "disagreement_rate": 0.1325,
+   "acceptable": false,
+   "titles_per_s": 85.5,
+   "model_bytes": 569872326
+  },
+  "per_channel_preproc": {
+   "mean_cosine": 0.9839,
+   "min_cosine": 0.976,
+   "top20_overlap": 0.8675,
+   "top20_overlap_min": 0.6,
+   "disagreement_rate": 0.1325,
+   "acceptable": false,
+   "titles_per_s": 85.3,
+   "model_bytes": 569872371
+  },
+  "per_channel_matmul": {
+   "mean_cosine": 0.984,
+   "min_cosine": 0.9752,
+   "top20_overlap": 0.8677,
+   "top20_overlap_min": 0.55,
+   "disagreement_rate": 0.1323,
+   "acceptable": false,
+   "titles_per_s": 85.2,
+   "model_bytes": 1363051963
+  }
+ },
+ "acceptable_variants": [],
+ "process_peak_mb": 5226,
+ "speed": {
+  "model": "per_channel_matmul",
+  "settings": {
+   "threads0_batch64": {
+    "threads": 0,
+    "batch": 64,
+    "seconds": 23.7,
+    "titles_per_s": 84.4,
+    "projected_full_index_hours": 3.11,
+    "max_abs_diff_vs_first_setting": 0.0
+   },
+   "threads0_batch128": {
+    "threads": 0,
+    "batch": 128,
+    "seconds": 26.4,
+    "titles_per_s": 75.8,
+    "projected_full_index_hours": 3.46,
+    "max_abs_diff_vs_first_setting": 0.033798325806856155
+   },
+   "threads8_batch64": {
+    "threads": 8,
+    "batch": 64,
+    "seconds": 29.1,
+    "titles_per_s": 68.8,
+    "projected_full_index_hours": 3.81,
+    "max_abs_diff_vs_first_setting": 0.0
+   },
+   "threads8_batch128": {
+    "threads": 8,
+    "batch": 128,
+    "seconds": 31.5,
+    "titles_per_s": 63.5,
+    "projected_full_index_hours": 4.13,
+    "max_abs_diff_vs_first_setting": 0.033798325806856155
+   },
+   "threads16_batch64": {
+    "threads": 16,
+    "batch": 64,
+    "seconds": 25.7,
+    "titles_per_s": 78.0,
+    "projected_full_index_hours": 3.36,
+    "max_abs_diff_vs_first_setting": 0.0
+   },
+   "threads16_batch128": {
+    "threads": 16,
+    "batch": 128,
+    "seconds": 28.8,
+    "titles_per_s": 69.5,
+    "projected_full_index_hours": 3.77,
+    "max_abs_diff_vs_first_setting": 0.033798325806856155
+   },
+   "threads28_batch64": {
+    "threads": 28,
+    "batch": 64,
+    "seconds": 35.8,
+    "titles_per_s": 55.8,
+    "projected_full_index_hours": 4.69,
+    "max_abs_diff_vs_first_setting": 0.0
+   },
+   "threads28_batch128": {
+    "threads": 28,
+    "batch": 128,
+    "seconds": 38.7,
+    "titles_per_s": 51.6,
+    "projected_full_index_hours": 5.08,
+    "max_abs_diff_vs_first_setting": 0.033798325806856155
+   }
+  },
+  "best": "threads0_batch64"
+ },
+ "batch_diagnostic": {
+  "note": "int8 dynamic quantization scales activations per batch, so vectors depend on batch-mates; fp32 is batch-invariant (max abs diff 0.0, batch 1 vs 64, 200 titles). Agreement vs fp32 (fp32 at batch 64).",
+  "per_tensor_batch1": {
+   "mean_cosine": 0.9779,
+   "min_cosine": 0.9673,
+   "top20_overlap": 0.8597,
+   "top20_overlap_min": 0.55,
+   "disagreement_rate": 0.1403,
+   "acceptable": false,
+   "titles_per_s": 50.7
+  },
+  "per_tensor_batch128": {
+   "mean_cosine": 0.9753,
+   "min_cosine": 0.963,
+   "top20_overlap": 0.8484,
+   "top20_overlap_min": 0.5,
+   "disagreement_rate": 0.1516,
+   "acceptable": false,
+   "titles_per_s": 76.6
+  },
+  "per_channel_matmul_batch1": {
+   "mean_cosine": 0.9865,
+   "min_cosine": 0.9803,
+   "top20_overlap": 0.8782,
+   "top20_overlap_min": 0.55,
+   "disagreement_rate": 0.1218,
+   "acceptable": false,
+   "titles_per_s": 49.7
+  },
+  "per_channel_matmul_batch128": {
+   "mean_cosine": 0.9837,
+   "min_cosine": 0.975,
+   "top20_overlap": 0.8653,
+   "top20_overlap_min": 0.55,
+   "disagreement_rate": 0.1347,
+   "acceptable": false,
+   "titles_per_s": 75.7
+  }
+ },
+ "fp32_projected_full_index_hours": 7.34
+}
