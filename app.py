@@ -80,7 +80,7 @@ if result.score is None:
 else:
     c1.metric("امتیاز ریسک (0 تا 1، وزن‌دهی دستی)", f"{result.score:.2f}")
 c2.metric("نیاز به بررسی", "بله" if result.needs_review else "خیر",
-          help=f"پرچم قطعی، یا امتیاز دست‌کم {HIGH_RISK}")
+          help=f"پرچم قطعی یا فعال شدن یک قاعده (کف امتیاز {HIGH_RISK})")
 st.markdown(md_escape(rate_status_text(result, prof.rates_trusted)))
 
 st.subheader("قاعده‌های فعال‌شده")
@@ -93,7 +93,9 @@ for code in result.skipped:
             f"هنوز روشن نیست (TODO(legal)).")
 with st.expander("اجزای امتیاز"):
     st.table(contribution_rows(result) or [{"جزء": "-", "سهم": 0}])
-    st.caption("وزن‌ها دستی تعیین شده‌اند، نه با یادگیری (src/detect/score.py).")
+    st.caption("وزن‌ها دستی تعیین شده‌اند، نه با یادگیری (src/detect/score.py). امتیاز فقط "
+               "ترتیب ردیف‌ها را در صف بررسی تعیین می‌کند؛ هر ردیفی که قاعده‌ای در آن فعال شود "
+               "وارد صف می‌شود.")
 
 st.subheader("پنج شناسه جایگزین (BM25، معتبر در تاریخ صدور)")
 if result.alternatives:

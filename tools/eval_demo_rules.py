@@ -16,7 +16,9 @@ reported (must be 0).
 precision = TP / (TP + FP), recall = TP / (TP + FN), per code, over all lines; None if undefined.
 fp_by_label: for each code, its false positives split by the line's true label ("clean" = none).
 Hard flags: lines carrying NOT_IN_CATALOG / NOT_IN_FORCE / QUARANTINED_ONLY are never scored; the
-score table covers the other lines only, by true label.
+score table covers the other lines only, by true label. The score is a ranking, not a gate: a
+fired rule floors it at the review threshold (src/detect/score.py), so `in_review` counts lines
+where some rule fired, and `raw_*` is the weighted sum before the floor.
 Labels come from tools/make_demo_invoices.py (circular for T1/T3/T4, see its docstring).
 """
 import argparse
@@ -51,11 +53,17 @@ def _ratio(a, b):
     return None if b == 0 else round(a / b, 4)
 
 
-def _stats(xs):
-    if not xs:
+def _stats(pairs):
+    """pairs: (score, raw_score) per line. in_review = score at or above the threshold;
+    floored = lifted to the threshold by a fired rule (these tie; raw orders them)."""
+    if not pairs:
         return {"n": 0}
+    xs, raws = [p[0] for p in pairs], [p[1] for p in pairs]
     return {"n": len(xs), "mean": round(sum(xs) / len(xs), 4), "min": round(min(xs), 4),
-            "max": round(max(xs), 4), "high_risk": sum(x >= HIGH_RISK for x in xs)}
+            "max": round(max(xs), 4), "in_review": sum(x >= HIGH_RISK for x in xs),
+            "floored": sum(r < x for x, r in pairs),
+            "raw_mean": round(sum(raws) / len(raws), 4), "raw_min": round(min(raws), 4),
+            "raw_max": round(max(raws), 4)}
 
 
 def evaluate(checker, rows):
@@ -84,7 +92,7 @@ def evaluate(checker, rows):
             flagged_by_label[truth] = flagged_by_label.get(truth, 0) + 1
             scored_hard_flags += res.score is not None
         else:
-            by_label.setdefault(truth, []).append(res.score)
+            by_label.setdefault(truth, []).append((res.score, res.raw_score))
     out = {}
     for c, m in per.items():
         p, r = _ratio(m["tp"], m["tp"] + m["fp"]), _ratio(m["tp"], m["tp"] + m["fn"])

@@ -60,6 +60,18 @@ def test_unflagged_line_is_scored(fake):
     assert r.hard_flags == () and r.score is not None and r.needs_review == r.high_risk
 
 
+def test_fired_rule_always_enters_review_and_raw_score_orders_ties(fake):
+    # T1 (weight 0): declared ID has nothing in common with the text
+    r = fake.check(InvoiceLine.parse("1405-02-01", "2909206651897", "خدمات آموزشی آزمایشی", "1",
+                                     "1000", "10", "100"))
+    assert r.codes == ["T1"]
+    assert r.score == 0.5 and r.needs_review and 0 < r.raw_score < 0.5
+    assert r.raw_score == pytest.approx(r.score - r.contributions["review_floor"])
+    clean = fake.check(InvoiceLine.parse("1405-02-01", "2909206651897", "برنج فرضی", "1", "1000",
+                                         "10", "100"))
+    assert clean.codes == [] and not clean.needs_review and clean.raw_score == clean.score
+
+
 def test_profiles():
     assert profile("fake") is FAKE and FAKE.rates_trusted
     with pytest.raises(ValueError):

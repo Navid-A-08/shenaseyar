@@ -16,6 +16,10 @@ Tests always use the fake profile.
 HARD FLAGS (2026-09-28). NOT_IN_CATALOG, NOT_IN_FORCE and QUARANTINED_ONLY are facts about the
 declared ID, not risk. They bypass the score: a line that carries one gets score None and
 needs_review True. The other rules still run and are listed.
+
+THE SCORE IS A RANKING, NOT A GATE (2026-09-30). Any fired rule floors the score at the review
+threshold (src/detect/score.py), so needs_review = hard flag or a fired rule. Order the queue by
+(score, raw_score).
 """
 import os
 from dataclasses import dataclass
@@ -26,7 +30,7 @@ from src.detect.explain import explain
 from src.detect.features import CatalogSearch
 from src.detect.legal import LegalUnits
 from src.detect.rates import RateTable
-from src.detect.score import HARD_FLAGS, HIGH_RISK, risk_score
+from src.detect.score import FLOOR_TERM, HARD_FLAGS, HIGH_RISK, risk_score
 
 ROOT = Path(__file__).resolve().parents[2]
 FAKE_CATALOG = ROOT / "data" / "sample" / "fake_catalog.csv"
@@ -97,6 +101,11 @@ class LineResult:
     @property
     def hard_flags(self):
         return tuple(h for h in self.hits if h.code in HARD_FLAGS)
+
+    @property
+    def raw_score(self):
+        """The weighted sum without the review floor: orders lines that tie at the floor."""
+        return None if self.score is None else self.score - self.contributions.get(FLOOR_TERM, 0.0)
 
     @property
     def high_risk(self):
