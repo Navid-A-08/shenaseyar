@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 import make_demo_invoices as mdi  # noqa: E402
+from src.detect.features import CatalogSearch  # noqa: E402
 from src.detect.rates import RateTable, Status  # noqa: E402
 from src.retrieval.bm25 import tokenize  # noqa: E402
 
@@ -87,7 +88,7 @@ def test_file_is_utf8_with_expected_columns():
         assert next(csv.reader(f)) == mdi.COLUMNS
 
 
-def _misleading_source(r, differs):
+def _misleading_source(r, differs, same_head=True):
     """IDs other than the declared one that could have produced a T1 line's text: in force on
     the date, same head word as the declared title, text words all in their title, and a
     different tax consequence (`differs`)."""
@@ -100,19 +101,21 @@ def _misleading_source(r, differs):
         if sid == r["sstid"] or res.status is not Status.OK:
             continue
         a = res.version
-        if tokenize(a.title)[0] == head and words <= set(tokenize(a.title)) and differs(a, declared):
+        if same_head and tokenize(a.title)[0] != head:
+            continue
+        if words <= set(tokenize(a.title)) and differs(a, declared):
             out.append(sid)
     return out
 
 
-def _check_t1(rows, differs):
+def _check_t1(rows, differs, same_head=True):
     t1 = [r for r in rows if r["labels"] == "T1"]
     assert len(t1) == 10
     for r in t1:
         declared = TABLE.rate_at(r["sstid"], r["issue_date"])
         assert declared.status is Status.OK and Decimal(r["vra"]) == declared.rate, r   # no T2
         assert not set(tokenize(r["sstt"])) <= set(tokenize(declared.version.title)), r
-        assert _misleading_source(r, differs), r            # a neighbor, never a random ID
+        assert _misleading_source(r, differs, same_head), r   # a neighbor, never a random ID
 
 
 def test_t1_lines_are_misleading_neighbors_with_a_different_rate(rows):
@@ -120,11 +123,28 @@ def test_t1_lines_are_misleading_neighbors_with_a_different_rate(rows):
 
 
 def test_real_profile_mode_has_no_t2_t6_and_uses_charges_vat():
-    rows = mdi.generate(TABLE, 200, 1405, rates_trusted=False)
+    stats = {}
+    rows = mdi.generate(TABLE, 200, 1405, rates_trusted=False, stats=stats)
     c = Counter(r["labels"] or "clean" for r in rows)
     assert c == {"clean": 162, "T1": 10, "T3": 10, "T4": 10, "NOT_IN_CATALOG": 4,
                  "NOT_IN_FORCE": 4}
-    _check_t1(rows, lambda a, b: mdi.charges_vat(a) != mdi.charges_vat(b))
+    _check_t1(rows, lambda a, b: mdi.charges_vat(a) != mdi.charges_vat(b), same_head=False)
+    # hard set: every declared ID is one of the text's own top-20 in-force BM25 matches
+    search = CatalogSearch(TABLE)
+    for r in rows:
+        if r["labels"] == "T1":
+            f = search.features(r["sstt"], r["sstid"], r["issue_date"])
+            assert f.rank_declared <= 20, r
+    assert stats["attempts"] - stats["skipped"] == 10 == len(stats["neighbor_ranks"])
+    assert stats["skipped"] == (stats["skipped_no_taxable_difference"]
+                                + stats["skipped_candidates_contain_whole_text"])
+    assert all(1 <= k <= 20 for k in stats["neighbor_ranks"])
+
+
+def test_fake_profile_keeps_the_head_word_picker(rows):
+    stats = {}
+    assert mdi.generate(TABLE, 200, 1405, stats=stats) == rows
+    assert stats["attempts"] == 0          # the top-20 picker was never used
 
 
 def test_real_profile_output_is_not_committed():

@@ -1,0 +1,23 @@
+{
+  "seed": 1405,
+  "n": 200,
+  "t1_picker": "top20",
+  "t1": {
+    "attempts": 336,
+    "skipped": 326,
+    "skipped_no_taxable_difference": 326,
+    "skipped_candidates_contain_whole_text": 0,
+    "neighbor_ranks": [
+      20,
+      18,
+      9,
+      17,
+      20,
+      20,
+      20,
+      16,
+      18,
+      2
+    ]
+  }
+}

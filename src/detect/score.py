@@ -5,10 +5,20 @@ severities in architecture.md §3; no data was fitted and no weight was tuned on
 lines. This module is the PLACEHOLDER for the calibrated LightGBM model (descoped, CLAUDE.md), and
 its output is a ranking aid, not a probability.
 
-    score = min(1, sum over finding codes present of WEIGHTS[code]
-                   + WEIGHTS["text_mismatch"] * (1 - sim_declared)
-                   + WEIGHTS["rank_declared"] * (rank_declared - 1) / (RANK_ABSENT - 1)
-                   + WEIGHTS["confident_alternative"] * margin_top1 * [rank_declared != 1])
+    raw   = sum over finding codes present of WEIGHTS[code]
+            + WEIGHTS["text_mismatch"] * (1 - sim_declared)
+            + WEIGHTS["rank_declared"] * (rank_declared - 1) / (RANK_ABSENT - 1)
+            + WEIGHTS["confident_alternative"] * margin_top1 * [rank_declared != 1]
+    score = min(1, max(raw, HIGH_RISK))   if a rule fired (any finding code except AMBIGUOUS)
+            min(1, raw)                   otherwise
+
+THE SCORE IS A RANKING, NOT A GATE (decided 2026-09-30, architecture.md §6). A fired rule floors
+the score at the review threshold, so whether a line enters the review queue is decided by the
+rules (and the hard flags), never by the weights. The weighted sum only orders lines inside the
+queue. This is structural: no weight was changed. The floor's share is reported as the
+`review_floor` term, so the terms still add up to the score. Several floored lines tie at exactly
+HIGH_RISK; `raw` (score minus `review_floor`) breaks those ties.
+AMBIGUOUS does not floor: it is our data problem and must never raise a score (architecture §3).
 
 Inputs are finding codes and three numeric BM25 features only. The function never receives any
 text, so neither the invoice text nor any generated explanation can move the score.
@@ -38,7 +48,9 @@ WEIGHTS = {
     "rank_declared": 0.10,
     "confident_alternative": 0.05,
 }
-HIGH_RISK = 0.5    # hand-set display threshold ("needs review"); not a capacity-based cut-off
+HIGH_RISK = 0.5    # review threshold: every line with a fired rule scores at least this
+NO_FLOOR = frozenset({"AMBIGUOUS"})     # informational findings: never raise a score
+FLOOR_TERM = "review_floor"
 
 
 def signals(features):
@@ -51,9 +63,11 @@ def signals(features):
 
 def risk_score(codes, features):
     """codes: iterable of finding codes; features: dict with sim_declared, rank_declared,
-    margin_top1. Returns (score in [0, 1], {term: contribution})."""
+    margin_top1. Returns (score in [0, 1], {term: contribution}); the contributions include
+    FLOOR_TERM when the floor lifted the score."""
     contrib = {}
-    for code in dict.fromkeys(codes):
+    codes = list(dict.fromkeys(codes))
+    for code in codes:
         if code in HARD_FLAGS:
             raise ValueError(f"{code} is a hard flag and bypasses the score")
         if code not in WEIGHTS:
@@ -63,4 +77,8 @@ def risk_score(codes, features):
         if not 0.0 <= value <= 1.0:
             raise ValueError(f"signal {name}={value} outside [0, 1]")
         contrib[name] = WEIGHTS[name] * value
-    return min(1.0, sum(contrib.values())), contrib
+    raw = sum(contrib.values())
+    if raw < HIGH_RISK and any(c not in NO_FLOOR for c in codes):
+        contrib[FLOOR_TERM] = HIGH_RISK - raw
+        return HIGH_RISK, contrib
+    return min(1.0, raw), contrib

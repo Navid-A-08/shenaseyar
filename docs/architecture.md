@@ -153,15 +153,33 @@ data-quality rules are not in `goods_catalog`. They go to a quarantine list with
 **DECIDED (Navid, 2026-09-25), still in force: the model never sees `ambiguous`.** It is recorded only
 in the catalog-maintenance counter and never raises a score. Rationale: `ambiguous` is a defect in
 our data (3 known IDs), and it carries no signal about the seller.
-Threshold is set by **review capacity** (e.g. top 2% per period); report Precision@k at that point.
+
+**The score is a ranking, not a gate (DECIDED, Navid, 2026-09-30).**
+- *Who enters the review queue* is decided by the rules: a line enters if it carries a hard flag
+  (§3) or if **any rule fired**. The score does not decide this.
+- Mechanically, a fired rule **floors** the line's score at the review threshold (0.5 in v0.1,
+  `src/detect/score.py`). The weighted sum is unchanged above the floor. No weight was changed for
+  this, including T1's 0.
+- *The order inside the queue* is the score. Lines lifted to the floor tie at the threshold; the
+  weighted sum before the floor (`raw_score`) orders them.
+- `AMBIGUOUS` does not floor (it must never raise a score, §3). Hard-flag lines have no score and
+  are always in the queue.
+- The retrieval terms alone cannot put a line in the queue: without a fired rule their maximum
+  (0.30) stays under the threshold.
+- **Review capacity** (e.g. top 2% per period) is a cut *within the ordered queue*, not the entry
+  test; report Precision@k at that point. This supersedes the earlier reading in which the score
+  threshold itself was the gate.
+- The same holds for the later LightGBM model: it ranks the queue; it does not admit lines to it.
 
 ## 7. Synthetic data
 Seeded, reproducible generator: stratified ID sampling (weight groups mixing exempt/taxable),
 realistic descriptions (templates + offline LLM paraphrase + noise: typos, Arabic ي/ك, missing
 half-space, abbreviations, mixed script), log-normal prices, ~15% injected errors T1–T6. T1 is built
 from "misleading neighbors" (lexically close, different rate). v0.1 (`tools/make_demo_invoices.py`):
-"close" = same head word, drawn at random among those; "different rate" becomes "different
-`charges_vat`" on the real catalog while its `Vat` column is `TODO(legal)`. Random **and** group-based splits.
+on the fake catalog, "close" = same head word, drawn at random among those. On the real catalog
+(hard set, 2026-09-30) the neighbor is drawn from the text's own top-20 BM25 matches and must differ
+in `charges_vat` ("different rate" is not usable there while `Vat` is `TODO(legal)`); lines with no
+such neighbor are skipped and counted. Random **and** group-based splits.
 **Golden set: 300 lines written and labeled by hand, independent of the generator** (two tiers, S and C; §10). It's the final
 reference for accuracy. Known weakness: evaluating on self-generated data is circular. Real
 anonymized lines, even 100, would be the biggest improvement.

@@ -5,7 +5,7 @@ import pytest
 
 from src.detect import score
 from src.detect.features import RANK_ABSENT
-from src.detect.score import WEIGHTS, risk_score
+from src.detect.score import HIGH_RISK, WEIGHTS, risk_score
 
 BEST = {"sim_declared": 1.0, "rank_declared": 1, "margin_top1": 0.8}
 WORST = {"sim_declared": 0.0, "rank_declared": RANK_ABSENT, "margin_top1": 1.0}
@@ -22,14 +22,37 @@ def test_clean_well_matched_line_scores_zero():
 
 
 def test_findings_add_their_weights():
-    s, contrib = risk_score(["T3"], BEST)
-    assert s == pytest.approx(WEIGHTS["T3"]) and contrib == {
-        "T3": WEIGHTS["T3"], "text_mismatch": 0.0, "rank_declared": 0.0,
+    s, contrib = risk_score(["T2"], BEST)
+    assert s == pytest.approx(WEIGHTS["T2"]) and contrib == {
+        "T2": WEIGHTS["T2"], "text_mismatch": 0.0, "rank_declared": 0.0,
         "confident_alternative": 0.0}
 
 
+@pytest.mark.parametrize("code", ["T1", "T3", "T4"])
+def test_any_fired_rule_floors_the_score_at_the_review_threshold(code):
+    s, contrib = risk_score([code], BEST)
+    assert s == HIGH_RISK
+    assert contrib["review_floor"] == pytest.approx(HIGH_RISK - WEIGHTS[code])
+    assert sum(contrib.values()) == pytest.approx(s)          # the terms still explain the score
+
+
+def test_floor_never_lowers_and_is_absent_when_not_needed():
+    s, contrib = risk_score(["T2"], WORST)
+    assert s > HIGH_RISK and "review_floor" not in contrib
+    assert "review_floor" not in risk_score([], WORST)[1]      # no rule fired: no floor
+    assert risk_score([], WORST)[0] < HIGH_RISK                # BM25 terms alone never gate
+
+
+def test_floor_keeps_the_weighted_sum_as_the_order_above_it():
+    assert risk_score(["T2"], BEST)[0] > risk_score(["T6"], BEST)[0] >= HIGH_RISK
+
+
+def test_codes_may_be_a_generator():
+    assert risk_score((c for c in ["T1"]), BEST)[0] == HIGH_RISK
+
+
 def test_duplicate_codes_count_once_and_score_is_capped():
-    assert risk_score(["T6", "T6"], BEST)[0] == pytest.approx(WEIGHTS["T6"])
+    assert risk_score(["T2", "T2"], BEST)[0] == pytest.approx(WEIGHTS["T2"])
     assert risk_score(["T2", "T6", "T3"], WORST)[0] == 1.0
 
 

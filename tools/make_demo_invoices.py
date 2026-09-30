@@ -21,12 +21,19 @@ How each kind is built (rates always come from rate_at on the line's date, never
   T1              "misleading neighbor" (architecture.md §7), never a random ID. Text written from
                   an ID A in force on the date; the DECLARED ID is a neighbor B that
                     - is in force on the same date,
-                    - shares A's head word (first token of the normalized title): lexically close,
                     - does not contain every word of the text (else the text supports B as well),
                     - differs from A in its tax consequence: a different rate on the fake profile;
                       a different charges_vat (Taxable: مشمول vs معاف / غیر مشمول) on the real
-                      profile, because the real Vat column is unresolved (TODO(legal)).
-                  B is drawn at random among such neighbors (not the closest one).
+                      profile, because the real Vat column is unresolved (TODO(legal)),
+                    - is lexically close to the text:
+                      fake  B shares A's head word (first token of the normalized title), drawn
+                            at random among those;
+                      real  HARD SET (2026-09-30): B is drawn at random from the text's own
+                            top-20 in-force BM25 matches. If none of them qualifies, the line is
+                            skipped and another A is drawn; the counts go to
+                            eval/results/demo_invoices_real_build.json. (The head-word picker
+                            was dropped for the real catalog: among ~1M rows a random same-head ID
+                            is almost never close, so that set only measured unrelated-ID swaps.)
                   vra / vam are consistent with B, so the line is otherwise clean (no T2, no T6).
   T2              as clean, but vra = another rate that exists in the table; vam consistent with it
   T6              as clean, but vam moved by at least 2 Rial (small absolute or 1-50% relative)
@@ -49,6 +56,7 @@ The vague phrases are NOT read from the rule: some are deliberately worded the w
 """
 import argparse
 import csv
+import json
 import random
 import sys
 from decimal import ROUND_CEILING, ROUND_FLOOR, ROUND_HALF_UP, Decimal
@@ -60,6 +68,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.detect.engine import load_rules  # noqa: E402
+from src.detect.features import CatalogSearch  # noqa: E402
 from src.detect.rates import RateTable, Status, parse_jalali  # noqa: E402
 from src.retrieval.bm25 import tokenize  # noqa: E402
 
@@ -71,6 +80,7 @@ ZWNJ = "‌"
 ROUNDINGS = [ROUND_HALF_UP, ROUND_FLOOR, ROUND_CEILING]
 MAX_TRIES = 100_000
 NEIGHBOR_SAMPLE = 200        # neighbors examined per T1 attempt (random subset of the head group)
+BUILD_REPORT = ROOT / "eval" / "results" / "demo_invoices_real_build.json"
 DEFAULTS = {"fake": (ROOT / "data" / "sample" / "fake_catalog.csv",
                      ROOT / "data" / "sample" / "demo_invoices.csv"),
             "real": (None, ROOT / "data" / "interim" / "demo_invoices_real.csv")}
@@ -107,6 +117,9 @@ class Gen:
         self.ids = sorted(table.ids())
         self._ok, self._gap, self._rates = {}, {}, None
         self._heads = self._pairs = None
+        self.search = None               # CatalogSearch, built only for the top-20 T1 picker
+        self.t1_stats = {"attempts": 0, "skipped": 0, "skipped_no_taxable_difference": 0,
+                         "skipped_candidates_contain_whole_text": 0, "neighbor_ranks": []}
         self.t4_min = t4_threshold()
 
     # --- lazy per-ID lookups (the real catalog has ~1M IDs) ---------------------------------
@@ -219,6 +232,36 @@ class Gen:
         return self.line(d, sid, self.seller_text(v.title), am, fee, v.rate)
 
     def t1(self):
+        return self.t1_head_word() if self.rates_trusted else self.t1_top20()
+
+    def t1_top20(self):
+        """Real profile (hard set): the declared ID is drawn from the text's OWN top-20 in-force
+        BM25 matches, so the swap is always close. Lines with no eligible candidate are skipped
+        and counted in self.t1_stats."""
+        if self.search is None:
+            self.search = CatalogSearch(self.t)
+        st = self.t1_stats
+        for _ in range(MAX_TRIES):
+            a, d, va = self.pick_ok()
+            text = self.seller_text(va.title)
+            st["attempts"] += 1
+            ranked = self.search.features(text, a, d).ranked
+            differing = [(i, c) for i, c in enumerate(ranked, 1)
+                         if c.sstid != a and self.differs(va, c.version)]
+            words = set(tokenize(text))
+            cands = [(i, c) for i, c in differing if not words <= set(tokenize(c.version.title))]
+            if not cands:
+                st["skipped"] += 1
+                st["skipped_no_taxable_difference" if not differing
+                   else "skipped_candidates_contain_whole_text"] += 1
+                continue
+            rank, c = self.rng.choice(cands)
+            st["neighbor_ranks"].append(rank)
+            am, fee = self.amounts()
+            return self.line(d, c.sstid, text, am, fee, c.version.rate, label="T1")
+        raise SystemExit("no T1 neighbor in any top-20")
+
+    def t1_head_word(self):
         heads = self.heads()
         for _ in range(MAX_TRIES):
             a, d, va = self.pick_ok()
@@ -315,8 +358,9 @@ class Gen:
                          self.rng.choice([v.rate for v in vs]), label="NOT_IN_FORCE")
 
 
-def generate(table, n=200, seed=1405, rates_trusted=True):
-    """rates_trusted=False is the real profile: no T2 or T6 lines, T1 neighbors by charges_vat."""
+def generate(table, n=200, seed=1405, rates_trusted=True, stats=None):
+    """rates_trusted=False is the real profile: no T2 or T6 lines, T1 neighbors from the text's
+    top-20 BM25 matches, differing in charges_vat. `stats` (a dict) receives the T1 skip counts."""
     g = Gen(table, seed, rates_trusted)
     each, status, vague_neg = round(n * 0.05), round(n * 0.02), round(n * 0.06)
     rows = [g.t1() for _ in range(each)]
@@ -329,6 +373,8 @@ def generate(table, n=200, seed=1405, rates_trusted=True):
              + [g.not_in_force() for _ in range(status)]
              + [g.vague(False) for _ in range(vague_neg)])
     rows += [g.clean() for _ in range(n - len(rows))]
+    if stats is not None:
+        stats.update(g.t1_stats)
     g.rng.shuffle(rows)
     for i, row in enumerate(rows, 1):
         row["line_id"] = f"L{i:03d}"
@@ -357,8 +403,17 @@ def main(argv=None):
     else:
         catalog = a.catalog or DEFAULTS["fake"][0]
     out = a.out or DEFAULTS[a.profile][1]
-    rows = generate(RateTable.from_catalog(catalog), a.n, a.seed, a.profile == "fake")
+    stats = {}
+    rows = generate(RateTable.from_catalog(catalog), a.n, a.seed, a.profile == "fake", stats)
     write(rows, out)
+    if a.profile == "real":
+        BUILD_REPORT.write_text(json.dumps({"seed": a.seed, "n": a.n, "t1_picker": "top20",
+                                            "t1": stats}, indent=2) + "\n", encoding="utf-8")
+        print(f"T1 picker: {stats['attempts']} lines tried, {stats['skipped']} skipped "
+              f"(no Taxable difference in the top 20: {stats['skipped_no_taxable_difference']}; "
+              f"only candidates containing the whole text: "
+              f"{stats['skipped_candidates_contain_whole_text']}); "
+              f"ranks of the chosen neighbors: {sorted(stats['neighbor_ranks'])}")
     labels = {}
     for r in rows:
         labels[r["labels"] or "clean"] = labels.get(r["labels"] or "clean", 0) + 1

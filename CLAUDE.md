@@ -21,6 +21,11 @@ is a bug. T1, T3 and T4 have no bar; they are reported only. T1's decision rule
 (`rank_declared > 5` and `sim_declared < 0.5`) was pre-registered in commit d96472f.
 Hard flags (2026-09-28): NOT_IN_CATALOG, NOT_IN_FORCE, QUARANTINED_ONLY bypass the risk score
 (no score, always reviewed, shown first). T1 has score weight 0; other weights unchanged.
+The score is a ranking, not a gate (2026-09-30): any fired rule floors the score at the review
+threshold, so rules decide who enters the review queue and the weighted sum only orders it.
+Real-profile T1 lines are the hard set (2026-09-30): the swapped ID comes from the text's own
+top-20 BM25 matches and differs in Taxable; skipped draws are counted in
+`eval/results/demo_invoices_real_build.json`.
 Commands: `python tools/eval_demo_rules.py [--profile real]` · `streamlit run app.py`
 (Update this section whenever the scope changes.)
 

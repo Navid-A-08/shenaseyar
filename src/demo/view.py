@@ -11,7 +11,8 @@ LABELS_FA = {"issue_date": "تاریخ صدور (YYYY-MM-DD شمسی)", "sstid":
 SEVERITY_FA = {"high": "زیاد", "medium": "متوسط", "low": "کم", "none": "اطلاعاتی"}
 TERM_FA = {"text_mismatch": "ناهمخوانی شرح با شناسه (BM25)",
            "rank_declared": "رتبه شناسه اعلام‌شده (BM25)",
-           "confident_alternative": "وجود جایگزین مطمئن (BM25)"}
+           "confident_alternative": "وجود جایگزین مطمئن (BM25)",
+           "review_floor": "کف امتیاز: قاعده‌ای فعال شده است"}
 _MD = re.compile(r"([\\`*_{}\[\]()#+\-.!|<>~])")
 
 
