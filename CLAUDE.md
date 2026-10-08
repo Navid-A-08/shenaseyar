@@ -18,7 +18,9 @@ Lines come from `tools/make_demo_invoices.py [--profile real]`. Report: `docs/de
 Pre-registered bar (2026-09-28, before any rule code): **T2 and T6 precision and recall both
 1.00 on the 200 synthetic fake-profile lines.** They are arithmetic and lookup, so anything less
 is a bug. T1, T3 and T4 have no bar; they are reported only. T1's decision rule
-(`rank_declared > 5` and `sim_declared < 0.5`) was pre-registered in commit d96472f.
+(`rank_declared > 5` and `sim_declared < 0.5`) was pre-registered in commit d96472f. A
+precondition was added 2026-10-08 AFTER seeing results (T1 abstains when the description has no
+word outside T4's vague-word list); boundaries unchanged. Report it as post hoc.
 Hard flags (2026-09-28): NOT_IN_CATALOG, NOT_IN_FORCE, QUARANTINED_ONLY bypass the risk score
 (no score, always reviewed, shown first). T1 has score weight 0; other weights unchanged.
 The score is a ranking, not a gate (2026-09-30): any fired rule floors the score at the review

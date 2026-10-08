@@ -19,7 +19,7 @@ This keeps CPU cost low and every decision traceable.
 ## 3. Error types (targets)
 | Code | Meaning | Detected by |
 |---|---|---|
-| T1 | Description doesn't match declared ID (e.g. a good that charges VAT filed under an ID with `charges_vat = false`) | retrieval + rule (v0.1: `rank_declared > 5` and `sim_declared < 0.5`, pre-registered 2026-09-28, `src/detect/rules/t1_description_mismatch.yaml`); later retrieval + risk model (core NLP) |
+| T1 | Description doesn't match declared ID (e.g. a good that charges VAT filed under an ID with `charges_vat = false`) | retrieval + rule (v0.1: `rank_declared > 5` and `sim_declared < 0.5`, pre-registered 2026-09-28, `src/detect/rules/t1_description_mismatch.yaml`; precondition added 2026-10-08 after seeing results: abstains on vague-only text, T4's word list); later retrieval + risk model (core NLP) |
 | T2 | Declared rate ≠ reference rate of the ID on invoice date | rule |
 | T3 | Generic/"other" ID used where a specific ID exists | retrieval + rule |
 | T4 | Vague description ("کالا", "خدمات") with high amount | rule + feature |

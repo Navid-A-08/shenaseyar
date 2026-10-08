@@ -103,3 +103,18 @@ def test_t1_renders_rank_and_similarity():
     e = explain(Hit("T1", "x", "high", "d", dict(EVIDENCE["T1"], rank_declared=7)), LINE, UNITS)
     assert "رتبه: 7" in e.text
     assert "مستندی که" in e.citation_text          # no legal unit is attached to T1 yet
+
+
+def test_t1_states_a_tax_status_difference_as_a_fact_about_the_two_ids():
+    ev = dict(EVIDENCE["T1"], declared_tax_status="exempt", best_tax_status="taxable")
+    e = explain(Hit("T1", "x", "high", "d", ev), LINE, UNITS)
+    assert "«معاف»" in e.text and "«مشمول»" in e.text and "متفاوت" in e.text
+    assert "٪ " not in e.text.split("متفاوت")[1]        # no rate after the note: no claim about it
+    assert not any(w in e.text for w in ("باید", "صحیح", "درست"))   # never says what is correct
+    out = dict(ev, declared_tax_status="out_of_scope", best_tax_status="exempt")
+    assert "«غیر مشمول»" in explain(Hit("T1", "x", "high", "d", out), LINE, UNITS).text
+
+
+def test_t1_says_nothing_about_tax_status_when_it_is_the_same():
+    ev = dict(EVIDENCE["T1"], declared_tax_status="taxable", best_tax_status="taxable")
+    assert "متفاوت" not in explain(Hit("T1", "x", "high", "d", ev), LINE, UNITS).text

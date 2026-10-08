@@ -1,6 +1,7 @@
 """T1 (description vs declared ID): the pre-registered decision rule and its boundaries.
 
-fires iff rate_at OK, s1 > 0, rank_declared > top_k (5) AND sim_declared < max_sim (0.5).
+fires iff rate_at OK, s1 > 0, rank_declared > top_k (5) AND sim_declared < max_sim (0.5),
+plus the precondition added 2026-10-08: the text has a word outside T4's vague-word list.
 """
 from decimal import Decimal
 
@@ -13,7 +14,8 @@ from src.detect.rates import RateTable, Version
 
 SPEC = "شناسه اختصاصی تولید داخل"
 D = "1404-06-01"
-P = {"top_k": 5, "max_sim": 0.5}
+VAGUE = next(r for r in load_rules() if r.code == "T4").params["vague_words"]
+P = {"top_k": 5, "max_sim": 0.5, "vague_words_from": "t4_vague_high_amount", "vague_words": VAGUE}
 
 
 def v(sid, title, frm="1404-01-01", to=None):
@@ -36,7 +38,42 @@ def fires(rank, sim, s1=10.0, line=LINE):
 
 def test_committed_rule_has_the_preregistered_boundaries():
     rule = next(r for r in load_rules() if r.code == "T1")
-    assert rule.params == {"top_k": 5, "max_sim": 0.5}
+    assert rule.params == {"top_k": 5, "max_sim": 0.5, "vague_words_from": "t4_vague_high_amount"}
+
+
+def test_precondition_borrows_t4s_list_not_a_copy():
+    rules = {r.code: r for r in load_rules()}
+    assert rules["T1"].resolved == {"vague_words": rules["T4"].params["vague_words"]}
+
+
+def _vague_line(sstt):
+    return InvoiceLine.parse(D, "2900000000002", sstt, "1", "1000", "10", "100")
+
+
+@pytest.mark.parametrize("sstt", ["خدمات", "کالا", "خدمات متفرقه", "بابت خدمات ۲", "ساير اقلام",
+                                  "123"])
+def test_abstains_on_vague_only_text(sstt):
+    # features would fire (not in top 5, sim 0); the precondition alone stops T1
+    assert not fires(RANK_ABSENT, 0.0, line=_vague_line(sstt))
+
+
+@pytest.mark.parametrize("sstt", ["خدمات حمل", "کالای متفرقه", "اجناس فروش رفته"])
+def test_one_word_outside_the_list_is_enough(sstt):
+    # «حمل» is informative; «کالای» and «رفته» are not on T4's list (its known gap), so T1 inherits it
+    assert fires(RANK_ABSENT, 0.0, line=_vague_line(sstt))
+
+
+def test_reference_to_a_missing_rule_fails_loudly(tmp_path):
+    import shutil
+    from src.detect.engine import RULES_DIR
+    shutil.copy(RULES_DIR / "t1_description_mismatch.yaml", tmp_path)
+    with pytest.raises(RuleError, match="vague_words_from"):
+        load_rules(tmp_path)
+
+
+def test_t1_evidence_carries_both_tax_statuses():
+    (_, _, ev), = check_description_mismatch(LINE, Context(TABLE, feats(RANK_ABSENT, 0.0)), P)
+    assert ev["declared_tax_status"] == "taxable" and ev["best_tax_status"] == "taxable"
 
 
 @pytest.mark.parametrize("rank, sim, expected", [

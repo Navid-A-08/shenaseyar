@@ -4,6 +4,9 @@
 # top_k = 5: the alternatives the reviewer is shown (same as T3) and the Recall@5 of Phase 1.
 # max_sim = 0.5: the best in-force alternative scores at least twice the declared ID.
 # Both are round, hand-set values chosen before looking at any T1 result. Not tuned.
+# vague_words_from (PRECONDITION, added 2026-10-08 AFTER seeing the first run's false alarms):
+#   T1 abstains when the text has no word outside this rule's vague_words list (T4's list).
+#   The boundaries above are unchanged.
 id: t1_description_mismatch
 code: T1
 check: description_mismatch
@@ -12,3 +15,4 @@ description: شرح کالا یا خدمت با عنوان شناسه اعلام
 params:
   top_k: 5
   max_sim: 0.5
+  vague_words_from: t4_vague_high_amount

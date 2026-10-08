@@ -1,20 +1,15 @@
 {
   "per_code": {
     "T1": {
-      "precision": 0.3636,
+      "precision": 0.6667,
       "recall": 0.4,
       "support": 10,
       "tp": 4,
-      "fp": 7,
+      "fp": 2,
       "fn": 6,
       "fp_lines": [
-        "L001",
         "L030",
-        "L075",
-        "L111",
-        "L130",
-        "L180",
-        "L188"
+        "L180"
       ],
       "fn_lines": [
         "L024",
@@ -25,8 +20,8 @@
         "L128"
       ],
       "fp_by_label": {
-        "clean": 4,
-        "T4": 3
+        "clean": 1,
+        "T4": 1
       }
     },
     "T2": {
@@ -178,11 +173,11 @@
     },
     "clean": {
       "n": 142,
-      "mean": 0.0262,
+      "mean": 0.0209,
       "min": 0.0,
       "max": 0.5,
-      "in_review": 4,
-      "floored": 4,
+      "in_review": 1,
+      "floored": 1,
       "raw_mean": 0.0193,
       "raw_min": 0.0,
       "raw_max": 0.2605

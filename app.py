@@ -10,8 +10,9 @@ The invoice text is untrusted: it is shown only through st.code / escaped Markdo
 import streamlit as st
 
 from src.demo.pipeline import FAKE, Checker, real_catalog_path, real_profile
-from src.demo.view import (FIELDS, LABELS_FA, alternative_rows, contribution_rows,
-                           hard_flag_texts, hit_rows, md_escape, rate_status_text, read_demo_rows)
+from src.demo.view import (FIELDS, LABELS_FA, alternative_rows, contribution_rows, default_pick,
+                           hard_flag_texts, hit_rows, md_escape, rate_status_text, read_demo_rows,
+                           score_texts)
 from src.detect.engine import InvoiceLine, LineError
 from src.detect.score import HIGH_RISK
 
@@ -27,6 +28,13 @@ PICK, MANUAL = "انتخاب از ردیف‌های نمونه", "ورود دس�
 @st.cache_resource
 def get_checker(name):
     return Checker.from_profile(real_profile() if name == "real" else FAKE)
+
+
+@st.cache_resource
+def get_default_pick(name):
+    """First sample line whose injected error is caught, so the page opens on a true positive."""
+    checker = get_checker(name)
+    return default_pick(read_demo_rows(checker.profile.invoices), checker)
 
 
 st.set_page_config(page_title="شناسه‌یار: نسخه نمایشی", layout="wide")
@@ -50,7 +58,7 @@ if mode == PICK:
     rows = read_demo_rows(prof.invoices)
     labels = [f"{r['line_id']}  [{r['labels'] or 'بدون خطای تزریقی'}]" for r in rows]
     pick = st.selectbox("ردیف نمونه (برچسب واقعی داخل کروشه)", range(len(rows)),
-                        format_func=lambda i: labels[i])
+                        index=get_default_pick(name), format_func=lambda i: labels[i])
     values = {f: rows[pick][f] for f in FIELDS}
 else:
     values = {f: st.text_input(LABELS_FA[f], value="") for f in FIELDS}
@@ -72,13 +80,14 @@ for text in hard_flag_texts(result):
 st.subheader("ردیف ورودی")
 st.code("\n".join(f"{f}: {values[f]}" for f in FIELDS), language=None)
 
-c1, c2 = st.columns(2)
-if result.score is None:
-    c1.metric("امتیاز ریسک (0 تا 1، وزن‌دهی دستی)", "محاسبه نشد")
-    st.caption("این ردیف پرچم قطعی دارد: امتیاز ریسک برای آن محاسبه نمی‌شود و ردیف در هر حال "
-               "برای بررسی فرستاده می‌شود.")
-else:
-    c1.metric("امتیاز ریسک (0 تا 1، وزن‌دهی دستی)", f"{result.score:.2f}")
+value, note = score_texts(result)
+floored = result.raw_score is not None and result.raw_score < (result.score or 0)
+c1, c2, c3 = st.columns(3)
+c1.metric("امتیاز ریسک (0 تا 1، وزن‌دهی دستی)", value)
+if floored:
+    c3.metric("امتیاز خام (پیش از کف بررسی)", f"{result.raw_score:.2f}")
+if note:
+    st.caption(note)
 c2.metric("نیاز به بررسی", "بله" if result.needs_review else "خیر",
           help=f"پرچم قطعی یا فعال شدن یک قاعده (کف امتیاز {HIGH_RISK})")
 st.markdown(md_escape(rate_status_text(result, prof.rates_trusted)))
@@ -92,14 +101,22 @@ for code in result.skipped:
     st.info(f"قاعده {code} روی این فهرست اجرا نشد (نه اینکه یافته‌ای نداشت): معنای ستون Vat "
             f"هنوز روشن نیست (TODO(legal)).")
 with st.expander("اجزای امتیاز"):
-    st.table(contribution_rows(result) or [{"جزء": "-", "سهم": 0}])
+    breakdown = contribution_rows(result)
+    if breakdown:
+        st.table(breakdown)
+    else:
+        st.write("امتیازی محاسبه نشده است: این ردیف پرچم قطعی دارد.")
     st.caption("وزن‌ها دستی تعیین شده‌اند، نه با یادگیری (src/detect/score.py). امتیاز فقط "
                "ترتیب ردیف‌ها را در صف بررسی تعیین می‌کند؛ هر ردیفی که قاعده‌ای در آن فعال شود "
                "وارد صف می‌شود.")
 
 st.subheader("پنج شناسه جایگزین (BM25، معتبر در تاریخ صدور)")
 if result.alternatives:
-    st.table(alternative_rows(result, prof.rates_trusted))
+    alt = alternative_rows(result, prof.rates_trusted)
+    st.table(alt)
+    if any(r["هم‌امتیاز"] for r in alt):
+        st.caption("ردیف‌هایی که ستون «هم‌امتیاز» دارند امتیاز BM25 برابر دارند؛ ترتیب آن‌ها رتبه‌بندی "
+                   "نیست (فقط بر اساس شماره شناسه مرتب شده‌اند).")
 else:
     st.write("هیچ شناسه معتبری با این شرح منطبق نشد.")
 
