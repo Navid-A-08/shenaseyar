@@ -1,7 +1,7 @@
 """Synthetic demo invoice lines with ground-truth labels. Seeded and reproducible.
 
     python tools/make_demo_invoices.py [--profile fake|real] [--seed 1405] [--n 200]
-                                       [--catalog PATH] [--out PATH]
+                                       [--catalog PATH] [--out PATH] [--report PATH]
 
 Two catalog profiles (src/demo/pipeline.py):
   fake  data/sample/fake_catalog.csv -> data/sample/demo_invoices.csv (committed).
@@ -396,6 +396,7 @@ def main(argv=None):
     ap.add_argument("--n", type=int, default=200)
     ap.add_argument("--catalog")
     ap.add_argument("--out")
+    ap.add_argument("--report", help="real profile: where the T1 build report (JSON) goes")
     a = ap.parse_args(argv)
     if a.profile == "real":
         from src.demo.pipeline import real_profile
@@ -407,7 +408,7 @@ def main(argv=None):
     rows = generate(RateTable.from_catalog(catalog), a.n, a.seed, a.profile == "fake", stats)
     write(rows, out)
     if a.profile == "real":
-        BUILD_REPORT.write_text(json.dumps({"seed": a.seed, "n": a.n, "t1_picker": "top20",
+        Path(a.report or BUILD_REPORT).write_text(json.dumps({"seed": a.seed, "n": a.n, "t1_picker": "top20",
                                             "t1": stats}, indent=2) + "\n", encoding="utf-8")
         print(f"T1 picker: {stats['attempts']} lines tried, {stats['skipped']} skipped "
               f"(no Taxable difference in the top 20: {stats['skipped_no_taxable_difference']}; "

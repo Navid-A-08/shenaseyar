@@ -139,3 +139,84 @@ def test_alternative_rows_mark_the_declared_id():
     rows = alternative_rows(r)
     assert rows[0]["شناسه"] == "2729744617259" and rows[0]["اعلام‌شده"] == "✓"
     assert len(rows) <= 5
+
+
+# ---- demo-page fixes (2026-10-08) ---------------------------------------------------------------
+
+def test_default_sample_line_is_a_caught_injected_error():
+    from src.demo.pipeline import DEMO_INVOICES
+    from src.demo.view import default_pick, read_demo_rows
+    c = Checker.from_paths()
+    rows = read_demo_rows(DEMO_INVOICES)
+    i = default_pick(rows, c)
+    r = rows[i]
+    assert r["labels"].startswith("T")
+    line = InvoiceLine.parse(*(r[f] for f in ("issue_date", "sstid", "sstt", "am", "fee", "vra",
+                                              "vam")))
+    assert r["labels"] in c.check(line).codes
+
+
+def test_app_opens_on_the_default_pick_and_keeps_labels_in_the_dropdown(monkeypatch):
+    st, calls = _stub("انتخاب از ردیف‌های نمونه", pick=0)
+    assert _run(monkeypatch, st) == "done"
+    (_, args, kw), = [c for c in calls if c[0] == "selectbox"]
+    from src.demo.pipeline import DEMO_INVOICES
+    from src.demo.view import default_pick, read_demo_rows
+    assert kw["index"] == default_pick(read_demo_rows(DEMO_INVOICES), Checker.from_paths())
+    assert "[" in kw["format_func"](kw["index"])            # ground-truth label still shown
+    assert "بدون خطای تزریقی" not in kw["format_func"](kw["index"])
+
+
+def _line(sstid, sstt, vra="10", vam="100"):
+    return InvoiceLine.parse("1405-02-01", sstid, sstt, "1", "1000", vra, vam)
+
+
+def test_floored_score_is_labeled_with_the_raw_score_next_to_it():
+    from src.demo.view import score_texts
+    r = Checker.from_paths().check(_line("2909206651897", "خدمات آموزشی آزمایشی"))   # T1 fires
+    assert r.codes == ["T1"]
+    value, note = score_texts(r)
+    assert value == "0.50 (کف بررسی)" and f"{r.raw_score:.2f}" in note
+
+
+def test_unfloored_and_hard_flagged_scores():
+    from src.demo.view import score_texts
+    c = Checker.from_paths()
+    assert score_texts(c.check(_line("2909206651897", "برنج فرضی")))[1] is None
+    assert score_texts(c.check(_line("2999999999999", "برنج فرضی")))[0] == "محاسبه نشد"
+
+
+def test_score_breakdown_is_never_an_empty_table():
+    from src.demo.view import contribution_rows
+    c = Checker.from_paths()
+    clean = contribution_rows(c.check(_line("2909206651897", "برنج فرضی")))
+    names = [r["جزء"] for r in clean]
+    assert len(clean) == 5 and names[-2:] == ["امتیاز خام (جمع اجزا)", "امتیاز نهایی"]
+    t1 = contribution_rows(c.check(_line("2909206651897", "خدمات آموزشی آزمایشی")))
+    assert {"جزء": "قاعده T1 (وزن دستی)", "سهم": "0.000"} in t1   # weight 0 is shown, not hidden
+    assert t1[-1] == {"جزء": "امتیاز نهایی", "سهم": "0.500"}
+    assert contribution_rows(c.check(_line("2999999999999", "برنج فرضی"))) == []
+
+
+def test_app_shows_floor_metric_and_breakdown(monkeypatch):
+    values = {"issue_date": "1405-02-01", "sstid": "2909206651897", "sstt": "خدمات آموزشی آزمایشی",
+              "am": "1", "fee": "1000", "vra": "10", "vam": "100"}
+    st, calls = _stub("ورود دستی", manual={LABELS_FA[k]: v for k, v in values.items()})
+    assert _run(monkeypatch, st) == "done"
+    metrics = {a[0]: a[1] for n, a, _ in calls if n == "metric"}
+    assert metrics["امتیاز ریسک (0 تا 1، وزن‌دهی دستی)"] == "0.50 (کف بررسی)"
+    assert "امتیاز خام (پیش از کف بررسی)" in metrics
+    tables = [a[0] for n, a, _ in calls if n == "table" and a and a[0] and "جزء" in a[0][0]]
+    assert tables and len(tables[0]) >= 4
+
+
+def test_tied_alternatives_are_marked():
+    from src.demo.view import tie_groups
+    assert tie_groups([1.54, 1.54, 1.54, 0.9, 0.9, 0.5]) == [[1, 2, 3]] * 3 + [[4, 5]] * 2 + [[]]
+    assert tie_groups([3.0, 2.0]) == [[], []]
+    r = Checker.from_paths().check(_line("2909206651897", "خدمات آموزشی آزمایشی"))
+    rows = alternative_rows(r)
+    scores = [row["امتیاز BM25"] for row in rows]
+    for row in rows:
+        tied = scores.count(row["امتیاز BM25"]) > 1
+        assert bool(row["هم‌امتیاز"]) is tied

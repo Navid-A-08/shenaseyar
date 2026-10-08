@@ -21,7 +21,7 @@ TEMPLATES = {
     "T1": ("شرح این ردیف با عنوان شناسه اعلام‌شده {sstid} همخوانی ندارد: این شناسه در میان "
            "{top_k} شناسه منطبق‌تر با شرح نیست (رتبه: {rank_text}) و امتیاز انطباق آن {sim_pct}٪ "
            "امتیاز بهترین شناسه معتبر در تاریخ {issue_date} است. نزدیک‌ترین شناسه: {best_sstid} "
-           "با عنوان «{best_title}»."),
+           "با عنوان «{best_title}».{tax_note}"),
     "T2": ("نرخ اعلام‌شده در این ردیف {declared_rate}٪ است، اما برای شناسه {sstid} در تاریخ "
            "{issue_date} نرخ {reference_rate}٪ ثبت شده است (وضعیت در فهرست شناسه‌ها: {tax_status_fa}؛ "
            "این نسخه از {valid_from} تا {valid_to} معتبر است)."),
@@ -81,9 +81,20 @@ def _fields(hit, line):
         rank = hit.evidence["rank_declared"]
         f["rank_text"] = f"پایین‌تر از {RANK_ABSENT - 1}" if rank >= RANK_ABSENT else str(rank)
         f["sim_pct"] = str(round(100 * hit.evidence["sim_declared"]))
+        f["tax_note"] = t1_tax_note(hit.evidence)
     if "tied_rates" in hit.evidence:
         f["tied_rates"] = "، ".join(f"{fmt_num(r)}٪" for r in hit.evidence["tied_rates"])
     return f
+
+
+def t1_tax_note(ev):
+    """T1: when the declared ID and the best match differ in catalog tax status, say so as a fact
+    about the two IDs. It never says which status or rate is correct."""
+    d, b = ev.get("declared_tax_status"), ev.get("best_tax_status")
+    if d is None or b is None or d == b:
+        return ""
+    return (f" وضعیت مالیاتی این دو شناسه در فهرست متفاوت است: شناسه اعلام‌شده «{TAX_STATUS_FA[d]}» "
+            f"و نزدیک‌ترین شناسه «{TAX_STATUS_FA[b]}» ثبت شده است.")
 
 
 def cite(code, date, units):

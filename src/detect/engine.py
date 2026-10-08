@@ -17,7 +17,7 @@ Every check reads the rate only through table.rate_at(sstid, issue_date). The ID
 (NOT_IN_CATALOG, NOT_IN_FORCE, AMBIGUOUS, QUARANTINED_ONLY) come from the ID_STATUS rule; T2 fires
 only when rate_at is OK, so they are never reported as T2.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
@@ -171,10 +171,21 @@ def check_description_mismatch(line, ctx, p):
     Consequences accepted in advance:
       - A declared ID that shares a head noun and most words with the text (a close neighbor)
         passes (c) or (d) and is NOT flagged. T1 catches gross mismatches, not near-misses.
-      - A vague-only text (T4 territory) usually shares no word with the declared title, so
-        T1 fires on it too. No abstention was added for that; the eval reports it.
-      - No rate or tax status is used: T1 is about the text, T2 about the rate.
+      - No rate or tax status is used to DECIDE: T1 is about the text, T2 about the rate.
+        The tax statuses of the declared ID and of the best match are only carried as evidence
+        for the explanation.
+
+    PRECONDITION (added 2026-10-08, AFTER seeing the first run's false-alarm breakdown, where
+    every non-T3 false positive was a vague-only text; Navid's decision, docs/demo.md):
+      (p) the text has at least one word (non-digit token) outside the vague-word list. A text
+          made only of vague words («خدمات», «کالای متفرقه») is not a product description, so
+          there is nothing to compare with an ID; that case is T4's. The list is T4's own
+          (`vague_words_from` names the rule), so the two rules can never disagree on what
+          "vague" means, and T1 inherits T4's known gaps (e.g. «رفته» is not in the list).
+    This is a precondition on what T1 applies to. Boundaries (c) and (d) are unchanged.
     """
+    if vague_only(line.sstt, p["vague_words"]):
+        return []
     res = ctx.table.rate_at(line.sstid, line.issue_date)
     if res.status is not Status.OK:
         return []
@@ -188,14 +199,25 @@ def check_description_mismatch(line, ctx, p):
     best = r.ranked[0]
     return [("T1", None, {"rank_declared": r.rank_declared, "sim_declared": r.sim_declared,
                           "top_k": p["top_k"], "best_sstid": best.sstid,
-                          "best_title": best.version.title})]
+                          "best_title": best.version.title,
+                          "declared_tax_status": res.version.tax_status,
+                          "best_tax_status": best.version.tax_status})]
+
+
+def _words(text):
+    """Normalized non-digit tokens: the words a vagueness test looks at."""
+    return [t for t in tokenize(text) if not t.isdigit()]
+
+
+def vague_only(text, vague_words):
+    """True if the text has no word outside `vague_words` (also True for no words at all).
+    Shared by T4 (vague and high amount) and T1's precondition."""
+    vague = {normalize(w) for w in vague_words}
+    return all(t in vague for t in _words(text))
 
 
 def check_vague_high_amount(line, ctx, p):
-    vague = {normalize(w) for w in p["vague_words"]}
-    toks = tokenize(line.sstt)
-    words = [t for t in toks if not t.isdigit()]
-    if not words or not all(t in vague for t in words):
+    if not _words(line.sstt) or not vague_only(line.sstt, p["vague_words"]):
         return []
     if line.base < Decimal(str(p["min_amount_rial"])):
         return []
@@ -207,9 +229,11 @@ CHECKS = {
     "rate_mismatch": (check_rate_mismatch, set()),
     "vat_arithmetic": (check_vat_arithmetic, {"tolerance_rial"}),
     "general_with_specific": (check_general_with_specific, {"top_k"}),
-    "description_mismatch": (check_description_mismatch, {"top_k", "max_sim"}),
+    "description_mismatch": (check_description_mismatch, {"top_k", "max_sim", "vague_words_from"}),
     "vague_high_amount": (check_vague_high_amount, {"vague_words", "min_amount_rial"}),
 }
+# params that name another rule whose param is borrowed at load time: {param: borrowed param}
+REFERENCES = {"vague_words_from": "vague_words"}
 
 
 @dataclass(frozen=True)
@@ -220,12 +244,13 @@ class Rule:
     severity: str
     description: str
     params: dict
+    resolved: dict = field(default_factory=dict)    # borrowed params (REFERENCES), set by load_rules
 
     def run(self, line, ctx):
         fn = CHECKS[self.check][0]
         return [Hit(code=code, rule_id=self.id, severity=sev or self.severity,
                     description=self.description, evidence=ev)
-                for code, sev, ev in fn(line, ctx, self.params)]
+                for code, sev, ev in fn(line, ctx, {**self.params, **self.resolved})]
 
 
 def _rule(raw, src):
@@ -259,7 +284,20 @@ def load_rules(rules_dir=RULES_DIR):
         raise RuleError(f"duplicate rule ids in {rules_dir}")
     if not rules:
         raise RuleError(f"no rules in {rules_dir}")
-    return rules
+    by_id = {r.id: r for r in rules}
+    out = []
+    for r in rules:
+        resolved = {}
+        for ref, borrowed in REFERENCES.items():
+            if ref not in r.params:
+                continue
+            src = by_id.get(r.params[ref])
+            if src is None or borrowed not in src.params:
+                raise RuleError(f"rule {r.id}: {ref} = {r.params[ref]!r} names no rule with "
+                                f"{borrowed!r}")
+            resolved[borrowed] = src.params[borrowed]
+        out.append(replace(r, resolved=resolved) if resolved else r)
+    return out
 
 
 def run_rules(rules, line, ctx):

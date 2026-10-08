@@ -37,12 +37,45 @@ profile. T1, T3 and T4: no bar, reported only. The **T1 decision rule** was comm
 (`d96472f`) before any T1 run:
 fires iff `rate_at` is OK, the text matches some in-force ID, **`rank_declared > 5` and
 `sim_declared < 0.5`** (docstring of `check_description_mismatch`, `src/detect/engine.py`).
+On 2026-10-08 a **precondition** was added to T1 after seeing results (next section); the two
+boundaries were not touched.
 
-## Result (2026-09-30; real profile = hard T1 set)
+## T1 precondition (2026-10-08): added AFTER seeing the first run's false alarms
+**This was not pre-registered.** It was added after the 2026-09-28 and 2026-09-30 runs showed
+that every T1 false positive outside the T3 lines was a vague-only description («خدمات»,
+«کالای متفرقه»), so the numbers below are not an independent test of it.
+The precondition: **T1 abstains when the description has no word outside the vague-word list.**
+A vague-only string carries no product information, so there is nothing to compare with an ID;
+that case belongs to T4. The list is T4's own: the T1 rule names it (`vague_words_from`), so the
+two rules cannot disagree on what "vague" means. The rank and similarity boundaries
+(`rank_declared > 5`, `sim_declared < 0.5`) are **unchanged**.
+
+Same lines before and after (fake: committed, seed 1405; real: hard set, seed 1405):
+
+| T1 | fake P | fake R | fake FP | real P | real R | real FP |
+|---|---:|---:|---:|---:|---:|---:|
+| before (2026-09-30) | 0.36 | 0.40 | 7 | 0.09 | 0.30 | 32 |
+| **after** (2026-10-08) | **0.67** | 0.40 | 2 | **0.15** | 0.30 | 17 |
+
+| T1 false positives by true label | fake before | fake after | real before | real after |
+|---|---:|---:|---:|---:|
+| vague low-amount lines (labeled clean) | 4 | 1 | 12 | 3 |
+| T4 lines | 3 | 1 | 10 | 4 |
+| T3 lines | 0 | 0 | 10 | 10 |
+| non-vague clean lines | 0 | 0 | 0 | 0 |
+
+- **Recall cannot change, and did not:** no T1 line has a vague-only description.
+- **The false alarms that remain on vague text are T4's list gaps, inherited.** All 9 survivors
+  (2 fake, 7 real) are «کالای متفرقه» (4) or «اجناس فروش رفته» (5): «کالای» and «رفته» are not
+  on the list, so T4 misses those texts and T1 treats them as descriptions. Extending the list
+  would change T4 too and was not done.
+- The 10 real T3-line false alarms are untouched (open item 2 below).
+
+## Result (2026-10-08; real profile = hard T1 set; T1 with the precondition)
 
 | Code | fake P | fake R | fake FP | fake FN | real P | real R | real FP | real FN | Bar (fake) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| T1 | 0.36 | 0.40 | 7 | 6 | **0.09** | **0.30** | 32 | 7 | none |
+| T1 | 0.67 | 0.40 | 2 | 6 | **0.15** | **0.30** | 17 | 7 | none |
 | T2 | 1.00 | 1.00 | 0 | 0 | not run | not run | | | **PASS** |
 | T3 | 0.59 | 1.00 | 7 | 0 | 1.00 | 1.00 | 0 | 0 | none |
 | T4 | 1.00 | 0.80 | 0 | 2 | 1.00 | 0.60 | 0 | 4 | none |
@@ -51,7 +84,7 @@ fires iff `rate_at` is OK, the text matches some in-force ID, **`rank_declared >
 | NOT_IN_FORCE | 1.00 | 1.00 | 0 | 0 | 1.00 | 1.00 | 0 | 0 | none |
 
 Support is 10 for T1–T6 and 4 for each ID status. ID-status lines that also got T2: 0 on the fake
-profile. The fake-profile lines and numbers are unchanged from 2026-09-28.
+profile. The fake-profile lines are unchanged from 2026-09-28; only the T1 row moved (precondition).
 
 ### The real-catalog T1 set (hard set)
 The declared (swapped) ID is drawn at random from the description's **own top-20 in-force BM25
@@ -67,13 +100,17 @@ A line with no such candidate is skipped and another is drawn
   **6 fail the similarity condition** (rank 9–20, but `sim_declared` 0.51–0.77: the swapped ID
   scores more than half of the best match) and **1 fails the rank condition** (rank 2).
   The 3 hits have `sim_declared` 0.33–0.42.
-- **T1 precision 0.09 (3 of 35).** The 32 false positives are 12 vague low-amount lines (labeled
-  clean), 10 T4 lines and all 10 T3 lines. There are 0 on the 150 non-vague clean lines.
+- **T1 precision 0.15 (3 of 20)** with the precondition (0.09, 3 of 35, before). The 17 false
+  positives are all 10 T3 lines, 4 T4 lines and 3 vague low-amount lines. There are 0 on the 150
+  non-vague clean lines.
 
-**What the skip rate means.** A close neighbor with a different `Taxable` exists for only about 3%
-of the drawn lines. The 10 T1 lines are therefore not a random sample of catalog IDs: they come
-from the small part of the catalog where taxable and non-taxable titles sit next to each other.
-Their neighbors also sit low in the top 20 (8 of 10 at rank 16 or lower).
+**Limitation of this measurement (not of the rule): the hard-set lines are not a random sample.**
+A close neighbor with a different `Taxable` exists for only about 3% of the drawn lines (326 of
+336 draws had none in their top 20). So the T1 lines come from roughly the 3% of the catalog where
+taxable and non-taxable titles sit close together, and their neighbors sit low in the top 20
+(8 of 10 at rank 16 or lower). The recall above is a recall on that slice. It says nothing about
+how T1 behaves on the other 97% of the catalog, or on real mislabeled lines, which need not come
+from that slice at all. This is a property of how the test set was built, not a defect of T1.
 
 ### Earlier real-catalog T1 numbers (2026-09-28): an unrelated-ID swap, not the headline
 The first real set (commit `a774e6e`) drew the swapped ID at random among all IDs sharing the
@@ -84,16 +121,17 @@ unrelated ID, which is the easy case, so it says nothing about misleading neighb
 headline. The picker was replaced; those lines are no longer generated.
 
 ### Fake profile
-- T1 false positives: 4 on the vague low-amount lines, 3 on T4 lines. 0 on the 130 non-vague clean
-  lines.
+- T1 false positives: 2 with the precondition (1 vague low-amount line, 1 T4 line, both «کالای
+  متفرقه»); 7 before. 0 on the 130 non-vague clean lines.
 - T1 misses: 6 of 10. In all 6 the declared neighbor ranked 2–4 (inside the top 5 shown). In 4 of
   them T3 fired instead (the neighbor was a general ID).
 - T3 false positives: 7, all T1 lines whose neighbor is a general ID. Swapping a specific ID for
   its general head is also a T3 situation, and the generator labels it T1 only.
 
 ### T1 false positives in general
-Every T1 false positive is a vague-only text or a T3 line. The vague case was predicted in the
-rule's docstring before the first run; the T3 overlap was not. On the real catalog a declared
+Before the precondition, every T1 false positive was a vague-only text or a T3 line. The vague case
+was predicted in the rule's docstring before the first run (and was then addressed by the
+precondition, after the fact); the T3 overlap was not predicted. On the real catalog a declared
 general ID ranks outside the top 20 for a specific text, because thousands of specific titles
 extend it.
 
@@ -108,7 +146,9 @@ The list was not extended to fit the generator. T4 recall moves between runs (0.
   generator and the detector share the same notion of closeness (BM25 over normalized tokens).
   The hard set is built from the detector's own ranking. No real invoice line has been checked.
 - **Recall 0.30 is not a recall on real errors.** It is 3 of 10 synthetic swaps, from the 3% of
-  lines that have a close neighbor with a different `Taxable`. How real mislabeled lines are
+  lines that have a close neighbor with a different `Taxable` (see the limitation above).
+- **Precision after the precondition is not an independent result.** The precondition was chosen
+  after seeing which lines were false alarms, on these same lines. How real mislabeled lines are
   distributed (close or far, taxable or not) is unknown.
 - **Not evidence of precision on real invoices.** 150 of the 162 real clean lines are catalog
   titles with light noise, so they match their own ID trivially. Seller text is usually terser
@@ -130,12 +170,12 @@ review queue because a rule fired (or a hard flag is set), never because of the 
 (architecture.md §6, `src/detect/score.py`). The weighted sum only orders the queue. **No weight
 was changed**; T1 still weighs 0. `AMBIGUOUS` does not floor, because it must never raise a score.
 
-Hard-flagged lines excluded. "In review" = score ≥ 0.5; "floored" = lifted to 0.5 by the floor;
+Hard-flagged lines excluded; T1 with the precondition (2026-10-08). "In review" = score ≥ 0.5; "floored" = lifted to 0.5 by the floor;
 "raw" = the weighted sum before the floor.
 
 | Label | fake n | fake in review | fake floored | fake raw mean (min–max) | real n | real in review | real floored | real raw mean (min–max) |
 |---|---:|---:|---:|---|---:|---:|---:|---|
-| clean | 142 | 4 | 4 | 0.019 (0.000–0.261) | 162 | 12 | 12 | 0.021 (0.000–0.280) |
+| clean | 142 | 1 | 1 | 0.019 (0.000–0.261) | 162 | 3 | 3 | 0.021 (0.000–0.280) |
 | T1 | 10 | 8 | 7 | 0.336 (0.020–0.548) | 10 | **3** | 3 | 0.145 (0.031–0.187) |
 | T2 | 10 | 10 | 0 | 0.600 (0.600–0.600) | – | | | |
 | T3 | 10 | 10 | 10 | 0.414 (0.393–0.442) | 10 | 10 | 0 | 0.537 (0.530–0.542) |
@@ -147,10 +187,11 @@ Hard-flagged lines excluded. "In review" = score ≥ 0.5; "floored" = lifted to 
 - **It cannot help where no rule fires.** On the hard real set only 3 of 10 T1 lines are in
   review, because T1 fired on 3. The 7 missed lines have raw scores of 0.03–0.17, the same range
   as clean lines, so the retrieval terms do not separate them either.
-- **The queue now contains T1's false positives:** the "clean" lines in review (4 fake, 12 real)
-  are the vague low-amount lines on which T1 fired.
-- **Floored lines tie at exactly 0.5** (25 fake, 19 real). `LineResult.raw_score` orders them.
-- The 4 real T4 lines that the T4 rule missed are in review anyway, through T1.
+- **The queue contains T1's false positives:** the "clean" lines in review (1 fake, 3 real; 4 and
+  12 before the precondition) are vague low-amount lines on which T1 fired, all list-gap phrases.
+- **Floored lines tie at exactly 0.5** (22 fake, 10 real). `LineResult.raw_score` orders them.
+- The 4 real T4 lines that the T4 rule missed («اجناس فروش رفته») are in review anyway, through
+  T1: the same list gap makes T4 miss them and T1 treat them as descriptions.
 - The fake T1 lines in review without T1 firing got there through T3.
 
 ## Why all these numbers are weak evidence
@@ -169,6 +210,14 @@ Hard-flagged lines excluded. "In review" = score ≥ 0.5; "floored" = lifted to 
 - **T6 base = am × fee.** The demo line has no discount field.
 - **T3** fires only if the declared general ID matches the text at all (BM25 > 0), and a
   specific ID in force on the date scores strictly higher within the top 5.
+- **T1 precondition** (2026-10-08, after the fact): abstain when no word is outside T4's
+  vague-word list (digits ignored, as in T4). One shared function, `vague_only`, serves both rules.
+- **T1 explanation** names the catalog tax status of the declared ID and of the best match when
+  they differ (e.g. «معاف» and «مشمول»), as a fact about the two IDs. It never says which is correct.
+- **Demo page:** opens on the first sample line whose injected error is caught (true positive);
+  a floored score is labeled «کف بررسی» with the raw score next to it; «اجزای امتیاز» lists every
+  term including zero weights (so T1's 0 is visible), the raw sum, the floor and the final score;
+  alternatives that tie on BM25 are marked «هم‌امتیاز», since their order is by ID, not by rank.
 - **T1 misleading neighbor** (generator). Both profiles: in force on the same date, not containing
   every word of the text. Fake: same head word as the text's source title and a different rate,
   drawn at random. Real: drawn at random from the text's own top-20 BM25 matches, with a different
@@ -184,7 +233,7 @@ Hard-flagged lines excluded. "In review" = score ≥ 0.5; "floored" = lifted to 
    pre-registration and a fresh set (another seed) to measure it on.
 2. **T1 vs T3.** On the real catalog T1 fires on every T3 line. One option is for T1 to yield when
    T3 fires.
-3. **T1 on vague-only text.** It fires on all of them, and with the floor they now enter the
-   review queue. One option is for T1 to abstain when every word is vague (T4's word list).
+3. **The vague-word list.** «کالای» and «رفته» are missing; they cause all remaining T4 misses and
+   all remaining T1 false alarms on vague text. Changing the list changes both rules.
 4. **More T1 lines.** n = 10 gives a wide interval. At a 97% skip rate, 100 T1 lines need about
    3,400 draws.
