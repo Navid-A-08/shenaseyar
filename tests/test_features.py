@@ -58,3 +58,24 @@ def test_features_are_in_range():
             d = S.features(q, sid, "1404-06-01").as_dict()
             assert 0 <= d["sim_declared"] <= 1 and 0 <= d["margin_top1"] <= 1
             assert 1 <= d["rank_declared"] <= RANK_ABSENT
+
+
+def test_fast_ranking_equals_the_full_scan():
+    """_rank looks only at the top-m documents; it must match the original full scan exactly,
+    including when m is tiny and the window has to widen (m=1), and on BM25 ties."""
+    import csv as _csv
+    from pathlib import Path as _P
+    from src.detect.rates import RateTable as _RT
+    fake = _P(__file__).resolve().parents[1] / "data" / "sample" / "demo_invoices.csv"
+    table = _RT.from_catalog(_P(__file__).resolve().parents[1] / "data" / "sample" / "fake_catalog.csv")
+    s = CatalogSearch(table)
+    rows = list(_csv.DictReader(open(fake, encoding="utf-8")))
+    assert len(rows) == 200
+    for r in rows:
+        args = (r["sstt"], r["sstid"], r["issue_date"])
+        assert s.features(*args) == s._features_reference(*args), r["line_id"]
+        scores = s.bm25.scores(r["sstt"])
+        pos = __import__("numpy").flatnonzero(scores > 0)
+        for m in (1, 2, 3):
+            assert s._rank(scores, pos, r["issue_date"], m=m) == list(
+                s._features_reference(*args).ranked), (r["line_id"], m)

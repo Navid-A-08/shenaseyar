@@ -207,6 +207,13 @@ def test_t4_vague_and_high():
     assert _t4("خدمات ۲", "2000000000")               # digits ignored
 
 
+@pytest.mark.parametrize("sstt", ["کالای متفرقه", "اجناس فروش رفته"])
+def test_t4_inflection_gap_is_pinned(sstt):
+    # The inflection gap (docs/demo.md): «کالای» and «رفته» are not on the list, so T4 misses
+    # these texts. Left unfixed in v0.1; if the list changes, this test must change with it.
+    assert not _t4(sstt, "5000000000")
+
+
 def test_t4_needs_both_conditions():
     assert not _t4("کالا", "999999990")               # below threshold
     assert not _t4("پیچ نمونه", "5000000000")         # specific text
