@@ -1,4 +1,4 @@
-# Demo UI only (app.py). Not installed in the test venv; tests stub it.
-# Unpinned on purpose: no version was installed or tested in this repo yet. Pin after first install.
+# Demo UI only (app.py). Tests do not need it (they stub streamlit).
+# Pinned 2026-10-15 to the version v0.1 was tested with; full lock: requirements-demo.lock.txt.
 -r requirements.txt
-streamlit
+streamlit==1.64.0

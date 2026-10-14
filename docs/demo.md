@@ -29,7 +29,7 @@ split "T2 on the fake catalog, T1/T3/T4 and retrieval on the real one" is theref
   any firing counts as a false positive.
 - On the real profile, `vra` in the synthetic lines is the version's raw `Vat` value. That is a
   placeholder number: nothing reads it as a rate there.
-- Loading the real catalog takes ~45 s (rate table 17 s, BM25 26 s); one query ~0.16 s.
+- Loading the real catalog takes ~45 s (rate table 17 s, BM25 26 s); one line ~0.04 s end to end (re-measured 2026-10-15 after the top-m ranking change, commit `020d749`; the earlier ~0.16 s predates it).
 
 ## Pre-registered bars
 Set 2026-09-28 before any rule code: **T2 and T6 precision and recall both 1.00** on the fake
@@ -50,7 +50,16 @@ that case belongs to T4. The list is T4's own: the T1 rule names it (`vague_word
 two rules cannot disagree on what "vague" means. The rank and similarity boundaries
 (`rank_declared > 5`, `sim_declared < 0.5`) are **unchanged**.
 
-Same lines before and after (fake: committed, seed 1405; real: hard set, seed 1405):
+In plain words: the precondition was added **after** looking at the first run's false-alarm
+breakdown. On the fake profile it raised T1 precision from **0.36 to 0.67**, while recall
+**stayed at 0.40**. Recall not moving is the point: a precondition that only removes inputs the
+rule should never have judged (vague-only text) can cut false alarms without touching true
+positives. Tuning a boundary (`rank_declared`, `sim_declared`) moves both at once, and a recall
+change would have been the sign of that. The boundaries were not touched. Still, the precondition
+was chosen on these lines, so the precision gain is not an independent result.
+
+Same lines before and after (fake: committed, seed 1405; real: hard set, seed 1405;
+before = `eval/results/demo_rules*.json` at commit `3a6127a`, after = the committed files):
 
 | T1 | fake P | fake R | fake FP | real P | real R | real FP |
 |---|---:|---:|---:|---:|---:|---:|
@@ -140,6 +149,24 @@ Fake: «اجناس فروش رفته» and «کالای متفرقه». Real: 4,
 «کالای» are not in the rule's vague list, a known gap already tested in `tests/test_engine.py`.
 The list was not extended to fit the generator. T4 recall moves between runs (0.90 on
 2026-09-28, 0.60 now) only because a new draw picked that phrase more often.
+
+## Known limitation: the inflection gap (one limitation, two symptoms; documented, not fixed)
+The vague-word list (`src/detect/rules/t4_vague_high_amount.yaml`) holds bare forms, and matching
+is exact on normalized tokens. Inflected forms are not on it: «کالای» (کالا + ezafe) and «رفته»
+(as in «فروش رفته»). The list is shared by T4 and T1's precondition, so the one gap shows up twice:
+
+| Symptom | fake | real | Texts |
+|---|---:|---:|---|
+| T4 misses (all of them) | 2 of 2 | 4 of 4 | «اجناس فروش رفته» (fake 1, real 4), «کالای متفرقه» (fake 1) |
+| T1 false alarms on vague text that survive the precondition (all of them) | 2 | 7 | «کالای متفرقه» (fake 2, real 2), «اجناس فروش رفته» (real 5) |
+
+On the fake profile these are T1's **two** surviving false alarms. On the real profile T1 has 17
+false alarms: the 7 above plus the 10 T3 lines, which are a different issue (open item 2).
+**The list was left alone for v0.1.** Adding the two forms, or matching on a stem, would change
+both T4 and T1 on the same lines the gap was found on, so it would be a post-hoc fix with no fresh
+set to measure it. The gap is pinned by tests on both sides: T4 misses the two texts
+(`test_t4_inflection_gap_is_pinned`, `tests/test_engine.py`) and T1 treats them as descriptions
+(`test_one_word_outside_the_list_is_enough`, `tests/test_t1.py`).
 
 ## What the T1 numbers are NOT evidence of
 - **Not evidence that T1 catches real mislabeling.** The labels come from our generator, and the

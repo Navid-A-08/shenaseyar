@@ -29,6 +29,8 @@ Real-profile T1 lines are the hard set (2026-09-30): the swapped ID comes from t
 top-20 BM25 matches and differs in Taxable; skipped draws are counted in
 `eval/results/demo_invoices_real_build.json`.
 Commands: `python tools/eval_demo_rules.py [--profile real]` · `streamlit run app.py`
+**Shipped 2026-10-15 as git tag `v0.1`** (README.md: measured vs designed, limitations). The
+inflection gap in T4's vague-word list («کالای», «رفته») is documented, not fixed (docs/demo.md).
 (Update this section whenever the scope changes.)
 
 The retrieval-baseline work (Phase 1) stays as it was: the harness, the silver set and the
